@@ -11,16 +11,16 @@ export function Shell({ children }: { children: ReactNode }) {
           <span>业务协同与交付推进</span>
         </div>
         <div className="sidebar-group">
-          <div className="sidebar-label">Workspace</div>
+          <div className="sidebar-label">业务主线</div>
           <nav className="nav">
             <Link href="/">总览</Link>
-            <Link href={"/sales/leads" as Route}>客户 / 线索录入</Link>
-            <Link href="/projects/proj-1">项目档案</Link>
-            <Link href="/client/proj-1">客户端门户</Link>
+            <Link href={"/sales/leads" as Route}>线索与客户</Link>
+            <Link href="/projects/proj-1">项目中心</Link>
+            <Link href="/client/proj-1">客户确认</Link>
           </nav>
         </div>
         <div className="sidebar-group">
-          <div className="sidebar-label">Role Views</div>
+          <div className="sidebar-label">角色工作台</div>
           <nav className="nav">
             <Link href="/role/sales">销售工作台</Link>
             <Link href="/role/designer">设计工作台</Link>
