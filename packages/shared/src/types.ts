@@ -203,6 +203,50 @@ export interface DashboardSummary {
   }>;
 }
 
+export interface ProjectPortfolioItem {
+  id: string;
+  code: string;
+  name: string;
+  customerName: string;
+  city: string;
+  status: Project["status"];
+  leadStage: Lead["stage"];
+  areaSqm: number;
+  budgetRange: {
+    min: number;
+    max: number;
+  };
+  currentRequirementSummary: string;
+  currentDesignVersion?: string;
+  currentRenderingVersion?: string;
+  currentConstructionDrawingVersion?: string;
+  quotationAmount: number;
+  pendingConfirmationCount: number;
+  openIssueCount: number;
+  nextMilestone?: {
+    name: string;
+    plannedDate: string;
+    status: MilestoneStatus;
+  };
+}
+
+export interface PortfolioOverview {
+  metrics: {
+    customers: number;
+    leads: number;
+    activeProjects: number;
+    pendingConfirmations: number;
+    openIssues: number;
+    totalQuotationValue: number;
+  };
+  projects: ProjectPortfolioItem[];
+}
+
+export interface UpdateConfirmationInput {
+  status: ConfirmationStatus;
+  note?: string;
+}
+
 export interface AiRequirementSuggestion {
   summary: string;
   goals: string[];
@@ -234,4 +278,3 @@ export interface AiInspectionDigest {
   dailyReport: string;
   followUps: string[];
 }
-

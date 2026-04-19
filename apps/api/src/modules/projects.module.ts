@@ -11,6 +11,16 @@ class ProjectsController {
     return this.repository.getProjects();
   }
 
+  @Get("overview")
+  getOverview() {
+    return this.repository.getPortfolioOverview();
+  }
+
+  @Get("dashboard")
+  getDashboardByRole(@Query("role") role: UserRole = "sales") {
+    return this.repository.getDashboard(role);
+  }
+
   @Get(":id/archive")
   getArchive(@Param("id") id: string) {
     return this.repository.getProjectArchive(id);
@@ -56,14 +66,9 @@ class ProjectsController {
     return this.repository.getInspections(id);
   }
 
-  @Get(":id/dashboard")
-  getDashboard(@Query("role") role: UserRole = "sales") {
-    return this.repository.getDashboard(role);
-  }
 }
 
 @Module({
   controllers: [ProjectsController]
 })
 export class ProjectsModule {}
-

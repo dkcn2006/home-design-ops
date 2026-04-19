@@ -1,15 +1,26 @@
 import { getArchive } from "../../../lib/data";
 
+function getConfirmationLabel(status: "pending" | "confirmed" | "rejected") {
+  if (status === "confirmed") {
+    return "已确认";
+  }
+  if (status === "rejected") {
+    return "已驳回";
+  }
+  return "待确认";
+}
+
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const archive = getArchive(id);
+  const archive = await getArchive(id);
+  const currentQuotation = archive.quotations[0];
 
   return (
     <>
       <section className="hero-card">
         <h1>{archive.project.name}</h1>
         <p>
-          项目档案中心把需求、方案版本、效果图、施工图、报价、变更、巡检和客户确认统一收口。当前演示的是 MVP 里的单项目总览。
+          项目档案页现在是一个完整的业务主线视图：从客户需求、版本资产、报价变更，到交付节点和客户确认，全部通过 API 聚合返回，便于后续替换成真实数据库。
         </p>
         <div className="badge-row">
           <span className="badge">项目编号 {archive.project.code}</span>
@@ -20,32 +31,33 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       </section>
 
       <section className="panel">
-        <div className="two-col">
+        <div className="section-title">
+          <h2>1. 客户与需求</h2>
+          <span>Lead + requirement sheet</span>
+        </div>
+        <div className="cards-2">
           <article className="kanban-card">
-            <div className="section-title">
-              <h3>需求与风险</h3>
-              <span>Requirement Sheet</span>
-            </div>
-            <p className="muted">{archive.requirementSheet.summary}</p>
             <ul className="clean">
+              <li>客户：{archive.customer.name}</li>
+              <li>城市：{archive.customer.city}</li>
+              <li>家庭画像：{archive.customer.householdProfile}</li>
+              <li>预算区间：¥{archive.customer.budgetMin.toLocaleString()} - ¥{archive.customer.budgetMax.toLocaleString()}</li>
+              <li>线索阶段：{archive.lead.stage}</li>
+              <li>线索摘要：{archive.lead.summary}</li>
+            </ul>
+          </article>
+          <article className="ai-card">
+            <p className="muted">{archive.requirementSheet.summary}</p>
+            <ul className="clean" style={{ marginTop: 14 }}>
               {archive.requirementSheet.goals.map((item) => (
                 <li key={item}>目标：{item}</li>
               ))}
               {archive.requirementSheet.risks.map((item) => (
                 <li key={item}>风险：{item}</li>
               ))}
-            </ul>
-          </article>
-          <article className="ai-card">
-            <div className="section-title">
-              <h3>AI 助手入口</h3>
-              <span>Scene native assistants</span>
-            </div>
-            <ul className="clean">
-              <li>需求整理：补全待确认问题</li>
-              <li>SU 布局建议：校验动线和收纳</li>
-              <li>效果图建议：输出方向型渲染说明</li>
-              <li>施工图校核：提醒设备点位和交底清单</li>
+              {archive.requirementSheet.pendingQuestions.map((item) => (
+                <li key={item}>待确认：{item}</li>
+              ))}
             </ul>
           </article>
         </div>
@@ -53,8 +65,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
       <section className="panel" style={{ marginTop: 22 }}>
         <div className="section-title">
-          <h2>版本中心</h2>
-          <span>Current effective version control</span>
+          <h2>2. 版本与设计资产</h2>
+          <span>SU / rendering / drawings</span>
         </div>
         <div className="cards-3">
           <article className="artifact-card">
@@ -94,61 +106,105 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       </section>
 
       <section className="panel" style={{ marginTop: 22 }}>
+        <div className="section-title">
+          <h2>3. 报价与变更</h2>
+          <span>Version-linked commercial records</span>
+        </div>
         <div className="cards-2">
           <article className="timeline-card">
-            <div className="section-title">
-              <h3>报价与变更</h3>
-              <span>Linked to versions</span>
-            </div>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>类型</th>
-                  <th>说明</th>
-                  <th>状态</th>
-                </tr>
-              </thead>
-              <tbody>
-                {archive.quotations.map((item) => (
-                  <tr key={item.id}>
-                    <td>报价</td>
-                    <td>{item.summary}</td>
-                    <td>{item.status}</td>
-                  </tr>
-                ))}
-                {archive.changeOrders.map((item) => (
-                  <tr key={item.id}>
-                    <td>变更</td>
-                    <td>{item.title} / {item.reason}</td>
-                    <td>{item.confirmationStatus}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <h3>当前报价</h3>
+            {currentQuotation ? (
+              <>
+                <p className="muted">{currentQuotation.summary}</p>
+                <ul className="clean" style={{ marginTop: 14 }}>
+                  {currentQuotation.lineItems.map((item) => (
+                    <li key={item.name}>
+                      {item.name} · ¥{item.amount.toLocaleString()} · {item.category}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="muted">当前暂无报价记录。</p>
+            )}
           </article>
           <article className="timeline-card">
-            <div className="section-title">
-              <h3>节点与巡检</h3>
-              <span>Delivery workflow</span>
-            </div>
-            <ul className="clean">
-              {archive.milestones.map((item) => (
+            <h3>变更记录</h3>
+            <ul className="clean" style={{ marginTop: 14 }}>
+              {archive.changeOrders.map((item) => (
                 <li key={item.id}>
-                  <strong>{item.name}</strong>
-                  <div className="muted">计划时间：{item.plannedDate} · 状态：{item.status}</div>
-                </li>
-              ))}
-              {archive.inspections.map((item) => (
-                <li key={item.id}>
-                  <strong>巡检摘要</strong>
-                  <div className="muted">{item.summary}</div>
+                  <strong>{item.title}</strong>
+                  <div className="muted">{item.reason}</div>
+                  <div className="muted">金额变化：¥{item.amountDelta.toLocaleString()}</div>
+                  <div className="muted">状态：{getConfirmationLabel(item.confirmationStatus)}</div>
                 </li>
               ))}
             </ul>
           </article>
         </div>
       </section>
+
+      <section className="panel" style={{ marginTop: 22 }}>
+        <div className="section-title">
+          <h2>4. 交付执行</h2>
+          <span>Milestones + inspections</span>
+        </div>
+        <div className="cards-2">
+          <article className="timeline-card">
+            <ul className="clean">
+              {archive.milestones.map((item) => (
+                <li key={item.id}>
+                  <strong>{item.name}</strong>
+                  <div className="muted">计划时间：{item.plannedDate}</div>
+                  <div className="muted">负责人：{item.ownerRole}</div>
+                  <div className="muted">状态：{item.status}</div>
+                </li>
+              ))}
+            </ul>
+          </article>
+          <article className="timeline-card">
+            <ul className="clean">
+              {archive.inspections.map((item) => (
+                <li key={item.id}>
+                  <strong>{item.summary}</strong>
+                  {item.issues.map((issue) => (
+                    <div className="muted" key={issue.title}>
+                      {issue.severity} · {issue.assigneeRole} · {issue.resolved ? "已关闭" : "待处理"} · {issue.title}
+                    </div>
+                  ))}
+                </li>
+              ))}
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section className="panel" style={{ marginTop: 22 }}>
+        <div className="section-title">
+          <h2>5. 客户确认留痕</h2>
+          <span>Client-facing confirmation records</span>
+        </div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>类型</th>
+              <th>目标</th>
+              <th>状态</th>
+              <th>备注</th>
+            </tr>
+          </thead>
+          <tbody>
+            {archive.confirmations.map((item) => (
+              <tr key={item.id}>
+                <td>{item.type}</td>
+                <td>{item.targetId}</td>
+                <td>{getConfirmationLabel(item.status)}</td>
+                <td>{item.note ?? "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
     </>
   );
 }
-

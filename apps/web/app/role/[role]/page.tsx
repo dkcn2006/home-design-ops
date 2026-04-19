@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { getDashboard } from "../../../lib/data";
 import type { UserRole } from "@home-design-ops/shared";
+import { getDashboard, getPortfolioOverview } from "../../../lib/data";
 
 const roleLabels: Record<UserRole, string> = {
   sales: "销售顾问",
@@ -17,13 +17,15 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
     notFound();
   }
 
-  const dashboard = getDashboard(role);
+  const [dashboard, overview] = await Promise.all([getDashboard(role), getPortfolioOverview()]);
 
   return (
     <>
       <section className="hero-card">
         <h1>{roleLabels[role]}工作台</h1>
-        <p>每个角色只看到自己的关键指标、待办事项和项目动作，但底层共用同一份项目档案与版本记录。</p>
+        <p>
+          工作台保留角色视角，但底层统一读取 API 返回的数据。这样每个角色都在同一份项目事实基础上协作，不再出现前端各看各的数据快照。
+        </p>
         <div className="badge-row">
           <span className="badge">Role: {role}</span>
           <span className="badge">Projects: {dashboard.metrics.activeProjects}</span>
@@ -41,7 +43,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
           <span>{dashboard.metrics.pendingConfirmations}</span>
         </article>
         <article className="stat-card">
-          <strong>报价额 / 预算视图</strong>
+          <strong>报价视图</strong>
           <span>¥{dashboard.metrics.quotationValue.toLocaleString()}</span>
         </article>
         <article className="stat-card">
@@ -51,11 +53,11 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
       </section>
 
       <section className="panel" style={{ marginTop: 22 }}>
-        <div className="two-col">
+        <div className="cards-2">
           <article className="kanban-card">
             <div className="section-title">
               <h3>当前关注</h3>
-              <span>Role specific focus</span>
+              <span>Role focus</span>
             </div>
             <ul className="clean">
               {dashboard.focus.map((item) => (
@@ -65,14 +67,14 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
           </article>
           <article className="ai-card">
             <div className="section-title">
-              <h3>AI 场景入口</h3>
-              <span>嵌入式助手</span>
+              <h3>建议继续实现的下一层能力</h3>
+              <span>Based on current MVP</span>
             </div>
             <ul className="clean">
-              <li>需求整理：把纪要整理为结构化需求单</li>
-              <li>方案建议：给出 SU 布局和收纳方向</li>
-              <li>报价说明：把增减项转换成客户可读文案</li>
-              <li>施工校核：生成交底前提醒清单</li>
+              <li>客户线索创建与阶段推进</li>
+              <li>需求单编辑与问题补录</li>
+              <li>报价与变更审批链</li>
+              <li>巡检问题关闭与责任人流转</li>
             </ul>
           </article>
         </div>
@@ -80,23 +82,32 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
 
       <section className="panel" style={{ marginTop: 22 }}>
         <div className="section-title">
-          <h2>项目清单</h2>
-          <span>Shared project data</span>
+          <h2>项目运营视图</h2>
+          <span>Shared project facts</span>
         </div>
         <table className="table">
           <thead>
             <tr>
               <th>项目</th>
-              <th>阶段</th>
-              <th>下一动作</th>
+              <th>客户</th>
+              <th>当前版本</th>
+              <th>执行状态</th>
+              <th>下一节点</th>
             </tr>
           </thead>
           <tbody>
-            {dashboard.projects.map((project) => (
+            {overview.projects.map((project) => (
               <tr key={project.id}>
                 <td>{project.name}</td>
-                <td>{project.status}</td>
-                <td>{project.nextAction}</td>
+                <td>{project.customerName}</td>
+                <td>
+                  SU {project.currentDesignVersion ?? "-"} / 效果图 {project.currentRenderingVersion ?? "-"} / 施工图{" "}
+                  {project.currentConstructionDrawingVersion ?? "-"}
+                </td>
+                <td>
+                  {project.status} · 待确认 {project.pendingConfirmationCount} · 问题 {project.openIssueCount}
+                </td>
+                <td>{project.nextMilestone ? `${project.nextMilestone.name} / ${project.nextMilestone.plannedDate}` : "-"}</td>
               </tr>
             ))}
           </tbody>
@@ -105,4 +116,3 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
     </>
   );
 }
-
