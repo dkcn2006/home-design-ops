@@ -1,0 +1,17 @@
+{
+  "name": "home-design-ops",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run build --workspace @home-design-ops/shared && npm run dev:web",
+    "dev:web": "npm run dev --workspace @home-design-ops/web",
+    "dev:api": "npm run start:dev --workspace @home-design-ops/api",
+    "build": "npm run build --workspace @home-design-ops/shared && npm run build --workspace @home-design-ops/api && npm run build --workspace @home-design-ops/web",
+    "lint": "npm run lint --workspace @home-design-ops/shared && npm run lint --workspace @home-design-ops/api && npm run lint --workspace @home-design-ops/web",
+    "test": "npm run test --workspace @home-design-ops/shared && npm run test --workspace @home-design-ops/api && npm run test --workspace @home-design-ops/web"
+  }
+}

@@ -1,46 +1,90 @@
 # home-design-ops
 
-An early-stage project exploring how AI can improve collaboration and productivity in the home renovation and interior design industry.
+An MVP-oriented monorepo for a home renovation operations system that connects sales, design, detailing, delivery, client confirmations, and workflow-native AI assistance.
 
 [中文说明 / Chinese Version](./README.zh-CN.md)
 
-## Overview
+## What is implemented
 
-This repository currently contains early product thinking, visual blueprints, and cost analysis materials for a system focused on:
+This repository now includes a concrete implementation foundation for the V1 plan:
 
-- sales, design, detailing, delivery, and client collaboration
-- improving high-cost design outputs such as SU models, renderings, and construction drawings
-- reducing repeated revisions, information gaps, and on-site rework
-- applying AI in practical workflow stages instead of treating it as a standalone novelty
+- `apps/web`
+  - Next.js App Router frontend
+  - role dashboards for sales, designer, and project manager
+  - project archive center
+  - client portal view
+- `apps/api`
+  - NestJS REST API
+  - resource-oriented endpoints for customers, leads, projects, requirements, design outputs, quotations, changes, milestones, inspections, confirmations, attachments, and AI helpers
+- `packages/shared`
+  - shared domain models
+  - demo seed data
+  - AI response contracts
+- `docs/implementation-overview.md`
+  - a concise architecture and implementation summary
 
-## Why This Project Exists
+## Implemented MVP scope
+
+- customer and lead tracking
+- project archive as the core data hub
+- SU design versions, rendering versions, and construction drawing versions
+- quotations and change orders
+- milestones and inspection records
+- confirmation records and attachment metadata
+- AI orchestration stubs for:
+  - requirement extraction
+  - SU layout assistance
+  - rendering guidance
+  - construction drawing review
+  - inspection digest generation
+
+## Tech stack
+
+- Frontend: Next.js + React + TypeScript
+- API: NestJS + TypeScript
+- Data model target: PostgreSQL via Prisma schema
+- Shared contracts: workspace package
+- File storage target: object storage metadata model
+
+## Getting started
+
+### Requirements
+
+- Node.js `>= 20.0.0`
+- npm `>= 8`
+
+The current repo includes `.nvmrc` with the recommended version:
+
+```bash
+nvm use
+```
+
+### Install
+
+```bash
+npm install
+```
+
+### Run
+
+```bash
+npm run dev:api
+npm run dev:web
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+## Current implementation note
+
+The API and frontend are wired around shared demo data so the product flow can be explored immediately. The PostgreSQL target model is already defined through Prisma schema, which reduces future migration churn when replacing the in-memory repository with persistent storage.
+
+## Why this project exists
 
 This project is personal.
 
-My younger brother works in the home renovation design industry, and I work in IT. As AI keeps accelerating, I want to explore how it can help real businesses and real people, especially in industries where a lot of value is still lost to repetitive communication, manual coordination, and preventable mistakes.
+My younger brother works in the home renovation design industry, and I work in IT. I want to use AI in a way that helps real renovation teams reduce repeated revisions, information gaps, and preventable rework, and hopefully help his team operate more efficiently and improve income.
 
-The goal is to combine technical thinking with real-world renovation workflows, and gradually shape a system that can genuinely help small design and renovation teams improve efficiency and income.
-
-## Current Contents
-
-- `index.html`
-  - A blueprint for a home renovation collaboration and AI productivity platform
-  - Covers workflow, roles, modules, AI opportunities, and the design-output chain across SU models, renderings, and construction drawings
-
-- `cost-analysis.html`
-  - A cost structure and AI cost-reduction analysis for small renovation companies
-  - Covers explicit costs, hidden costs, rework risks, and which AI capabilities are most worth prioritizing first
-
-## Direction
-
-The project may gradually evolve into:
-
-- product requirement documents
-- system and data model design
-- interactive prototypes
-- AI capability breakdowns
-- workflow validation for real renovation projects
-
-## Status
-
-This repository is still at a very early stage and currently serves as a place to store ideas, blueprints, and communication materials.

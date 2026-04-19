@@ -1,0 +1,15 @@
+{
+  "name": "@home-design-ops/shared",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No shared package tests configured yet\""
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id               String   @id @default(cuid())
+  name             String
+  phone            String
+  email            String?
+  preferredStyle   String[]
+  householdProfile String
+  budgetMin        Int
+  budgetMax        Int
+  city             String
+  notes            String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdBy        String
+  projects         Project[]
+  leads            Lead[]
+}
+
+model Lead {
+  id               String   @id @default(cuid())
+  customerId       String
+  source           String
+  stage            String
+  expectedSignDate DateTime?
+  summary          String
+  painPoints       String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdBy        String
+  customer         Customer @relation(fields: [customerId], references: [id])
+  projects         Project[]
+}
+
+model Project {
+  id                                String   @id @default(cuid())
+  customerId                        String
+  leadId                            String
+  code                              String   @unique
+  name                              String
+  location                          String
+  areaSqm                           Float
+  status                            String
+  currentRequirementSheetId         String
+  currentDesignVersionId            String?
+  currentRenderingVersionId         String?
+  currentConstructionDrawingVersionId String?
+  createdAt                         DateTime @default(now())
+  updatedAt                         DateTime @updatedAt
+  createdBy                         String
+  customer                          Customer @relation(fields: [customerId], references: [id])
+  lead                              Lead     @relation(fields: [leadId], references: [id])
+}
+
