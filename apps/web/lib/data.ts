@@ -5,15 +5,17 @@ import type {
   LeadPipelineItem,
   PortfolioOverview,
   ProjectArchive,
+  RoleWorkbench,
   UpdateLeadStageInput,
   UpdateConfirmationInput,
-  UserRole
+  UserRole,
+  WorkspaceHome
 } from "@home-design-ops/shared";
 
 const API_BASE_URL =
   process.env.INTERNAL_API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:4000/api";
+  "http://127.0.0.1:4010/api";
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -36,8 +38,16 @@ export function getPortfolioOverview() {
   return apiFetch<PortfolioOverview>("/projects/overview");
 }
 
+export function getWorkspaceHome() {
+  return apiFetch<WorkspaceHome>("/projects/workspace-home");
+}
+
 export function getDashboard(role: UserRole) {
   return apiFetch<DashboardSummary>(`/projects/dashboard?role=${role}`);
+}
+
+export function getRoleWorkbench(role: UserRole) {
+  return apiFetch<RoleWorkbench>(`/projects/role-workbench?role=${role}`);
 }
 
 export function getArchive(projectId: string) {

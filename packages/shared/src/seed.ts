@@ -15,6 +15,7 @@ import {
   RenderingVersion,
   RequirementSheet,
   Space,
+  WorkItem,
 } from "./types";
 
 const timestamp = "2026-04-19T08:00:00.000Z";
@@ -319,6 +320,101 @@ export const confirmations: ConfirmationRecord[] = [
   }
 ];
 
+export const workItems: WorkItem[] = [
+  {
+    id: "task-1",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    role: "sales",
+    type: "client_confirmation",
+    status: "todo",
+    priority: "high",
+    title: "跟进客户确认增项",
+    summary: "联系林女士确认蒸烤一体机升级，补充报价说明后推进闭环。",
+    dueDate: "2026-04-20",
+    targetPath: "/client/proj-1",
+    projectId: "proj-1",
+    leadId: "lead-1"
+  },
+  {
+    id: "task-2",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    role: "sales",
+    type: "lead_follow_up",
+    status: "in_progress",
+    priority: "medium",
+    title: "补齐客户需求结构化记录",
+    summary: "把开放厨房、岛台动线和卧室梳妆位需求补录到项目主档。",
+    dueDate: "2026-04-21",
+    targetPath: "/projects/proj-1",
+    projectId: "proj-1",
+    leadId: "lead-1"
+  },
+  {
+    id: "task-3",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    role: "designer",
+    type: "design_output",
+    status: "todo",
+    priority: "high",
+    title: "输出 SU V3 调整建议",
+    summary: "围绕岛台动线、高柜电器位和材质说明准备新一轮方案调整。",
+    dueDate: "2026-04-20",
+    targetPath: "/projects/proj-1",
+    projectId: "proj-1"
+  },
+  {
+    id: "task-4",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    role: "designer",
+    type: "client_confirmation",
+    status: "blocked",
+    priority: "medium",
+    title: "整理待客户确认的材质说明",
+    summary: "局部材质还未冻结，需结合客户反馈整理下一版说明。",
+    dueDate: "2026-04-22",
+    targetPath: "/client/proj-1",
+    projectId: "proj-1"
+  },
+  {
+    id: "task-5",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    role: "project_manager",
+    type: "milestone",
+    status: "in_progress",
+    priority: "high",
+    title: "推进施工图交底",
+    summary: "交底前核对施工图、点位说明和现场复尺结果，确保 4 月 22 日顺利推进。",
+    dueDate: "2026-04-22",
+    targetPath: "/projects/proj-1",
+    projectId: "proj-1"
+  },
+  {
+    id: "task-6",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    role: "project_manager",
+    type: "inspection_issue",
+    status: "todo",
+    priority: "high",
+    title: "关闭高柜电源位问题",
+    summary: "推动深化补齐图纸中的高柜电源位标注，避免交底后返工。",
+    dueDate: "2026-04-20",
+    targetPath: "/projects/proj-1",
+    projectId: "proj-1"
+  }
+];
+
 export function getProjectArchive(projectId: string): ProjectArchive | undefined {
   const project = projects.find((item) => item.id === projectId);
   if (!project) {
@@ -362,7 +458,9 @@ export const dashboards: DashboardSummary[] = [
         id: "proj-1",
         name: "林女士浦东住宅改造",
         status: "detailing",
-        nextAction: "确认增项并同步报价说明"
+        nextAction: "确认增项并同步报价说明",
+        customerName: "林女士",
+        targetPath: "/projects/proj-1"
       }
     ]
   },
@@ -380,7 +478,9 @@ export const dashboards: DashboardSummary[] = [
         id: "proj-1",
         name: "林女士浦东住宅改造",
         status: "detailing",
-        nextAction: "完成动线优化建议"
+        nextAction: "完成动线优化建议",
+        customerName: "林女士",
+        targetPath: "/projects/proj-1"
       }
     ]
   },
@@ -398,7 +498,9 @@ export const dashboards: DashboardSummary[] = [
         id: "proj-1",
         name: "林女士浦东住宅改造",
         status: "detailing",
-        nextAction: "完成施工图交底检查"
+        nextAction: "完成施工图交底检查",
+        customerName: "林女士",
+        targetPath: "/projects/proj-1"
       }
     ]
   },
@@ -416,9 +518,10 @@ export const dashboards: DashboardSummary[] = [
         id: "proj-1",
         name: "林女士浦东住宅改造",
         status: "detailing",
-        nextAction: "确认 change-1"
+        nextAction: "确认 change-1",
+        customerName: "林女士",
+        targetPath: "/projects/proj-1"
       }
     ]
   }
 ];
-

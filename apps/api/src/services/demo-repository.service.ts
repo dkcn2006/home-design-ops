@@ -14,17 +14,25 @@ import {
   projects,
   quotations,
   renderingVersions,
-  requirementSheets
+  requirementSheets,
+  workItems
 } from "@home-design-ops/shared";
 import type {
   CreateLeadIntakeInput,
   DashboardSummary,
+  MetricCard,
   LeadPipelineItem,
   PortfolioOverview,
   ProjectArchive,
+  RoleWorkbench,
+  RoleProjectFocusItem,
+  TaskFlowItem,
   UpdateLeadStageInput,
   UpdateConfirmationInput,
-  UserRole
+  UserRole,
+  WorkspaceActivityItem,
+  WorkspaceHome,
+  WorkspaceRiskItem
 } from "@home-design-ops/shared";
 
 @Injectable()
@@ -193,6 +201,43 @@ export class DemoRepositoryService {
     };
   }
 
+  getWorkspaceHome(): WorkspaceHome {
+    const overview = this.getPortfolioOverview();
+    const tasks = this.buildTaskFlow();
+    const risks = this.buildRisks();
+    const activities = this.buildActivities();
+    const roleDefinitions = this.getRoleDefinitions();
+
+    return {
+      metrics: {
+        ...overview.metrics,
+        overdueTasks: tasks.filter((item) => item.status !== "done" && item.dueDate < "2026-04-19").length,
+        activeRisks: risks.length
+      },
+      tasks: tasks.slice(0, 8),
+      risks: risks.slice(0, 6),
+      activities: activities.slice(0, 8),
+      roleSummaries: roleDefinitions.map((definition) => ({
+        role: definition.role,
+        label: definition.label,
+        summary: definition.summary,
+        taskCount: tasks.filter((item) => item.role === definition.role && item.status !== "done").length,
+        riskCount: risks.filter((item) => item.ownerRole === definition.role).length,
+        activeProjects: definition.dashboard.metrics.activeProjects,
+        primaryTask: tasks.find((item) => item.role === definition.role)?.title,
+        targetPath: `/role/${definition.role}`
+      })),
+      stageSummary: [
+        { stage: "discovery", label: "待量房", count: overview.projects.filter((item) => item.status === "discovery").length },
+        { stage: "design", label: "方案设计", count: overview.projects.filter((item) => item.status === "design").length },
+        { stage: "detailing", label: "施工准备", count: overview.projects.filter((item) => item.status === "detailing").length },
+        { stage: "delivery", label: "施工中", count: overview.projects.filter((item) => item.status === "delivery").length },
+        { stage: "completed", label: "已完工", count: overview.projects.filter((item) => item.status === "completed").length }
+      ],
+      projectLine: overview.projects
+    };
+  }
+
   getProjectArchive(projectId: string): ProjectArchive {
     const archive = getProjectArchive(projectId);
     if (!archive) {
@@ -266,6 +311,32 @@ export class DemoRepositoryService {
     };
   }
 
+  getRoleWorkbench(role: UserRole): RoleWorkbench {
+    if (role !== "sales" && role !== "designer" && role !== "project_manager") {
+      throw new NotFoundException(`Workbench for role ${role} was not found`);
+    }
+
+    const definition = this.getRoleDefinitions().find((item) => item.role === role);
+    if (!definition) {
+      throw new NotFoundException(`Workbench for role ${role} was not found`);
+    }
+
+    const tasks = this.buildTaskFlow().filter((item) => item.role === role);
+    const risks = this.buildRisks().filter((item) => item.ownerRole === role || (role === "project_manager" && item.ownerRole === "detailer"));
+    const activity = this.buildActivities().filter((item) => tasks.some((task) => task.projectId && task.projectId === item.projectId));
+
+    return {
+      role,
+      title: definition.title,
+      subtitle: definition.summary,
+      metrics: definition.metricBuilder(tasks, risks),
+      inbox: tasks,
+      risks,
+      activity: activity.slice(0, 6),
+      focusProjects: definition.dashboard.projects
+    };
+  }
+
   private buildDashboardMetrics(dashboard: DashboardSummary): DashboardSummary["metrics"] {
     const pendingConfirmations = confirmations.filter((item) => item.status === "pending").length;
     const quotationValue = quotations.reduce((sum, item) => sum + item.amount, 0);
@@ -278,6 +349,222 @@ export class DemoRepositoryService {
       quotationValue,
       openIssues
     };
+  }
+
+  private buildTaskFlow(): TaskFlowItem[] {
+    return workItems
+      .map((item) => {
+        const project = item.projectId ? projects.find((projectEntry) => projectEntry.id === item.projectId) : undefined;
+        const lead = item.leadId ? leads.find((leadEntry) => leadEntry.id === item.leadId) : undefined;
+        const customer = project
+          ? customers.find((customerEntry) => customerEntry.id === project.customerId)
+          : lead
+            ? customers.find((customerEntry) => customerEntry.id === lead.customerId)
+            : undefined;
+
+        return {
+          id: item.id,
+          title: item.title,
+          summary: item.summary,
+          dueDate: item.dueDate,
+          role: item.role,
+          status: item.status,
+          priority: item.priority,
+          type: item.type,
+          projectId: project?.id,
+          projectName: project?.name,
+          customerName: customer?.name,
+          targetPath: item.targetPath
+        };
+      })
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  }
+
+  private buildRisks(): WorkspaceRiskItem[] {
+    const issueRisks: WorkspaceRiskItem[] = inspections.flatMap((inspection) =>
+      inspection.issues.flatMap((issue, index) => {
+        if (issue.resolved) {
+          return [];
+        }
+        const project = projects.find((item) => item.id === inspection.projectId);
+        const ownerRole = this.toWorkspaceRole(issue.assigneeRole);
+        if (!ownerRole) {
+          return [];
+        }
+        return [
+          {
+            id: `${inspection.id}-issue-${index}`,
+            title: issue.title,
+            summary: `${inspection.summary}，需由${issue.assigneeRole}继续处理。`,
+            severity: issue.severity,
+            ownerRole,
+            projectId: project?.id,
+            projectName: project?.name,
+            targetPath: project ? `/projects/${project.id}` : "/"
+          }
+        ];
+      })
+    );
+
+    const confirmationRisks: WorkspaceRiskItem[] = confirmations
+      .filter((item) => item.status === "pending")
+      .map((item) => {
+        const project = projects.find((projectEntry) => projectEntry.id === item.projectId);
+        return {
+          id: item.id,
+          title: `${item.clientName} 尚未完成${item.type === "change_order" ? "增减项" : "客户"}确认`,
+          summary: "关键确认节点仍未闭环，后续设计、报价或施工推进会受到影响。",
+          severity: "medium",
+          ownerRole: "sales",
+          projectId: project?.id,
+          projectName: project?.name,
+          targetPath: project ? `/client/${project.id}` : "/"
+        } satisfies WorkspaceRiskItem;
+      });
+
+    const milestoneRisks: WorkspaceRiskItem[] = milestones.flatMap((item) => {
+      if (item.status === "done") {
+        return [];
+      }
+        const project = projects.find((projectEntry) => projectEntry.id === item.projectId);
+        const ownerRole = this.toWorkspaceRole(item.ownerRole);
+        if (!ownerRole) {
+          return [];
+        }
+        return [
+          {
+            id: item.id,
+            title: `${item.name} 节点待推进`,
+            summary: `${item.plannedDate} 前需要完成准备，避免项目推进延迟。`,
+            severity: item.status === "in_progress" ? "medium" : "low",
+            ownerRole,
+            projectId: project?.id,
+            projectName: project?.name,
+            targetPath: project ? `/projects/${project.id}` : "/"
+          }
+        ];
+      });
+
+    return [...issueRisks, ...confirmationRisks, ...milestoneRisks].sort((a, b) => {
+      const severityOrder: Record<WorkspaceRiskItem["severity"], number> = { high: 0, medium: 1, low: 2 };
+      return severityOrder[a.severity] - severityOrder[b.severity];
+    });
+  }
+
+  private buildActivities(): WorkspaceActivityItem[] {
+    const confirmationActivities = confirmations.map((item) => {
+      const project = projects.find((projectEntry) => projectEntry.id === item.projectId);
+      return {
+        id: item.id,
+        type: "confirmation",
+        title: `${item.clientName}${item.status === "pending" ? "待处理" : item.status === "confirmed" ? "已确认" : "已驳回"}${item.type === "change_order" ? "增减项" : "确认"}`,
+        summary: item.note ?? "客户侧确认记录已写入项目留痕。",
+        occurredAt: item.updatedAt,
+        projectId: project?.id,
+        projectName: project?.name,
+        targetPath: project ? `/client/${project.id}` : "/"
+      } satisfies WorkspaceActivityItem;
+    });
+
+    const changeActivities = changeOrders.map((item) => {
+      const project = projects.find((projectEntry) => projectEntry.id === item.projectId);
+      return {
+        id: item.id,
+        type: "change_order",
+        title: `设计变更：${item.title}`,
+        summary: `${item.reason}，金额变化 ¥${item.amountDelta.toLocaleString()}。`,
+        occurredAt: item.updatedAt,
+        projectId: project?.id,
+        projectName: project?.name,
+        targetPath: project ? `/projects/${project.id}` : "/"
+      } satisfies WorkspaceActivityItem;
+    });
+
+    const milestoneActivities = milestones.map((item) => {
+      const project = projects.find((projectEntry) => projectEntry.id === item.projectId);
+      return {
+        id: item.id,
+        type: "milestone",
+        title: `施工节点：${item.name}`,
+        summary: `${item.plannedDate} 计划推进，当前状态 ${item.status}。`,
+        occurredAt: item.updatedAt,
+        projectId: project?.id,
+        projectName: project?.name,
+        targetPath: project ? `/projects/${project.id}` : "/"
+      } satisfies WorkspaceActivityItem;
+    });
+
+    return [...confirmationActivities, ...changeActivities, ...milestoneActivities].sort((a, b) =>
+      b.occurredAt.localeCompare(a.occurredAt)
+    );
+  }
+
+  private getRoleDefinitions(): Array<{
+    role: Extract<UserRole, "sales" | "designer" | "project_manager">;
+    label: string;
+    title: string;
+    summary: string;
+    dashboard: DashboardSummary;
+    metricBuilder: (tasks: TaskFlowItem[], risks: WorkspaceRiskItem[]) => MetricCard[];
+  }> {
+    return [
+      {
+        role: "sales",
+        label: "销售工作台",
+        title: "销售工作台",
+        summary: "聚焦今日待跟进、高意向客户和待客户确认事项。",
+        dashboard: dashboards.find((item) => item.role === "sales")!,
+        metricBuilder: (tasks, risks) => [
+          { label: "今日待跟进", value: String(tasks.length), note: "线索跟进与客户确认", tone: "attention" },
+          {
+            label: "待客户确认",
+            value: String(confirmations.filter((item) => item.status === "pending").length),
+            note: "需要推动客户回复",
+            tone: "attention"
+          },
+          {
+            label: "签约金额视图",
+            value: `¥${quotations.reduce((sum, item) => sum + item.amount, 0).toLocaleString()}`,
+            note: "当前报价池",
+            tone: "positive"
+          },
+          { label: "转化阻塞", value: String(risks.length), note: "需立即处理的风险点" }
+        ]
+      },
+      {
+        role: "designer",
+        label: "设计工作台",
+        title: "设计工作台",
+        summary: "围绕待出图、待客户确认和设计变更组织当前工作。",
+        dashboard: dashboards.find((item) => item.role === "designer")!,
+        metricBuilder: (tasks, risks) => [
+          { label: "待出图任务", value: String(tasks.filter((item) => item.type === "design_output").length), note: "方案与材质说明" },
+          { label: "待确认反馈", value: String(tasks.filter((item) => item.type === "client_confirmation").length), note: "等待客户确认闭环", tone: "attention" },
+          { label: "设计风险", value: String(risks.length), note: "图纸与现场问题" },
+          { label: "当前项目", value: String(projects.filter((item) => item.status !== "completed").length), note: "跨项目协同中" }
+        ]
+      },
+      {
+        role: "project_manager",
+        label: "项目经理工作台",
+        title: "项目经理工作台",
+        summary: "聚焦施工节点、验收待办和延期风险项目。",
+        dashboard: dashboards.find((item) => item.role === "project_manager")!,
+        metricBuilder: (tasks, risks) => [
+          { label: "今日施工节点", value: String(tasks.filter((item) => item.type === "milestone").length), note: "需要现场推进" },
+          { label: "待处理问题", value: String(tasks.filter((item) => item.type === "inspection_issue").length), note: "问题闭环压力", tone: "attention" },
+          { label: "风险项目", value: String(risks.length), note: "节点或问题预警", tone: "attention" },
+          { label: "在建项目", value: String(projects.filter((item) => item.status === "delivery" || item.status === "detailing").length), note: "当前负责范围" }
+        ]
+      }
+    ];
+  }
+
+  private toWorkspaceRole(role: UserRole): WorkspaceRiskItem["ownerRole"] | null {
+    if (role === "sales" || role === "designer" || role === "detailer" || role === "project_manager") {
+      return role;
+    }
+    return null;
   }
 
   private buildId(prefix: string, collection: Array<{ id: string }>) {

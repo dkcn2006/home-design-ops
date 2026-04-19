@@ -16,9 +16,19 @@ class ProjectsController {
     return this.repository.getPortfolioOverview();
   }
 
+  @Get("workspace-home")
+  getWorkspaceHome() {
+    return this.repository.getWorkspaceHome();
+  }
+
   @Get("dashboard")
   getDashboardByRole(@Query("role") role: UserRole = "sales") {
     return this.repository.getDashboard(role);
+  }
+
+  @Get("role-workbench")
+  getRoleWorkbench(@Query("role") role: UserRole = "sales") {
+    return this.repository.getRoleWorkbench(role);
   }
 
   @Get(":id/archive")

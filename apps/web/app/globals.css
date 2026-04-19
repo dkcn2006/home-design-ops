@@ -265,6 +265,10 @@ body {
   margin-bottom: 22px;
 }
 
+.role-workbench-grid {
+  align-items: start;
+}
+
 .client-workspace-header {
   margin-bottom: 14px;
 }
@@ -365,6 +369,10 @@ body {
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
+}
+
+.stat-card-value-sm {
+  font-size: 24px;
 }
 
 .stat-card-emphasis {
@@ -517,6 +525,36 @@ ul.clean li {
   line-height: 1.5;
 }
 
+.list-meta-row,
+.list-link-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.list-meta-row span,
+.list-link-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.list-link-row {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list-link-row .table-link {
+  font-size: 13px;
+}
+
 .stage-summary-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -542,6 +580,10 @@ ul.clean li {
   font-size: 28px;
   line-height: 1;
   letter-spacing: -0.02em;
+}
+
+.role-helper-copy {
+  margin-bottom: 14px;
 }
 
 .muted {
@@ -626,6 +668,27 @@ ul.clean li {
   background: #f9ece8;
   color: #a04f42;
   border-color: #e7c8bf;
+}
+
+.status-risk-high,
+.status-priority-high {
+  background: #f9ece8;
+  color: #a04f42;
+  border-color: #e7c8bf;
+}
+
+.status-risk-medium,
+.status-priority-medium {
+  background: #fbf3e8;
+  color: #9a5b2f;
+  border-color: #e7cfb5;
+}
+
+.status-risk-low,
+.status-priority-low {
+  background: #eef5ec;
+  color: #466244;
+  border-color: #cad8c5;
 }
 
 .client-confirmation-card.is-pending {
@@ -875,6 +938,10 @@ ul.clean li {
 
   .list-row-top {
     flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .list-link-row {
     align-items: flex-start;
   }
 

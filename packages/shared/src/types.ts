@@ -23,6 +23,18 @@ export type ConfirmationStatus = "pending" | "confirmed" | "rejected";
 export type VersionStatus = "draft" | "review" | "current" | "archived";
 export type MilestoneStatus = "not_started" | "in_progress" | "blocked" | "done";
 export type InspectionSeverity = "low" | "medium" | "high";
+export type WorkItemStatus = "todo" | "in_progress" | "blocked" | "done";
+export type WorkItemPriority = "high" | "medium" | "low";
+export type WorkItemType =
+  | "lead_follow_up"
+  | "design_output"
+  | "client_confirmation"
+  | "quotation"
+  | "milestone"
+  | "inspection_issue"
+  | "acceptance";
+export type RiskSeverity = "high" | "medium" | "low";
+export type ActivityType = "follow_up" | "confirmation" | "change_order" | "milestone" | "inspection";
 
 export interface AuditFields {
   id: string;
@@ -167,6 +179,72 @@ export interface Attachment extends AuditFields {
   linkedEntityId?: string;
 }
 
+export interface WorkItem extends AuditFields {
+  role: Extract<UserRole, "sales" | "designer" | "detailer" | "project_manager">;
+  type: WorkItemType;
+  status: WorkItemStatus;
+  priority: WorkItemPriority;
+  title: string;
+  summary: string;
+  dueDate: string;
+  targetPath: string;
+  projectId?: string;
+  leadId?: string;
+}
+
+export interface TaskFlowItem {
+  id: string;
+  title: string;
+  summary: string;
+  dueDate: string;
+  role: WorkItem["role"];
+  status: WorkItemStatus;
+  priority: WorkItemPriority;
+  type: WorkItemType;
+  projectId?: string;
+  projectName?: string;
+  customerName?: string;
+  targetPath: string;
+}
+
+export interface WorkspaceRiskItem {
+  id: string;
+  title: string;
+  summary: string;
+  severity: RiskSeverity;
+  ownerRole: Extract<UserRole, "sales" | "designer" | "detailer" | "project_manager">;
+  projectId?: string;
+  projectName?: string;
+  targetPath: string;
+}
+
+export interface WorkspaceActivityItem {
+  id: string;
+  type: ActivityType;
+  title: string;
+  summary: string;
+  occurredAt: string;
+  projectId?: string;
+  projectName?: string;
+  targetPath: string;
+}
+
+export interface MetricCard {
+  label: string;
+  value: string;
+  note: string;
+  tone?: "default" | "attention" | "positive";
+}
+
+export interface RoleProjectFocusItem {
+  id: string;
+  name: string;
+  customerName: string;
+  status: Project["status"];
+  nextAction: string;
+  targetPath: string;
+}
+
 export interface ProjectArchive {
   project: Project;
   customer: Customer;
@@ -195,12 +273,7 @@ export interface DashboardSummary {
   role: UserRole;
   metrics: DashboardMetrics;
   focus: string[];
-  projects: Array<{
-    id: string;
-    name: string;
-    status: Project["status"];
-    nextAction: string;
-  }>;
+  projects: RoleProjectFocusItem[];
 }
 
 export interface ProjectPortfolioItem {
@@ -240,6 +313,43 @@ export interface PortfolioOverview {
     totalQuotationValue: number;
   };
   projects: ProjectPortfolioItem[];
+}
+
+export interface WorkspaceHome {
+  metrics: PortfolioOverview["metrics"] & {
+    overdueTasks: number;
+    activeRisks: number;
+  };
+  tasks: TaskFlowItem[];
+  risks: WorkspaceRiskItem[];
+  activities: WorkspaceActivityItem[];
+  roleSummaries: Array<{
+    role: Extract<UserRole, "sales" | "designer" | "project_manager">;
+    label: string;
+    summary: string;
+    taskCount: number;
+    riskCount: number;
+    activeProjects: number;
+    primaryTask?: string;
+    targetPath: string;
+  }>;
+  stageSummary: Array<{
+    stage: Project["status"];
+    label: string;
+    count: number;
+  }>;
+  projectLine: ProjectPortfolioItem[];
+}
+
+export interface RoleWorkbench {
+  role: Extract<UserRole, "sales" | "designer" | "project_manager">;
+  title: string;
+  subtitle: string;
+  metrics: MetricCard[];
+  inbox: TaskFlowItem[];
+  risks: WorkspaceRiskItem[];
+  activity: WorkspaceActivityItem[];
+  focusProjects: RoleProjectFocusItem[];
 }
 
 export interface UpdateConfirmationInput {

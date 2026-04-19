@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { Route } from "next";
-import { getArchive, getDashboard, getPortfolioOverview } from "../lib/data";
+import { getWorkspaceHome } from "../lib/data";
 
 const roleLabels = {
   sales: "销售",
   designer: "设计",
+  detailer: "深化",
   project_manager: "项目经理"
 } as const;
 
@@ -16,45 +17,37 @@ const projectStageLabels = {
   completed: "已完工"
 } as const;
 
-const leadStageLabels = {
-  new: "新线索",
-  following_up: "已联系",
-  site_measurement: "已预约量房",
-  proposal_pending: "方案中",
-  signed: "已签约",
-  closed: "已流失"
+const taskTypeLabels = {
+  lead_follow_up: "线索跟进",
+  design_output: "设计输出",
+  client_confirmation: "客户确认",
+  quotation: "报价推进",
+  milestone: "施工节点",
+  inspection_issue: "问题处理",
+  acceptance: "验收"
 } as const;
 
-const confirmationTypeLabels = {
-  proposal: "方案确认",
-  quotation: "报价确认",
-  change_order: "增减项确认",
-  milestone: "节点确认",
-  completion: "验收确认"
+const priorityLabels = {
+  high: "高优先级",
+  medium: "中优先级",
+  low: "低优先级"
 } as const;
 
 export default async function HomePage() {
-  const [salesDashboard, designerDashboard, managerDashboard, overview] = await Promise.all([
-    getDashboard("sales"),
-    getDashboard("designer"),
-    getDashboard("project_manager"),
-    getPortfolioOverview()
-  ]);
-
-  const [pilotProject] = overview.projects;
-  const pilotArchive = pilotProject ? await getArchive(pilotProject.id) : null;
+  const workspace = await getWorkspaceHome();
+  const [pilotProject] = workspace.projectLine;
 
   const quickLinks = [
     {
       href: "/sales/leads",
       label: "新建线索",
-      note: "录入客户、来源与下次跟进",
+      note: "录入客户、来源与跟进节点",
       tag: "Lead"
     },
     {
       href: "/role/sales",
       label: "销售跟进",
-      note: "查看今日待跟进与转化重点",
+      note: "查看今日待跟进与客户确认",
       tag: "Sales"
     },
     {
@@ -71,100 +64,6 @@ export default async function HomePage() {
     }
   ];
 
-  const todayTodos = [
-    ...salesDashboard.focus.map((item) => ({ role: "sales", title: item })),
-    ...designerDashboard.focus.map((item) => ({ role: "designer", title: item })),
-    ...managerDashboard.focus.map((item) => ({ role: "project_manager", title: item }))
-  ].slice(0, 6);
-
-  const riskItems = overview.projects
-    .flatMap((project) => {
-      const items = [];
-
-      if (project.pendingConfirmationCount > 0) {
-        items.push({
-          projectId: project.id,
-          title: `${project.name} 有 ${project.pendingConfirmationCount} 项待确认`,
-          note: "客户确认未闭环"
-        });
-      }
-
-      if (project.openIssueCount > 0) {
-        items.push({
-          projectId: project.id,
-          title: `${project.name} 有 ${project.openIssueCount} 个待处理问题`,
-          note: "施工/深化问题需继续推进"
-        });
-      }
-
-      if (project.nextMilestone) {
-        items.push({
-          projectId: project.id,
-          title: `${project.nextMilestone.name} 将于 ${project.nextMilestone.plannedDate} 推进`,
-          note: "注意节点准备与责任人同步"
-        });
-      }
-
-      return items;
-    })
-    .slice(0, 5);
-
-  const stageSummary = Object.entries(projectStageLabels).map(([key, label]) => ({
-    key,
-    label,
-    count: overview.projects.filter((project) => project.status === key).length
-  }));
-
-  const roleBoards = [
-    {
-      href: "/role/sales",
-      name: "销售工作台",
-      summary: "强跟进、强转化、强提醒",
-      dashboard: salesDashboard
-    },
-    {
-      href: "/role/designer",
-      name: "设计工作台",
-      summary: "清楚知道待量房、待出图与待确认",
-      dashboard: designerDashboard
-    },
-    {
-      href: "/role/project_manager",
-      name: "项目经理工作台",
-      summary: "盯节点、盯风险、盯验收闭环",
-      dashboard: managerDashboard
-    }
-  ];
-
-  const upcomingProjects = overview.projects
-    .filter((project) => project.nextMilestone)
-    .slice(0, 4);
-
-  const recentActivities = pilotArchive
-    ? [
-        ...pilotArchive.confirmations.map((item) => ({
-          time: item.updatedAt,
-          title: `${confirmationTypeLabels[item.type]} · ${item.status === "pending" ? "待处理" : item.status === "confirmed" ? "已确认" : "已驳回"}`,
-          note: item.note ?? `客户：${item.clientName}`,
-          href: `/client/${pilotArchive.project.id}` as Route
-        })),
-        ...pilotArchive.changeOrders.map((item) => ({
-          time: item.updatedAt,
-          title: `设计变更 · ${item.title}`,
-          note: `${item.confirmationStatus === "pending" ? "待确认" : "已处理"} · 金额变化 ¥${item.amountDelta.toLocaleString()}`,
-          href: `/projects/${pilotArchive.project.id}` as Route
-        })),
-        ...pilotArchive.milestones.map((item) => ({
-          time: item.updatedAt,
-          title: `施工节点 · ${item.name}`,
-          note: `${item.plannedDate} · 责任角色 ${roleLabels[item.ownerRole as keyof typeof roleLabels] ?? item.ownerRole}`,
-          href: `/projects/${pilotArchive.project.id}` as Route
-        }))
-      ]
-        .sort((a, b) => b.time.localeCompare(a.time))
-        .slice(0, 5)
-    : [];
-
   return (
     <>
       <section className="workspace-header">
@@ -172,7 +71,7 @@ export default async function HomePage() {
         <div className="workspace-copy">
           <div className="workspace-overline">workspace / overview</div>
           <h1>家装运营总览</h1>
-          <p>以客户到项目交付为主线，把待办、确认、风险和角色协作收在同一个工作区首页。</p>
+          <p>首页直接读取后端结构化任务流，把待办、风险、动态和项目主线收在同一个工作区首页。</p>
         </div>
       </section>
 
@@ -198,14 +97,26 @@ export default async function HomePage() {
         <article className="panel">
           <div className="section-title">
             <h2>我的待办</h2>
-            <span>今日优先处理</span>
+            <span>来自后端任务流</span>
           </div>
           <ul className="clean operational-list">
-            {todayTodos.map((item) => (
-              <li key={`${item.role}-${item.title}`}>
+            {workspace.tasks.map((task) => (
+              <li key={task.id}>
                 <div className="list-row-top">
-                  <strong>{item.title}</strong>
-                  <span className="status-chip">{roleLabels[item.role as keyof typeof roleLabels]}</span>
+                  <strong>{task.title}</strong>
+                  <span className={`status-chip status-priority-${task.priority}`}>{priorityLabels[task.priority]}</span>
+                </div>
+                <div className="list-meta-row">
+                  <span>{roleLabels[task.role]}</span>
+                  <span>{taskTypeLabels[task.type]}</span>
+                  <span>{task.dueDate}</span>
+                </div>
+                <div className="muted">{task.summary}</div>
+                <div className="list-link-row">
+                  <span className="muted">{task.projectName ?? task.customerName ?? "工作区任务"}</span>
+                  <Link href={task.targetPath as Route} className="table-link">
+                    查看详情
+                  </Link>
                 </div>
               </li>
             ))}
@@ -215,18 +126,26 @@ export default async function HomePage() {
         <article className="panel">
           <div className="section-title">
             <h2>风险与提醒</h2>
-            <span>待确认、问题与临近节点</span>
+            <span>由确认、问题与节点聚合而成</span>
           </div>
           <ul className="clean operational-list">
-            {riskItems.map((item) => (
-              <li key={`${item.projectId}-${item.title}`}>
+            {workspace.risks.map((risk) => (
+              <li key={risk.id}>
                 <div className="list-row-top">
-                  <strong>{item.title}</strong>
-                  <Link href={`/projects/${item.projectId}`} className="table-link">
+                  <strong>{risk.title}</strong>
+                  <span className={`status-chip status-risk-${risk.severity}`}>{risk.severity.toUpperCase()}</span>
+                </div>
+                <div className="list-meta-row">
+                  <span>{roleLabels[risk.ownerRole]}</span>
+                  <span>{risk.projectName ?? "全局风险"}</span>
+                </div>
+                <div className="muted">{risk.summary}</div>
+                <div className="list-link-row">
+                  <span className="muted">需继续推进闭环</span>
+                  <Link href={risk.targetPath as Route} className="table-link">
                     查看项目
                   </Link>
                 </div>
-                <div className="muted">{item.note}</div>
               </li>
             ))}
           </ul>
@@ -244,42 +163,42 @@ export default async function HomePage() {
               <strong>客户数</strong>
               <span className="stat-card-meta">客户档案沉淀</span>
             </div>
-            <div className="stat-card-value">{overview.metrics.customers}</div>
+            <div className="stat-card-value">{workspace.metrics.customers}</div>
           </article>
           <article className="stat-card">
             <div className="stat-card-head">
               <strong>线索数</strong>
               <span className="stat-card-meta">获客入口总量</span>
             </div>
-            <div className="stat-card-value">{overview.metrics.leads}</div>
+            <div className="stat-card-value">{workspace.metrics.leads}</div>
           </article>
           <article className="stat-card">
             <div className="stat-card-head">
               <strong>活跃项目</strong>
               <span className="stat-card-meta">当前推进中</span>
             </div>
-            <div className="stat-card-value">{overview.metrics.activeProjects}</div>
+            <div className="stat-card-value">{workspace.metrics.activeProjects}</div>
           </article>
           <article className="stat-card">
             <div className="stat-card-head">
               <strong>待确认事项</strong>
               <span className="stat-card-meta">待客户反馈</span>
             </div>
-            <div className="stat-card-value">{overview.metrics.pendingConfirmations}</div>
+            <div className="stat-card-value">{workspace.metrics.pendingConfirmations}</div>
           </article>
           <article className="stat-card">
             <div className="stat-card-head">
-              <strong>待处理问题</strong>
-              <span className="stat-card-meta">问题待闭环</span>
+              <strong>活跃风险</strong>
+              <span className="stat-card-meta">问题与节点预警</span>
             </div>
-            <div className="stat-card-value">{overview.metrics.openIssues}</div>
+            <div className="stat-card-value">{workspace.metrics.activeRisks}</div>
           </article>
           <article className="stat-card stat-card-emphasis">
             <div className="stat-card-head">
               <strong>总报价额</strong>
               <span className="stat-card-meta">项目累计金额</span>
             </div>
-            <div className="stat-card-value">¥{overview.metrics.totalQuotationValue.toLocaleString()}</div>
+            <div className="stat-card-value">¥{workspace.metrics.totalQuotationValue.toLocaleString()}</div>
           </article>
         </div>
       </section>
@@ -287,22 +206,22 @@ export default async function HomePage() {
       <section className="panel" style={{ marginTop: 22 }}>
         <div className="section-title">
           <h2>角色工作入口</h2>
-          <span>打开系统先看到最需要处理的信息</span>
+          <span>每个角色进入后看到同一主线上的不同视角</span>
         </div>
         <div className="cards-3">
-          {roleBoards.map((board) => (
-            <Link href={board.href as Route} className="workspace-link-card role-card" key={board.name}>
+          {workspace.roleSummaries.map((role) => (
+            <Link href={role.targetPath as Route} className="workspace-link-card role-card" key={role.role}>
               <div className="list-row-top">
-                <strong>{board.name}</strong>
+                <strong>{role.label}</strong>
                 <span className="pill">Role</span>
               </div>
-              <p className="muted">{board.summary}</p>
+              <p className="muted">{role.summary}</p>
               <div className="role-card-metrics">
-                <span>活跃项目 {board.dashboard.metrics.activeProjects}</span>
-                <span>待确认 {board.dashboard.metrics.pendingConfirmations}</span>
-                <span>开放问题 {board.dashboard.metrics.openIssues}</span>
+                <span>待办 {role.taskCount}</span>
+                <span>风险 {role.riskCount}</span>
+                <span>活跃项目 {role.activeProjects}</span>
               </div>
-              <div className="muted">当前重点：{board.dashboard.focus[0]}</div>
+              <div className="muted">当前重点：{role.primaryTask ?? "暂无待办"}</div>
             </Link>
           ))}
         </div>
@@ -315,23 +234,23 @@ export default async function HomePage() {
             <span>按主阶段查看整体分布与本周节点</span>
           </div>
           <div className="stage-summary-grid">
-            {stageSummary.map((item) => (
-              <div className="stage-summary-card" key={item.key}>
+            {workspace.stageSummary.map((item) => (
+              <div className="stage-summary-card" key={item.stage}>
                 <span>{item.label}</span>
                 <strong>{item.count}</strong>
               </div>
             ))}
           </div>
-          <div className="subsection-title">本周关键节点</div>
+          <div className="subsection-title">项目主线摘要</div>
           <ul className="clean compact-list operational-list" style={{ marginTop: 12 }}>
-            {upcomingProjects.map((project) => (
+            {workspace.projectLine.slice(0, 4).map((project) => (
               <li key={project.id}>
                 <div className="list-row-top">
-                  <strong>{project.nextMilestone?.name}</strong>
+                  <strong>{project.name}</strong>
                   <span className="status-chip">{projectStageLabels[project.status]}</span>
                 </div>
                 <div className="muted">
-                  {project.name} · {project.nextMilestone?.plannedDate}
+                  {project.customerName} · 待确认 {project.pendingConfirmationCount} · 问题 {project.openIssueCount}
                 </div>
               </li>
             ))}
@@ -341,18 +260,22 @@ export default async function HomePage() {
         <article className="panel">
           <div className="section-title">
             <h2>最近动态</h2>
-            <span>确认、变更与节点留痕</span>
+            <span>后端动态流，记录确认、变更与节点留痕</span>
           </div>
           <ul className="clean compact-list activity-list">
-            {recentActivities.map((item) => (
-              <li key={`${item.time}-${item.title}`}>
+            {workspace.activities.map((item) => (
+              <li key={item.id}>
                 <div className="list-row-top">
                   <strong>{item.title}</strong>
-                  <Link href={item.href} className="table-link">
+                  <Link href={item.targetPath as Route} className="table-link">
                     查看
                   </Link>
                 </div>
-                <div className="muted">{item.note}</div>
+                <div className="list-meta-row">
+                  <span>{item.occurredAt.slice(0, 10)}</span>
+                  <span>{item.projectName ?? "工作区"}</span>
+                </div>
+                <div className="muted">{item.summary}</div>
               </li>
             ))}
           </ul>
@@ -375,21 +298,21 @@ export default async function HomePage() {
             </tr>
           </thead>
           <tbody>
-            {overview.projects.map((project) => (
+            {workspace.projectLine.map((project) => (
               <tr key={project.id}>
                 <td>
-                  <Link href={`/projects/${project.id}`} className="table-link">
+                  <Link href={`/projects/${project.id}` as Route} className="table-link">
                     {project.name}
                   </Link>
                   <div className="muted">{project.code}</div>
                 </td>
                 <td>
                   {project.customerName}
-                  <div className="muted">{leadStageLabels[project.leadStage]}</div>
+                  <div className="muted">{project.city}</div>
                 </td>
                 <td>
                   {projectStageLabels[project.status]}
-                  <div className="muted">{project.city} · {project.areaSqm} ㎡</div>
+                  <div className="muted">{project.areaSqm} ㎡</div>
                 </td>
                 <td>
                   待确认 {project.pendingConfirmationCount} · 问题 {project.openIssueCount}
