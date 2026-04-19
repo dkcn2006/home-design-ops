@@ -7,8 +7,8 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          home-design-ops
-          <span>家装业务协同与 AI 提效 MVP</span>
+          家装运营工作台
+          <span>业务协同与交付推进</span>
         </div>
         <div className="sidebar-group">
           <div className="sidebar-label">Workspace</div>

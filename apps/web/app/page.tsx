@@ -33,7 +33,7 @@ export default async function HomePage() {
       <section className="workspace-header">
         <div className="workspace-emoji">🏠</div>
         <div className="workspace-copy">
-          <div className="workspace-overline">home-design-ops / workspace</div>
+          <div className="workspace-overline">workspace / overview</div>
           <h1>家装运营总览</h1>
           <p>
             当前系统已经进入可联调的 MVP 阶段：首页通过 NestJS API 读取项目事实，用一个工作区视图把线索、项目、报价、确认和下一步动作整理在一起。

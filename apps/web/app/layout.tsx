@@ -4,8 +4,8 @@ import "./globals.css";
 import { Shell } from "../components/layout";
 
 export const metadata: Metadata = {
-  title: "home-design-ops",
-  description: "Home renovation operations and AI productivity MVP"
+  title: "家装运营工作台",
+  description: "Home renovation operations workspace"
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
