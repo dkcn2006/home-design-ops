@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build": "nest build",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start": "node dist/apps/api/src/main.js",
+    "start:dev": "npm run build && node dist/apps/api/src/main.js",
     "lint": "tsc --noEmit",
     "test": "echo \"No API tests configured yet\""
   },
@@ -27,4 +27,3 @@
     "typescript": "^5.7.2"
   }
 }
-
