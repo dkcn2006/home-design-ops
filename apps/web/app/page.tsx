@@ -30,16 +30,33 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="hero-card">
-        <h1>面向小型家装团队的前后端 MVP 已切到真实 API 结构</h1>
-        <p>
-          当前首页不再直接读取本地种子数据，而是通过 NestJS API 获取项目运营概览。MVP 的下一阶段重点是把每个业务节点都做成可操作、可追踪、可确认的真实流程。
-        </p>
-        <div className="badge-row">
-          <span className="badge">Next.js Web</span>
-          <span className="badge">NestJS API</span>
-          <span className="badge">Project Archive Center</span>
-          <span className="badge">Confirmation Workflow</span>
+      <section className="workspace-header">
+        <div className="workspace-emoji">🏠</div>
+        <div className="workspace-copy">
+          <div className="workspace-overline">home-design-ops / workspace</div>
+          <h1>家装运营总览</h1>
+          <p>
+            当前系统已经进入可联调的 MVP 阶段：首页通过 NestJS API 读取项目事实，用一个工作区视图把线索、项目、报价、确认和下一步动作整理在一起。
+          </p>
+        </div>
+      </section>
+
+      <section className="doc-properties">
+        <div className="doc-property">
+          <span>系统状态</span>
+          <strong>本地可运行</strong>
+        </div>
+        <div className="doc-property">
+          <span>数据来源</span>
+          <strong>NestJS API</strong>
+        </div>
+        <div className="doc-property">
+          <span>当前阶段</span>
+          <strong>MVP 联调中</strong>
+        </div>
+        <div className="doc-property">
+          <span>重点方向</span>
+          <strong>流程闭环与持久化</strong>
         </div>
       </section>
 
@@ -64,8 +81,32 @@ export default async function HomePage() {
 
       <section className="panel" style={{ marginTop: 22 }}>
         <div className="section-title">
-          <h2>MVP 详细功能落地顺序</h2>
-          <span>从信息收口到执行闭环</span>
+          <h2>工作区入口</h2>
+          <span>常用视图</span>
+        </div>
+        <div className="cards-3">
+          <Link href="/sales/leads" className="workspace-link-card">
+            <div className="pill">Sales</div>
+            <h3>客户 / 线索录入</h3>
+            <p className="muted">录入客户、创建线索、更新销售阶段，形成前端和 API 贯通的链路入口。</p>
+          </Link>
+          <Link href="/role/sales" className="workspace-link-card">
+            <div className="pill">Role View</div>
+            <h3>销售工作台</h3>
+            <p className="muted">查看销售视角的关注事项、共享项目事实和近期待推动节点。</p>
+          </Link>
+          <Link href={pilotProject ? `/projects/${pilotProject.id}` : "/"} className="workspace-link-card">
+            <div className="pill">Archive</div>
+            <h3>项目档案</h3>
+            <p className="muted">进入项目单一事实来源页面，查看需求、版本、报价、交付和客户确认。</p>
+          </Link>
+        </div>
+      </section>
+
+      <section className="panel" style={{ marginTop: 22 }}>
+        <div className="section-title">
+          <h2>MVP 功能路径</h2>
+          <span>从线索到确认</span>
         </div>
         <div className="cards-3">
           {workflowSteps.map((step) => (
@@ -84,28 +125,40 @@ export default async function HomePage() {
         <section className="panel" style={{ marginTop: 22 }}>
           <div className="section-title">
             <h2>当前试点项目</h2>
-            <span>{pilotProject.name}</span>
+            <span>{pilotProject.code}</span>
           </div>
-          <div className="cards-2">
+          <div className="doc-properties">
+            <div className="doc-property">
+              <span>客户</span>
+              <strong>{pilotProject.customerName}</strong>
+            </div>
+            <div className="doc-property">
+              <span>城市</span>
+              <strong>{pilotProject.city}</strong>
+            </div>
+            <div className="doc-property">
+              <span>项目阶段</span>
+              <strong>{pilotProject.status}</strong>
+            </div>
+            <div className="doc-property">
+              <span>线索阶段</span>
+              <strong>{pilotProject.leadStage}</strong>
+            </div>
+            <div className="doc-property">
+              <span>报价总额</span>
+              <strong>¥{pilotProject.quotationAmount.toLocaleString()}</strong>
+            </div>
+            <div className="doc-property">
+              <span>待确认</span>
+              <strong>{pilotProject.pendingConfirmationCount} 项</strong>
+            </div>
+          </div>
+          <div className="cards-2" style={{ marginTop: 18 }}>
             <article className="kanban-card">
-              <h3>项目运营概览</h3>
+              <h3>当前上下文</h3>
               <ul className="clean" style={{ marginTop: 14 }}>
-                <li>客户：{pilotProject.customerName}</li>
-                <li>城市：{pilotProject.city}</li>
-                <li>阶段：{pilotProject.status}</li>
-                <li>线索阶段：{pilotProject.leadStage}</li>
                 <li>预算区间：¥{pilotProject.budgetRange.min.toLocaleString()} - ¥{pilotProject.budgetRange.max.toLocaleString()}</li>
-                <li>当前报价总额：¥{pilotProject.quotationAmount.toLocaleString()}</li>
-                <li>待确认事项：{pilotProject.pendingConfirmationCount}</li>
                 <li>未关闭问题：{pilotProject.openIssueCount}</li>
-              </ul>
-            </article>
-            <article className="kanban-card">
-              <h3>下一步动作</h3>
-              <ul className="clean" style={{ marginTop: 14 }}>
-                {salesDashboard.focus.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
                 <li>
                   下一里程碑：
                   {pilotProject.nextMilestone
@@ -113,8 +166,16 @@ export default async function HomePage() {
                     : "暂无"}
                 </li>
               </ul>
+            </article>
+            <article className="kanban-card">
+              <h3>销售下一步动作</h3>
+              <ul className="clean" style={{ marginTop: 14 }}>
+                {salesDashboard.focus.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
               <div className="footer-note" style={{ marginTop: 18 }}>
-                <strong>当前已实现：</strong> 运营概览、项目档案、角色工作台和客户端确认流已经通过 API 串起来，可以继续往真实数据库迁移。
+                <strong>当前状态：</strong> 首页、项目档案、角色工作台和客户端确认流已经通过 API 串起来，下一步更适合补持久化和权限。
               </div>
             </article>
           </div>

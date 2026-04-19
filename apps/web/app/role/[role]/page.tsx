@@ -21,15 +21,29 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
 
   return (
     <>
-      <section className="hero-card">
-        <h1>{roleLabels[role]}工作台</h1>
-        <p>
-          工作台保留角色视角，但底层统一读取 API 返回的数据。这样每个角色都在同一份项目事实基础上协作，不再出现前端各看各的数据快照。
-        </p>
-        <div className="badge-row">
-          <span className="badge">Role: {role}</span>
-          <span className="badge">Projects: {dashboard.metrics.activeProjects}</span>
-          <span className="badge">Pending Confirmations: {dashboard.metrics.pendingConfirmations}</span>
+      <section className="workspace-header">
+        <div className="workspace-emoji">🧭</div>
+        <div className="workspace-copy">
+          <div className="workspace-overline">role view / operational workspace</div>
+          <h1>{roleLabels[role]}工作台</h1>
+          <p>
+            工作台保留角色视角，但底层统一读取 API 返回的数据。这样每个角色都基于同一份项目事实协作，不再出现前端各看各的数据快照。
+          </p>
+        </div>
+      </section>
+
+      <section className="doc-properties">
+        <div className="doc-property">
+          <span>角色标识</span>
+          <strong>{role}</strong>
+        </div>
+        <div className="doc-property">
+          <span>活跃项目</span>
+          <strong>{dashboard.metrics.activeProjects}</strong>
+        </div>
+        <div className="doc-property">
+          <span>待确认事项</span>
+          <strong>{dashboard.metrics.pendingConfirmations}</strong>
         </div>
       </section>
 
@@ -112,6 +126,9 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
             ))}
           </tbody>
         </table>
+        <div className="footer-note">
+          <strong>提示：</strong> 这里更适合继续演化成类似 Notion 数据库视图的项目表，支持过滤、排序和责任人视角切换。
+        </div>
       </section>
     </>
   );

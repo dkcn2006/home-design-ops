@@ -10,15 +10,23 @@ export function Shell({ children }: { children: ReactNode }) {
           home-design-ops
           <span>家装业务协同与 AI 提效 MVP</span>
         </div>
-        <nav className="nav">
-          <Link href="/">总览</Link>
-          <Link href={"/sales/leads" as Route}>客户/线索录入</Link>
-          <Link href="/role/sales">销售工作台</Link>
-          <Link href="/role/designer">设计工作台</Link>
-          <Link href="/role/project_manager">项目经理工作台</Link>
-          <Link href="/projects/proj-1">项目档案</Link>
-          <Link href="/client/proj-1">客户端门户</Link>
-        </nav>
+        <div className="sidebar-group">
+          <div className="sidebar-label">Workspace</div>
+          <nav className="nav">
+            <Link href="/">总览</Link>
+            <Link href={"/sales/leads" as Route}>客户 / 线索录入</Link>
+            <Link href="/projects/proj-1">项目档案</Link>
+            <Link href="/client/proj-1">客户端门户</Link>
+          </nav>
+        </div>
+        <div className="sidebar-group">
+          <div className="sidebar-label">Role Views</div>
+          <nav className="nav">
+            <Link href="/role/sales">销售工作台</Link>
+            <Link href="/role/designer">设计工作台</Link>
+            <Link href="/role/project_manager">项目经理工作台</Link>
+          </nav>
+        </div>
       </aside>
       <main className="main">{children}</main>
     </div>

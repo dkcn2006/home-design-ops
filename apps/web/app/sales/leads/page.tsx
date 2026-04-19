@@ -25,16 +25,29 @@ export default async function SalesLeadsPage() {
 
   return (
     <>
-      <section className="hero-card">
-        <h1>客户/线索创建与阶段流转</h1>
-        <p>
-          这一页把销售链路做成真实可操作的前后端功能：先录入客户与线索，再围绕阶段推进做协作，避免新客户信息散落在微信、表格和口头同步里。
-        </p>
-        <div className="badge-row">
-          <span className="badge">客户录入</span>
-          <span className="badge">线索创建</span>
-          <span className="badge">阶段流转</span>
-          <span className="badge">API-backed</span>
+      <section className="workspace-header">
+        <div className="workspace-emoji">🗂️</div>
+        <div className="workspace-copy">
+          <div className="workspace-overline">sales / lead database</div>
+          <h1>客户 / 线索录入</h1>
+          <p>
+            这一页把销售链路整理成一个工作区数据库：先录入客户与线索，再围绕阶段推进做协作，避免新客户信息散落在微信、表格和口头同步里。
+          </p>
+        </div>
+      </section>
+
+      <section className="doc-properties">
+        <div className="doc-property">
+          <span>视图类型</span>
+          <strong>线索数据库</strong>
+        </div>
+        <div className="doc-property">
+          <span>总线索数</span>
+          <strong>{pipeline.length}</strong>
+        </div>
+        <div className="doc-property">
+          <span>当前用途</span>
+          <strong>录入与阶段流转</strong>
         </div>
       </section>
 
@@ -135,8 +148,14 @@ export default async function SalesLeadsPage() {
                   {items.length ? (
                     items.map((item) => (
                       <div className="lead-card" key={item.lead.id}>
-                        <strong>{item.customer.name}</strong>
-                        <div className="muted">{item.customer.city} · {item.lead.source}</div>
+                        <div className="lead-card-header">
+                          <strong>{item.customer.name}</strong>
+                          <span className="badge">{stageLabels[item.lead.stage]}</span>
+                        </div>
+                        <div className="lead-meta-row">
+                          <span>{item.customer.city}</span>
+                          <span>{item.lead.source}</span>
+                        </div>
                         <div className="muted">预算：¥{item.customer.budgetMin.toLocaleString()} - ¥{item.customer.budgetMax.toLocaleString()}</div>
                         <div className="muted">摘要：{item.lead.summary}</div>
                         {item.linkedProject ? (
@@ -166,6 +185,9 @@ export default async function SalesLeadsPage() {
               </article>
             );
           })}
+        </div>
+        <div className="footer-note">
+          <strong>下一步建议：</strong> 这块很适合继续演化成 Notion 风格数据库，补充筛选、来源标签、签约概率和负责人字段。
         </div>
       </section>
     </>

@@ -17,16 +17,41 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <section className="hero-card">
-        <h1>{archive.project.name}</h1>
-        <p>
-          项目档案页现在是一个完整的业务主线视图：从客户需求、版本资产、报价变更，到交付节点和客户确认，全部通过 API 聚合返回，便于后续替换成真实数据库。
-        </p>
-        <div className="badge-row">
-          <span className="badge">项目编号 {archive.project.code}</span>
-          <span className="badge">状态 {archive.project.status}</span>
-          <span className="badge">客户 {archive.customer.name}</span>
-          <span className="badge">面积 {archive.project.areaSqm} ㎡</span>
+      <section className="workspace-header">
+        <div className="workspace-emoji">📁</div>
+        <div className="workspace-copy">
+          <div className="workspace-overline">project archive / single source of truth</div>
+          <h1>{archive.project.name}</h1>
+          <p>
+            这个页面把客户、需求、设计版本、报价、变更、交付和确认记录收进同一份项目文档，方便后续从 demo 数据迁移到真实数据库时保持业务结构稳定。
+          </p>
+        </div>
+      </section>
+
+      <section className="doc-properties">
+        <div className="doc-property">
+          <span>项目编号</span>
+          <strong>{archive.project.code}</strong>
+        </div>
+        <div className="doc-property">
+          <span>状态</span>
+          <strong>{archive.project.status}</strong>
+        </div>
+        <div className="doc-property">
+          <span>客户</span>
+          <strong>{archive.customer.name}</strong>
+        </div>
+        <div className="doc-property">
+          <span>面积</span>
+          <strong>{archive.project.areaSqm} ㎡</strong>
+        </div>
+        <div className="doc-property">
+          <span>线索阶段</span>
+          <strong>{archive.lead.stage}</strong>
+        </div>
+        <div className="doc-property">
+          <span>待确认</span>
+          <strong>{archive.confirmations.filter((item) => item.status === "pending").length} 项</strong>
         </div>
       </section>
 
@@ -37,6 +62,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         </div>
         <div className="cards-2">
           <article className="kanban-card">
+            <div className="doc-block-title">客户属性</div>
             <ul className="clean">
               <li>客户：{archive.customer.name}</li>
               <li>城市：{archive.customer.city}</li>
@@ -47,6 +73,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             </ul>
           </article>
           <article className="ai-card">
+            <div className="doc-block-title">需求摘要</div>
             <p className="muted">{archive.requirementSheet.summary}</p>
             <ul className="clean" style={{ marginTop: 14 }}>
               {archive.requirementSheet.goals.map((item) => (
@@ -71,6 +98,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         <div className="cards-3">
           <article className="artifact-card">
             <div className="pill">SU 模型图</div>
+            <div className="doc-block-title" style={{ marginTop: 12 }}>当前版本序列</div>
             <ul className="clean" style={{ marginTop: 14 }}>
               {archive.designVersions.map((item) => (
                 <li key={item.id}>
@@ -82,6 +110,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </article>
           <article className="artifact-card">
             <div className="pill">效果图</div>
+            <div className="doc-block-title" style={{ marginTop: 12 }}>风格输出</div>
             <ul className="clean" style={{ marginTop: 14 }}>
               {archive.renderingVersions.map((item) => (
                 <li key={item.id}>
@@ -93,6 +122,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </article>
           <article className="artifact-card">
             <div className="pill">施工图</div>
+            <div className="doc-block-title" style={{ marginTop: 12 }}>交底依据</div>
             <ul className="clean" style={{ marginTop: 14 }}>
               {archive.constructionDrawingVersions.map((item) => (
                 <li key={item.id}>
@@ -112,6 +142,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         </div>
         <div className="cards-2">
           <article className="timeline-card">
+            <div className="doc-block-title">当前有效报价</div>
             <h3>当前报价</h3>
             {currentQuotation ? (
               <>
@@ -129,6 +160,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             )}
           </article>
           <article className="timeline-card">
+            <div className="doc-block-title">变更留痕</div>
             <h3>变更记录</h3>
             <ul className="clean" style={{ marginTop: 14 }}>
               {archive.changeOrders.map((item) => (
@@ -151,6 +183,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         </div>
         <div className="cards-2">
           <article className="timeline-card">
+            <div className="doc-block-title">里程碑数据库</div>
             <ul className="clean">
               {archive.milestones.map((item) => (
                 <li key={item.id}>
@@ -163,6 +196,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             </ul>
           </article>
           <article className="timeline-card">
+            <div className="doc-block-title">巡检问题</div>
             <ul className="clean">
               {archive.inspections.map((item) => (
                 <li key={item.id}>
@@ -204,6 +238,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             ))}
           </tbody>
         </table>
+        <div className="footer-note">
+          <strong>说明：</strong> 当前确认记录已经贯通到客户端门户，可直接用于演示“发起确认、客户反馈、项目同步”的闭环。
+        </div>
       </section>
     </>
   );

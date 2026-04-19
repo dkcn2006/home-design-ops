@@ -19,15 +19,29 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ i
 
   return (
     <>
-      <section className="hero-card">
-        <h1>客户端门户</h1>
-        <p>
-          这里已经不是只读展示页。客户现在可以直接对待确认事项做确认或驳回，动作会写回 API，并同步反映到项目档案和首页指标里。
-        </p>
-        <div className="badge-row">
-          <span className="badge">{archive.customer.name}</span>
-          <span className="badge">当前项目：{archive.project.name}</span>
-          <span className="badge">待确认 {pendingItems.length} 项</span>
+      <section className="workspace-header client-workspace-header">
+        <div className="workspace-emoji">🤝</div>
+        <div className="workspace-copy">
+          <div className="workspace-overline">client portal / shared project page</div>
+          <h1>客户确认页面</h1>
+          <p>
+            这里用于同步当前项目的有效版本、近期进度和待确认事项。客户可以直接提交确认或反馈，信息会同步回项目档案，减少口头确认和聊天记录遗漏。
+          </p>
+        </div>
+      </section>
+
+      <section className="doc-properties client-doc-properties">
+        <div className="doc-property">
+          <span>客户</span>
+          <strong>{archive.customer.name}</strong>
+        </div>
+        <div className="doc-property">
+          <span>项目</span>
+          <strong>{archive.project.name}</strong>
+        </div>
+        <div className="doc-property">
+          <span>待确认事项</span>
+          <strong>{pendingItems.length} 项</strong>
         </div>
       </section>
 
@@ -36,7 +50,7 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ i
           <article className="kanban-card">
             <div className="section-title">
               <h3>当前有效版本</h3>
-              <span>Approved content only</span>
+              <span>当前可执行内容</span>
             </div>
             <ul className="clean">
               <li>SU 方案：{archive.designVersions.find((item) => item.id === archive.project.currentDesignVersionId)?.version}</li>
@@ -48,7 +62,7 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ i
           <article className="kanban-card">
             <div className="section-title">
               <h3>项目进度</h3>
-              <span>Transparent delivery updates</span>
+              <span>近期安排</span>
             </div>
             <ul className="clean">
               {archive.milestones.map((item) => (
@@ -66,54 +80,57 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ i
       <section className="panel" style={{ marginTop: 22 }}>
         <div className="section-title">
           <h2>待确认事项</h2>
-          <span>Write back to API</span>
+          <span>请直接提交意见</span>
         </div>
         <div className="cards-2">
           {archive.confirmations.map((item) => (
-            <article className="timeline-card" key={item.id}>
+            <article className={`timeline-card client-confirmation-card${item.status === "pending" ? " is-pending" : ""}`} key={item.id}>
               <div className="section-title">
                 <h3>{item.type}</h3>
-                <span>{getConfirmationLabel(item.status)}</span>
+                <span className={`status-chip status-${item.status}`}>{getConfirmationLabel(item.status)}</span>
               </div>
-              <p className="muted">目标记录：{item.targetId}</p>
-              <p className="muted">当前备注：{item.note ?? "暂无"}</p>
+              <p className="muted">对应记录：{item.targetId}</p>
+              <p className="muted">当前说明：{item.note ?? "暂无"}</p>
 
               {item.status === "pending" ? (
                 <form action={submitConfirmationAction} className="confirmation-form">
                   <input type="hidden" name="projectId" value={archive.project.id} />
                   <input type="hidden" name="confirmationId" value={item.id} />
                   <label className="field">
-                    <span>确认说明</span>
+                    <span>补充说明</span>
                     <textarea
                       name="note"
                       rows={4}
                       defaultValue={item.note ?? ""}
-                      placeholder="补充本次确认或驳回原因"
+                      placeholder="如果有需要，可补充本次确认或反馈说明"
                     />
                   </label>
                   <div className="button-row">
                     <button type="submit" name="status" value="confirmed" className="primary-button">
-                      确认
+                      确认通过
                     </button>
                     <button type="submit" name="status" value="rejected" className="ghost-button">
-                      驳回
+                      提交反馈
                     </button>
                   </div>
                 </form>
               ) : (
                 <div className="footer-note">
-                  <strong>已处理：</strong> 当前记录已经完成处理，如需再次变更可在后续版本中追加新的确认记录。
+                  <strong>已处理：</strong> 当前事项已经完成处理，如需再次调整，可在后续版本中追加新的确认记录。
                 </div>
               )}
             </article>
           ))}
+        </div>
+        <div className="footer-note">
+          <strong>说明：</strong> 这里只展示需要客户关注的核心信息，更多内部执行细节由项目团队在内部工作区处理。
         </div>
       </section>
 
       <section className="panel" style={{ marginTop: 22 }}>
         <div className="section-title">
           <h2>资料清单</h2>
-          <span>Attachments</span>
+          <span>当前项目资料</span>
         </div>
         <ul className="clean">
           {archive.attachments.map((item) => (
