@@ -1,8 +1,11 @@
 import type {
   ConfirmationRecord,
+  CreateLeadIntakeInput,
   DashboardSummary,
+  LeadPipelineItem,
   PortfolioOverview,
   ProjectArchive,
+  UpdateLeadStageInput,
   UpdateConfirmationInput,
   UserRole
 } from "@home-design-ops/shared";
@@ -43,6 +46,24 @@ export function getArchive(projectId: string) {
 
 export function updateConfirmation(projectId: string, confirmationId: string, input: UpdateConfirmationInput) {
   return apiFetch<ConfirmationRecord>(`/projects/${projectId}/confirmations/${confirmationId}`, {
+    method: "PATCH",
+    body: JSON.stringify(input)
+  });
+}
+
+export function getLeadPipeline() {
+  return apiFetch<LeadPipelineItem[]>("/leads/pipeline");
+}
+
+export function createLeadIntake(input: CreateLeadIntakeInput) {
+  return apiFetch<LeadPipelineItem>("/leads/intake", {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
+}
+
+export function updateLeadStage(leadId: string, input: UpdateLeadStageInput) {
+  return apiFetch<LeadPipelineItem>(`/leads/${leadId}/stage`, {
     method: "PATCH",
     body: JSON.stringify(input)
   });

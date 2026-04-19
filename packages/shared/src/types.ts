@@ -247,6 +247,41 @@ export interface UpdateConfirmationInput {
   note?: string;
 }
 
+export interface CreateCustomerInput {
+  name: string;
+  phone: string;
+  email?: string;
+  preferredStyle: string[];
+  householdProfile: string;
+  budgetMin: number;
+  budgetMax: number;
+  city: string;
+  notes: string;
+}
+
+export interface CreateLeadInput {
+  source: string;
+  stage?: LeadStage;
+  expectedSignDate?: string;
+  summary: string;
+  painPoints: string[];
+}
+
+export interface CreateLeadIntakeInput {
+  customer: CreateCustomerInput;
+  lead: CreateLeadInput;
+}
+
+export interface UpdateLeadStageInput {
+  stage: LeadStage;
+}
+
+export interface LeadPipelineItem {
+  lead: Lead;
+  customer: Customer;
+  linkedProject?: Pick<Project, "id" | "name" | "status" | "code">;
+}
+
 export interface AiRequirementSuggestion {
   summary: string;
   goals: string[];

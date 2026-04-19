@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { ReactNode } from "react";
 
 export function Shell({ children }: { children: ReactNode }) {
@@ -11,6 +12,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
         <nav className="nav">
           <Link href="/">总览</Link>
+          <Link href={"/sales/leads" as Route}>客户/线索录入</Link>
           <Link href="/role/sales">销售工作台</Link>
           <Link href="/role/designer">设计工作台</Link>
           <Link href="/role/project_manager">项目经理工作台</Link>
@@ -22,4 +24,3 @@ export function Shell({ children }: { children: ReactNode }) {
     </div>
   );
 }
-

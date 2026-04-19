@@ -17,9 +17,12 @@ import {
   requirementSheets
 } from "@home-design-ops/shared";
 import type {
+  CreateLeadIntakeInput,
   DashboardSummary,
+  LeadPipelineItem,
   PortfolioOverview,
   ProjectArchive,
+  UpdateLeadStageInput,
   UpdateConfirmationInput,
   UserRole
 } from "@home-design-ops/shared";
@@ -32,6 +35,95 @@ export class DemoRepositoryService {
 
   getLeads() {
     return leads;
+  }
+
+  getLeadPipeline(): LeadPipelineItem[] {
+    return leads.map((lead) => {
+      const customer = customers.find((item) => item.id === lead.customerId);
+      if (!customer) {
+        throw new NotFoundException(`Customer for lead ${lead.id} was not found`);
+      }
+
+      const linkedProject = projects.find((item) => item.leadId === lead.id);
+
+      return {
+        lead,
+        customer,
+        linkedProject: linkedProject
+          ? {
+              id: linkedProject.id,
+              name: linkedProject.name,
+              status: linkedProject.status,
+              code: linkedProject.code
+            }
+          : undefined
+      };
+    });
+  }
+
+  createLeadIntake(input: CreateLeadIntakeInput): LeadPipelineItem {
+    const now = new Date().toISOString();
+    const customerId = this.buildId("cust", customers);
+    const leadId = this.buildId("lead", leads);
+
+    const customer = {
+      id: customerId,
+      createdAt: now,
+      updatedAt: now,
+      createdBy: "system",
+      ...input.customer
+    };
+
+    const lead = {
+      id: leadId,
+      createdAt: now,
+      updatedAt: now,
+      createdBy: "system",
+      customerId,
+      source: input.lead.source,
+      stage: input.lead.stage ?? "new",
+      expectedSignDate: input.lead.expectedSignDate,
+      summary: input.lead.summary,
+      painPoints: input.lead.painPoints
+    };
+
+    customers.unshift(customer);
+    leads.unshift(lead);
+
+    return {
+      lead,
+      customer
+    };
+  }
+
+  updateLeadStage(leadId: string, input: UpdateLeadStageInput) {
+    const lead = leads.find((item) => item.id === leadId);
+    if (!lead) {
+      throw new NotFoundException(`Lead ${leadId} was not found`);
+    }
+
+    lead.stage = input.stage;
+    lead.updatedAt = new Date().toISOString();
+
+    const customer = customers.find((item) => item.id === lead.customerId);
+    if (!customer) {
+      throw new NotFoundException(`Customer for lead ${leadId} was not found`);
+    }
+
+    const linkedProject = projects.find((item) => item.leadId === lead.id);
+
+    return {
+      lead,
+      customer,
+      linkedProject: linkedProject
+        ? {
+            id: linkedProject.id,
+            name: linkedProject.name,
+            status: linkedProject.status,
+            code: linkedProject.code
+          }
+        : undefined
+    };
   }
 
   getProjects() {
@@ -186,5 +278,9 @@ export class DemoRepositoryService {
       quotationValue,
       openIssues
     };
+  }
+
+  private buildId(prefix: string, collection: Array<{ id: string }>) {
+    return `${prefix}-${collection.length + 1}`;
   }
 }
