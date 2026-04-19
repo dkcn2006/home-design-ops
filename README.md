@@ -1,55 +1,46 @@
 # home-design-ops
 
-一个面向家装设计行业的业务协同与 AI 提效项目雏形。
+An early-stage project exploring how AI can improve collaboration and productivity in the home renovation and interior design industry.
 
-## 项目背景
+[中文说明 / Chinese Version](./README.zh-CN.md)
 
-这个项目的起点很个人，也很实际。
+## Overview
 
-我的弟弟从事家装设计行业，我自己从事 IT 行业。最近几年，AI 的发展速度非常快，我越来越强烈地感觉到，AI 不应该只是一个热门话题，而应该真正进入具体行业、具体岗位，帮助真实的人提升效率、减少重复劳动、改善收入和生活状态。
+This repository currently contains early product thinking, visual blueprints, and cost analysis materials for a system focused on:
 
-我想做这个项目，是希望把我在技术上的理解，和他在家装行业里的实际经验结合起来，探索一套真正适用于家装公司的协同系统与 AI 提效方案。
+- sales, design, detailing, delivery, and client collaboration
+- improving high-cost design outputs such as SU models, renderings, and construction drawings
+- reducing repeated revisions, information gaps, and on-site rework
+- applying AI in practical workflow stages instead of treating it as a standalone novelty
 
-更直接一点说，这个项目也是想帮助我弟弟和他的公司：
+## Why This Project Exists
 
-- 让销售、设计师、深化设计、项目经理之间的协作更顺畅
-- 让 SU 模型图、效果图、施工图这些高成本环节更高效
-- 让需求整理、方案汇报、报价联动、施工校核这些关键步骤减少重复和返工
-- 让一家还在艰难阶段中的公司，借助 AI 获得更强的竞争力
+This project is personal.
 
-他因为一些个人机遇，目前还处在人生比较艰难的阶段。我希望这个项目不只是一个技术练习，而是一个真正可能帮到他、帮到团队、帮到业务的起点。
+My younger brother works in the home renovation design industry, and I work in IT. As AI keeps accelerating, I want to explore how it can help real businesses and real people, especially in industries where a lot of value is still lost to repetitive communication, manual coordination, and preventable mistakes.
 
-## 当前内容
+The goal is to combine technical thinking with real-world renovation workflows, and gradually shape a system that can genuinely help small design and renovation teams improve efficiency and income.
 
-当前仓库主要沉淀了两份用于沟通和规划的 HTML 页面：
+## Current Contents
 
 - `index.html`
-  - 家装业务协同与 AI 提效平台蓝图
-  - 重点展示业务主流程、角色工作台、系统模块、AI 提效点，以及 SU 模型图 / 效果图 / 施工图三类设计产物的提效链路
+  - A blueprint for a home renovation collaboration and AI productivity platform
+  - Covers workflow, roles, modules, AI opportunities, and the design-output chain across SU models, renderings, and construction drawings
 
 - `cost-analysis.html`
-  - 小型家装公司的成本结构与 AI 降本路径
-  - 重点分析显性成本、隐性成本、返工风险，以及小公司更适合优先投入的 AI 能力
+  - A cost structure and AI cost-reduction analysis for small renovation companies
+  - Covers explicit costs, hidden costs, rework risks, and which AI capabilities are most worth prioritizing first
 
-## 项目目标
+## Direction
 
-这个项目后续希望逐步演进为一套面向家装行业的系统蓝图和产品原型，核心目标包括：
+The project may gradually evolve into:
 
-- 打通销售、设计、深化、交付、客户确认的业务链路
-- 以项目档案为中心统一管理图纸、报价、变更、施工记录
-- 将 AI 深入嵌入需求整理、方案设计、效果表达、施工图校核、项目巡检等关键环节
-- 帮助小型家装公司先解决“反复修改、信息错位、现场返工”这些最伤利润的问题
+- product requirement documents
+- system and data model design
+- interactive prototypes
+- AI capability breakdowns
+- workflow validation for real renovation projects
 
-## 后续方向
+## Status
 
-后续可以继续推进的内容包括：
-
-- 系统 PRD 文档
-- 数据库与实体结构设计
-- 页面原型和交互稿
-- AI 能力拆解与集成方案
-- 真实项目工作流验证
-
-## 说明
-
-当前仓库还处于早期阶段，主要用于沉淀思路、蓝图和演示材料。后续会逐步补齐更系统的文档和工程结构。
+This repository is still at a very early stage and currently serves as a place to store ideas, blueprints, and communication materials.
