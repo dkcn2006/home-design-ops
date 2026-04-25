@@ -1,3 +1,5 @@
+import Link from "next/link";
+import type { Route } from "next";
 import { getArchive } from "../../../lib/data";
 
 function getConfirmationLabel(status: "pending" | "confirmed" | "rejected") {
@@ -53,6 +55,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <span>待确认</span>
           <strong>{archive.confirmations.filter((item) => item.status === "pending").length} 项</strong>
         </div>
+      </section>
+
+      <section style={{ marginBottom: 18 }}>
+        <Link href={`/projects/${id}/board` as Route} className="ghost-button">
+          查看项目看板 →
+        </Link>
       </section>
 
       <section className="panel">

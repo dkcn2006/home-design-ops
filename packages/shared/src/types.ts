@@ -2,11 +2,39 @@ export type UserRole = "sales" | "designer" | "detailer" | "project_manager" | "
 
 export type LeadStage =
   | "new"
-  | "following_up"
-  | "site_measurement"
-  | "proposal_pending"
-  | "signed"
-  | "closed";
+  | "contacted"
+  | "measured"
+  | "proposal"
+  | "quoted"
+  | "negotiating"
+  | "won"
+  | "lost";
+
+export type LeadSource = "walk_in" | "referral" | "xiaohongshu" | "douyin" | "local_ads" | "partner" | "other";
+export type LeadIntentLevel = "high" | "medium" | "low";
+
+export type UserStatus = "active" | "inactive";
+export type WorkflowPhaseCategory = "sales" | "design" | "detailing" | "quotation" | "delivery" | "acceptance";
+export type TaskStatus =
+  | "backlog"
+  | "todo"
+  | "in_progress"
+  | "blocked"
+  | "waiting_client"
+  | "waiting_internal"
+  | "done"
+  | "canceled";
+export type TaskPriority = "urgent" | "high" | "medium" | "low";
+export type TaskLinkedEntityType =
+  | "requirement_sheet"
+  | "design_version"
+  | "rendering_version"
+  | "construction_drawing_version"
+  | "quotation"
+  | "change_order"
+  | "confirmation_record"
+  | "inspection_record"
+  | "attachment";
 
 export type AttachmentCategory =
   | "meeting_note"
@@ -57,11 +85,58 @@ export interface Customer extends AuditFields {
 
 export interface Lead extends AuditFields {
   customerId: string;
-  source: string;
+  source: LeadSource;
   stage: LeadStage;
+  intentLevel: LeadIntentLevel;
+  ownerId: string;
+  budgetRange: string;
+  houseInfo: string;
+  requirementSummary: string;
+  nextFollowUpAt?: string;
+  lastContactedAt?: string;
+  lastContactSummary?: string;
   expectedSignDate?: string;
   summary: string;
   painPoints: string[];
+  lostReason?: string;
+  projectId?: string;
+}
+
+export interface User extends AuditFields {
+  name: string;
+  role: UserRole;
+  status: UserStatus;
+  avatarInitials: string;
+}
+
+export interface WorkflowPhase extends AuditFields {
+  name: string;
+  order: number;
+  category: WorkflowPhaseCategory;
+  description: string;
+}
+
+export interface TaskLinkedEntity {
+  type: TaskLinkedEntityType;
+  entityId: string;
+  label: string;
+}
+
+export interface ProjectTask extends AuditFields {
+  projectId: string;
+  spaceId?: string;
+  phaseId: string;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  assigneeId: string;
+  ownerRole: Extract<UserRole, "sales" | "designer" | "detailer" | "project_manager">;
+  reporterId: string;
+  dueDate?: string;
+  blockedReason?: string;
+  linkedEntities: TaskLinkedEntity[];
+  completedAt?: string;
 }
 
 export interface Space extends AuditFields {
@@ -315,6 +390,46 @@ export interface PortfolioOverview {
   projects: ProjectPortfolioItem[];
 }
 
+export interface LeadSummary {
+  total: number;
+  newCount: number;
+  wonCount: number;
+  lostCount: number;
+  conversionRate: number;
+  todayFollowUpCount: number;
+  overdueFollowUpCount: number;
+  staleLeadCount: number;
+  highIntentCount: number;
+  stageCounts: Record<LeadStage, number>;
+}
+
+export interface TaskBoardSummary {
+  totalTaskCount: number;
+  blockedTaskCount: number;
+  waitingClientCount: number;
+  overdueTaskCount: number;
+  blockedSpaceCount: number;
+}
+
+export interface ProjectTaskCard {
+  task: ProjectTask;
+  assignee?: User;
+  phase?: WorkflowPhase;
+  space?: Space;
+}
+
+export interface ProjectTaskBoard {
+  project: Pick<Project, "id" | "code" | "name" | "status">;
+  summary: TaskBoardSummary;
+  spaces: Array<{
+    space: Space;
+    phases: Array<{
+      phase: WorkflowPhase;
+      tasks: ProjectTaskCard[];
+    }>;
+  }>;
+}
+
 export interface WorkspaceHome {
   metrics: PortfolioOverview["metrics"] & {
     overdueTasks: number;
@@ -370,8 +485,15 @@ export interface CreateCustomerInput {
 }
 
 export interface CreateLeadInput {
-  source: string;
+  source: LeadSource;
   stage?: LeadStage;
+  intentLevel?: LeadIntentLevel;
+  ownerId?: string;
+  budgetRange?: string;
+  houseInfo?: string;
+  requirementSummary?: string;
+  nextFollowUpAt?: string;
+  lastContactSummary?: string;
   expectedSignDate?: string;
   summary: string;
   painPoints: string[];
@@ -384,6 +506,14 @@ export interface CreateLeadIntakeInput {
 
 export interface UpdateLeadStageInput {
   stage: LeadStage;
+}
+
+export interface UpdateTaskStatusInput {
+  status: TaskStatus;
+}
+
+export interface UpdateTaskAssigneeInput {
+  assigneeId: string;
 }
 
 export interface LeadPipelineItem {

@@ -27,7 +27,22 @@ class LeadsController {
   }
 }
 
+@Controller("sales/leads")
+class SalesLeadsController {
+  constructor(private readonly repository: DemoRepositoryService) {}
+
+  @Get()
+  getSalesLeads() {
+    return this.repository.getLeadPipeline();
+  }
+
+  @Get("summary")
+  getSalesLeadSummary() {
+    return this.repository.getLeadSummary();
+  }
+}
+
 @Module({
-  controllers: [LeadsController]
+  controllers: [LeadsController, SalesLeadsController]
 })
 export class LeadsModule {}

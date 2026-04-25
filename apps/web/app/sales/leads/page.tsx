@@ -1,27 +1,52 @@
-import type { LeadStage } from "@home-design-ops/shared";
+import type { LeadSource, LeadStage } from "@home-design-ops/shared";
 import { createLeadIntakeAction, updateLeadStageAction } from "../../../lib/actions";
-import { getLeadPipeline } from "../../../lib/data";
+import { getLeadPipeline, getLeadSummary } from "../../../lib/data";
 
 const stageOrder: LeadStage[] = [
   "new",
-  "following_up",
-  "site_measurement",
-  "proposal_pending",
-  "signed",
-  "closed"
+  "contacted",
+  "measured",
+  "proposal",
+  "quoted",
+  "negotiating",
+  "won",
+  "lost"
 ];
 
 const stageLabels: Record<LeadStage, string> = {
   new: "新线索",
-  following_up: "跟进中",
-  site_measurement: "待量房",
-  proposal_pending: "待方案",
-  signed: "已签约",
-  closed: "已关闭"
+  contacted: "已联系",
+  measured: "已量房",
+  proposal: "方案中",
+  quoted: "已报价",
+  negotiating: "谈判中",
+  won: "已赢单",
+  lost: "已流失"
 };
 
+const sourceLabels: Record<LeadSource, string> = {
+  walk_in: "自然到店",
+  referral: "老客户介绍",
+  xiaohongshu: "小红书",
+  douyin: "抖音",
+  local_ads: "本地广告",
+  partner: "合作渠道",
+  other: "其他来源"
+};
+
+const intentLabels = {
+  high: "高意向",
+  medium: "中意向",
+  low: "低意向"
+} as const;
+
 export default async function SalesLeadsPage() {
-  const pipeline = await getLeadPipeline();
+  const [pipeline, summary] = await Promise.all([getLeadPipeline(), getLeadSummary()]);
+  const today = "2026-04-19";
+  const staleBefore = "2026-04-09";
+  const todayFollowUps = pipeline.filter((item) => item.lead.nextFollowUpAt && item.lead.nextFollowUpAt <= today && item.lead.stage !== "won" && item.lead.stage !== "lost");
+  const highIntentLeads = pipeline.filter((item) => item.lead.intentLevel === "high" && item.lead.stage !== "won" && item.lead.stage !== "lost");
+  const staleLeads = pipeline.filter((item) => item.lead.lastContactedAt && item.lead.lastContactedAt < staleBefore && item.lead.stage !== "won" && item.lead.stage !== "lost");
 
   return (
     <>
@@ -43,11 +68,19 @@ export default async function SalesLeadsPage() {
         </div>
         <div className="doc-property">
           <span>总线索数</span>
-          <strong>{pipeline.length}</strong>
+          <strong>{summary.total}</strong>
         </div>
         <div className="doc-property">
-          <span>当前用途</span>
-          <strong>录入与阶段流转</strong>
+          <span>基础转化率</span>
+          <strong>{summary.conversionRate}%</strong>
+        </div>
+        <div className="doc-property">
+          <span>今日需跟进</span>
+          <strong>{summary.todayFollowUpCount + summary.overdueFollowUpCount}</strong>
+        </div>
+        <div className="doc-property">
+          <span>高意向线索</span>
+          <strong>{summary.highIntentCount}</strong>
         </div>
       </section>
 
@@ -84,7 +117,13 @@ export default async function SalesLeadsPage() {
             </label>
             <label className="field">
               <span>线索来源</span>
-              <input name="source" required placeholder="朋友转介绍 / 小红书 / 到店咨询" />
+              <select name="source" defaultValue="referral">
+                {Object.entries(sourceLabels).map(([source, label]) => (
+                  <option key={source} value={source}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="field">
               <span>当前阶段</span>
@@ -131,6 +170,70 @@ export default async function SalesLeadsPage() {
 
       <section className="panel" style={{ marginTop: 22 }}>
         <div className="section-title">
+          <h2>跟进优先级</h2>
+          <span>今日跟进 / 高意向 / 长期未跟进</span>
+        </div>
+        <div className="lead-stage-grid">
+          <article className="stage-column">
+            <div className="section-title">
+              <h3>今日需跟进</h3>
+              <span>{todayFollowUps.length}</span>
+            </div>
+            <div className="stage-stack">
+              {todayFollowUps.slice(0, 4).map((item) => (
+                <div className="lead-card" key={item.lead.id}>
+                  <div className="lead-card-header">
+                    <strong>{item.customer.name}</strong>
+                    <span className="badge">{item.lead.nextFollowUpAt}</span>
+                  </div>
+                  <div className="muted">{item.lead.lastContactSummary}</div>
+                </div>
+              ))}
+              {!todayFollowUps.length ? <div className="empty-state">暂无今日或逾期跟进</div> : null}
+            </div>
+          </article>
+          <article className="stage-column">
+            <div className="section-title">
+              <h3>高意向机会</h3>
+              <span>{highIntentLeads.length}</span>
+            </div>
+            <div className="stage-stack">
+              {highIntentLeads.slice(0, 4).map((item) => (
+                <div className="lead-card" key={item.lead.id}>
+                  <div className="lead-card-header">
+                    <strong>{item.customer.name}</strong>
+                    <span className="badge">{stageLabels[item.lead.stage]}</span>
+                  </div>
+                  <div className="muted">{item.lead.budgetRange} / {sourceLabels[item.lead.source]}</div>
+                  <div className="muted">{item.lead.requirementSummary}</div>
+                </div>
+              ))}
+              {!highIntentLeads.length ? <div className="empty-state">暂无高意向待推进线索</div> : null}
+            </div>
+          </article>
+          <article className="stage-column">
+            <div className="section-title">
+              <h3>长期未跟进</h3>
+              <span>{staleLeads.length}</span>
+            </div>
+            <div className="stage-stack">
+              {staleLeads.slice(0, 4).map((item) => (
+                <div className="lead-card" key={item.lead.id}>
+                  <div className="lead-card-header">
+                    <strong>{item.customer.name}</strong>
+                    <span className="badge">{item.lead.lastContactedAt}</span>
+                  </div>
+                  <div className="muted">{item.lead.lastContactSummary}</div>
+                </div>
+              ))}
+              {!staleLeads.length ? <div className="empty-state">暂无长期未跟进线索</div> : null}
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section className="panel" style={{ marginTop: 22 }}>
+        <div className="section-title">
           <h2>线索看板</h2>
           <span>{pipeline.length} 条线索</span>
         </div>
@@ -154,9 +257,12 @@ export default async function SalesLeadsPage() {
                         </div>
                         <div className="lead-meta-row">
                           <span>{item.customer.city}</span>
-                          <span>{item.lead.source}</span>
+                          <span>{sourceLabels[item.lead.source]}</span>
                         </div>
-                        <div className="muted">预算：¥{item.customer.budgetMin.toLocaleString()} - ¥{item.customer.budgetMax.toLocaleString()}</div>
+                        <div className="muted">
+                          {intentLabels[item.lead.intentLevel]} / 预算：¥{item.customer.budgetMin.toLocaleString()} - ¥{item.customer.budgetMax.toLocaleString()}
+                        </div>
+                        <div className="muted">下次跟进：{item.lead.nextFollowUpAt ?? "待安排"}</div>
                         <div className="muted">摘要：{item.lead.summary}</div>
                         {item.linkedProject ? (
                           <div className="muted">

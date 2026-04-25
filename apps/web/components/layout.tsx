@@ -17,6 +17,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <Link href={"/sales/leads" as Route}>线索与客户</Link>
             <Link href="/projects/proj-1">项目中心</Link>
             <Link href="/client/proj-1">客户确认</Link>
+            <Link href={"/tasks" as Route}>我的任务</Link>
           </nav>
         </div>
         <div className="sidebar-group">

@@ -2,12 +2,17 @@ import type {
   ConfirmationRecord,
   CreateLeadIntakeInput,
   DashboardSummary,
+  LeadSummary,
   LeadPipelineItem,
   PortfolioOverview,
   ProjectArchive,
+  ProjectTaskBoard,
+  ProjectTaskCard,
   RoleWorkbench,
   UpdateLeadStageInput,
   UpdateConfirmationInput,
+  UpdateTaskStatusInput,
+  UpdateTaskAssigneeInput,
   UserRole,
   WorkspaceHome
 } from "@home-design-ops/shared";
@@ -62,7 +67,11 @@ export function updateConfirmation(projectId: string, confirmationId: string, in
 }
 
 export function getLeadPipeline() {
-  return apiFetch<LeadPipelineItem[]>("/leads/pipeline");
+  return apiFetch<LeadPipelineItem[]>("/sales/leads");
+}
+
+export function getLeadSummary() {
+  return apiFetch<LeadSummary>("/sales/leads/summary");
 }
 
 export function createLeadIntake(input: CreateLeadIntakeInput) {
@@ -74,6 +83,28 @@ export function createLeadIntake(input: CreateLeadIntakeInput) {
 
 export function updateLeadStage(leadId: string, input: UpdateLeadStageInput) {
   return apiFetch<LeadPipelineItem>(`/leads/${leadId}/stage`, {
+    method: "PATCH",
+    body: JSON.stringify(input)
+  });
+}
+
+export function getProjectTaskBoard(projectId: string) {
+  return apiFetch<ProjectTaskBoard>(`/projects/${projectId}/task-board`);
+}
+
+export function getMyTasks(assigneeId = "user-sales-1") {
+  return apiFetch<ProjectTaskCard[]>(`/tasks/my?assigneeId=${encodeURIComponent(assigneeId)}`);
+}
+
+export function updateTaskStatus(taskId: string, input: UpdateTaskStatusInput) {
+  return apiFetch<{ id: string; status: string }>(`/tasks/${taskId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify(input)
+  });
+}
+
+export function updateTaskAssignee(taskId: string, input: UpdateTaskAssigneeInput) {
+  return apiFetch<{ id: string; assigneeId: string }>(`/tasks/${taskId}/assignee`, {
     method: "PATCH",
     body: JSON.stringify(input)
   });

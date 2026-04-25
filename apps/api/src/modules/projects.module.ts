@@ -36,6 +36,16 @@ class ProjectsController {
     return this.repository.getProjectArchive(id);
   }
 
+  @Get(":id/tasks")
+  getProjectTasks(@Param("id") id: string) {
+    return this.repository.getProjectTasks(id);
+  }
+
+  @Get(":id/task-board")
+  getProjectTaskBoard(@Param("id") id: string) {
+    return this.repository.getProjectTaskBoard(id);
+  }
+
   @Get(":id/requirements")
   getRequirement(@Param("id") id: string) {
     return this.repository.getRequirementSheet(id);

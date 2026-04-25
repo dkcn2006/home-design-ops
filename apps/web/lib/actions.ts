@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { ConfirmationStatus, LeadStage } from "@home-design-ops/shared";
+import type { ConfirmationStatus, LeadSource, LeadStage } from "@home-design-ops/shared";
 import { createLeadIntake, updateConfirmation, updateLeadStage } from "./data";
 
 export async function submitConfirmationAction(formData: FormData) {
@@ -48,7 +48,7 @@ export async function createLeadIntakeAction(formData: FormData) {
       notes: String(formData.get("customerNotes") ?? "").trim()
     },
     lead: {
-      source: String(formData.get("source") ?? "").trim(),
+      source: (String(formData.get("source") ?? "other").trim() as LeadSource) || "other",
       stage: (String(formData.get("stage") ?? "new") as LeadStage) || "new",
       expectedSignDate: String(formData.get("expectedSignDate") ?? "").trim() || undefined,
       summary: String(formData.get("summary") ?? "").trim(),

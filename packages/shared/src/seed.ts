@@ -11,10 +11,13 @@ import {
   Project,
   ProjectArchive,
   ProjectMilestone,
+  ProjectTask,
   Quotation,
   RenderingVersion,
   RequirementSheet,
   Space,
+  User,
+  WorkflowPhase,
   WorkItem,
 } from "./types";
 
@@ -36,6 +39,88 @@ export const customers: Customer[] = [
     budgetMax: 360000,
     city: "上海",
     notes: "希望签约前先确认开放厨房与岛台动线是否合理。"
+  },
+  {
+    id: "cust-2",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "王先生",
+    phone: "13800000002",
+    email: "wang@example.com",
+    preferredStyle: ["现代极简", "灰白木"],
+    householdProfile: "新婚夫妻，计划一年内入住，重视预算控制",
+    budgetMin: 220000,
+    budgetMax: 300000,
+    city: "上海",
+    notes: "已预约量房，重点关注老房采光和卫生间干湿分离。"
+  },
+  {
+    id: "cust-3",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "陈女士",
+    phone: "13800000003",
+    preferredStyle: ["奶油风", "亲子收纳"],
+    householdProfile: "四口之家，二孩家庭，需要儿童活动区",
+    budgetMin: 350000,
+    budgetMax: 460000,
+    city: "苏州",
+    notes: "小红书咨询后两周未跟进，需要销售重新激活。"
+  }
+];
+
+export const users: User[] = [
+  {
+    id: "user-sales-1",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "周敏",
+    role: "sales",
+    status: "active",
+    avatarInitials: "ZM"
+  },
+  {
+    id: "user-designer-1",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "许言",
+    role: "designer",
+    status: "active",
+    avatarInitials: "XY"
+  },
+  {
+    id: "user-detailer-1",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "沈工",
+    role: "detailer",
+    status: "active",
+    avatarInitials: "SG"
+  },
+  {
+    id: "user-pm-1",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "赵磊",
+    role: "project_manager",
+    status: "active",
+    avatarInitials: "ZL"
+  },
+  {
+    id: "user-admin-1",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "运营管理员",
+    role: "admin",
+    status: "active",
+    avatarInitials: "AD"
   }
 ];
 
@@ -46,11 +131,152 @@ export const leads: Lead[] = [
     updatedAt: timestamp,
     createdBy,
     customerId: "cust-1",
-    source: "朋友转介绍",
-    stage: "signed",
+    source: "referral",
+    stage: "won",
+    intentLevel: "high",
+    ownerId: "user-sales-1",
+    budgetRange: "28-36 万",
+    houseInfo: "浦东 128 平三房，旧房局改",
+    requirementSummary: "开放厨房、岛台动线、高频收纳和暖木风格。",
+    nextFollowUpAt: "2026-04-20",
+    lastContactedAt: "2026-04-18",
+    lastContactSummary: "客户已确认效果图方向，待确认蒸烤箱升级报价。",
     expectedSignDate: "2026-04-10",
     summary: "客户已完成初步方案确认，进入深化阶段。",
-    painPoints: ["旧房采光一般", "厨房收纳不足", "担心施工返工"]
+    painPoints: ["旧房采光一般", "厨房收纳不足", "担心施工返工"],
+    projectId: "proj-1"
+  },
+  {
+    id: "lead-2",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    customerId: "cust-2",
+    source: "walk_in",
+    stage: "measured",
+    intentLevel: "high",
+    ownerId: "user-sales-1",
+    budgetRange: "22-30 万",
+    houseInfo: "杨浦 88 平老房整装，已预约量房",
+    requirementSummary: "希望提升采光，控制预算，并解决卫生间干湿分离。",
+    nextFollowUpAt: "2026-04-19",
+    lastContactedAt: "2026-04-18",
+    lastContactSummary: "已约周末量房，客户关注预算是否可控。",
+    expectedSignDate: "2026-05-02",
+    summary: "到店咨询后进入量房阶段，成交意愿较强。",
+    painPoints: ["采光不足", "卫生间布局局促", "预算敏感"]
+  },
+  {
+    id: "lead-3",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    customerId: "cust-3",
+    source: "xiaohongshu",
+    stage: "contacted",
+    intentLevel: "medium",
+    ownerId: "user-sales-1",
+    budgetRange: "35-46 万",
+    houseInfo: "苏州 140 平四房，亲子家庭改善",
+    requirementSummary: "亲子活动区、全屋收纳、奶油风和环保材料。",
+    nextFollowUpAt: "2026-04-16",
+    lastContactedAt: "2026-04-04",
+    lastContactSummary: "客户收藏案例较多，但尚未确认量房时间。",
+    summary: "小红书来源线索，需求匹配度较高但已较久未跟进。",
+    painPoints: ["儿童收纳不足", "担心环保材料", "决策周期较长"]
+  }
+];
+
+export const workflowPhases: WorkflowPhase[] = [
+  {
+    id: "phase-requirement",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "需求确认",
+    order: 10,
+    category: "design",
+    description: "沉淀客户需求、生活方式、预算边界和待确认问题。"
+  },
+  {
+    id: "phase-layout",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "平面方案",
+    order: 20,
+    category: "design",
+    description: "完成空间布局、动线和基础功能分区。"
+  },
+  {
+    id: "phase-su",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "SU 模型",
+    order: 30,
+    category: "design",
+    description: "推敲空间体量、柜体关系和主要材质方向。"
+  },
+  {
+    id: "phase-rendering",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "效果图",
+    order: 40,
+    category: "design",
+    description: "输出客户可确认的视觉方向和关键空间效果。"
+  },
+  {
+    id: "phase-drawing",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "施工图",
+    order: 50,
+    category: "detailing",
+    description: "完成施工依据、柜体深化、点位和节点图。"
+  },
+  {
+    id: "phase-quotation",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "报价",
+    order: 60,
+    category: "quotation",
+    description: "生成并确认方案对应报价和增减项。"
+  },
+  {
+    id: "phase-handoff",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "交底",
+    order: 70,
+    category: "delivery",
+    description: "交接施工依据、现场条件和待确认事项。"
+  },
+  {
+    id: "phase-construction",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "施工",
+    order: 80,
+    category: "delivery",
+    description: "跟进现场施工节点、巡检问题和变更闭环。"
+  },
+  {
+    id: "phase-acceptance",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    name: "验收",
+    order: 90,
+    category: "acceptance",
+    description: "完成收尾检查、客户验收和交付归档。"
   }
 ];
 
@@ -111,6 +337,17 @@ export const spaces: Space[] = [
     type: "bedroom",
     areaSqm: 18,
     constraints: ["保留原飘窗结构"]
+  },
+  {
+    id: "space-3",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    projectId: "proj-1",
+    name: "卫生间",
+    type: "bathroom",
+    areaSqm: 7,
+    constraints: ["原排水位置尽量不移位", "需确认壁龛尺寸"]
   }
 ];
 
@@ -317,6 +554,133 @@ export const confirmations: ConfirmationRecord[] = [
     type: "change_order",
     status: "pending",
     clientName: "林女士"
+  }
+];
+
+export const projectTasks: ProjectTask[] = [
+  {
+    id: "ptask-1",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    projectId: "proj-1",
+    spaceId: "space-1",
+    phaseId: "phase-quotation",
+    title: "确认蒸烤箱升级增项",
+    description: "销售需要联系林女士确认蒸烤一体机升级，并同步报价变化。",
+    status: "waiting_client",
+    priority: "high",
+    assigneeId: "user-sales-1",
+    ownerRole: "sales",
+    reporterId: "user-sales-1",
+    dueDate: "2026-04-20",
+    blockedReason: "等待客户确认 change-1 增减项。",
+    linkedEntities: [
+      { type: "change_order", entityId: "change-1", label: "增减项 change-1" },
+      { type: "confirmation_record", entityId: "conf-2", label: "客户确认 conf-2" },
+      { type: "quotation", entityId: "quote-1", label: "报价 quote-1" }
+    ]
+  },
+  {
+    id: "ptask-2",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    projectId: "proj-1",
+    spaceId: "space-1",
+    phaseId: "phase-su",
+    title: "输出客餐厨 SU V3 调整建议",
+    description: "围绕岛台动线、高柜电器位和材质说明准备新一轮方案调整。",
+    status: "todo",
+    priority: "high",
+    assigneeId: "user-designer-1",
+    ownerRole: "designer",
+    reporterId: "user-sales-1",
+    dueDate: "2026-04-20",
+    linkedEntities: [
+      { type: "design_version", entityId: "design-2", label: "设计版本 V2" },
+      { type: "requirement_sheet", entityId: "req-1", label: "需求单 req-1" }
+    ]
+  },
+  {
+    id: "ptask-3",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    projectId: "proj-1",
+    spaceId: "space-2",
+    phaseId: "phase-requirement",
+    title: "确认主卧梳妆位需求",
+    description: "补齐主卧梳妆位、衣柜比例和飘窗使用方式。",
+    status: "waiting_internal",
+    priority: "medium",
+    assigneeId: "user-designer-1",
+    ownerRole: "designer",
+    reporterId: "user-sales-1",
+    dueDate: "2026-04-21",
+    blockedReason: "销售需要补充客户对主卧功能的反馈。",
+    linkedEntities: [{ type: "requirement_sheet", entityId: "req-1", label: "需求单 req-1" }]
+  },
+  {
+    id: "ptask-4",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    projectId: "proj-1",
+    spaceId: "space-1",
+    phaseId: "phase-drawing",
+    title: "补齐高柜电源位施工图标注",
+    description: "深化设计需要在交底前补齐高柜蒸烤箱电源位和散热尺寸。",
+    status: "blocked",
+    priority: "urgent",
+    assigneeId: "user-detailer-1",
+    ownerRole: "detailer",
+    reporterId: "user-pm-1",
+    dueDate: "2026-04-20",
+    blockedReason: "现场复尺后发现图纸中电源位标注不完整。",
+    linkedEntities: [
+      { type: "construction_drawing_version", entityId: "drawing-1", label: "施工图 CD1" },
+      { type: "inspection_record", entityId: "insp-1", label: "巡检记录 insp-1" }
+    ]
+  },
+  {
+    id: "ptask-5",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    projectId: "proj-1",
+    spaceId: "space-3",
+    phaseId: "phase-drawing",
+    title: "复核卫生间排水和壁龛尺寸",
+    description: "交底前确认卫生间排水位置、壁龛尺寸和防水节点。",
+    status: "in_progress",
+    priority: "medium",
+    assigneeId: "user-detailer-1",
+    ownerRole: "detailer",
+    reporterId: "user-pm-1",
+    dueDate: "2026-04-22",
+    linkedEntities: [{ type: "construction_drawing_version", entityId: "drawing-1", label: "施工图 CD1" }]
+  },
+  {
+    id: "ptask-6",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    createdBy,
+    projectId: "proj-1",
+    phaseId: "phase-handoff",
+    title: "准备施工图交底检查清单",
+    description: "项目经理汇总图纸、报价、确认记录和现场复尺问题，准备交底。",
+    status: "in_progress",
+    priority: "high",
+    assigneeId: "user-pm-1",
+    ownerRole: "project_manager",
+    reporterId: "user-pm-1",
+    dueDate: "2026-04-22",
+    linkedEntities: [
+      { type: "construction_drawing_version", entityId: "drawing-1", label: "施工图 CD1" },
+      { type: "quotation", entityId: "quote-1", label: "报价 quote-1" },
+      { type: "confirmation_record", entityId: "conf-1", label: "客户确认 conf-1" }
+    ]
   }
 ];
 

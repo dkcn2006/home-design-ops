@@ -11,22 +11,30 @@ import {
   inspections,
   leads,
   milestones,
+  projectTasks,
   projects,
   quotations,
   renderingVersions,
   requirementSheets,
+  spaces,
+  users,
+  workflowPhases,
   workItems
 } from "@home-design-ops/shared";
 import type {
   CreateLeadIntakeInput,
   DashboardSummary,
+  LeadSummary,
   MetricCard,
   LeadPipelineItem,
   PortfolioOverview,
   ProjectArchive,
+  ProjectTaskBoard,
   RoleWorkbench,
   RoleProjectFocusItem,
   TaskFlowItem,
+  UpdateTaskAssigneeInput,
+  UpdateTaskStatusInput,
   UpdateLeadStageInput,
   UpdateConfirmationInput,
   UserRole,
@@ -69,6 +77,43 @@ export class DemoRepositoryService {
     });
   }
 
+  getLeadSummary(): LeadSummary {
+    const today = "2026-04-19";
+    const staleBefore = "2026-04-09";
+    const stageCounts = leads.reduce(
+      (result, lead) => {
+        result[lead.stage] += 1;
+        return result;
+      },
+      {
+        new: 0,
+        contacted: 0,
+        measured: 0,
+        proposal: 0,
+        quoted: 0,
+        negotiating: 0,
+        won: 0,
+        lost: 0
+      } satisfies LeadSummary["stageCounts"]
+    );
+    const wonCount = stageCounts.won;
+    const lostCount = stageCounts.lost;
+    const effectiveLeadCount = Math.max(leads.length - lostCount, 1);
+
+    return {
+      total: leads.length,
+      newCount: stageCounts.new,
+      wonCount,
+      lostCount,
+      conversionRate: Math.round((wonCount / effectiveLeadCount) * 100),
+      todayFollowUpCount: leads.filter((lead) => lead.nextFollowUpAt === today).length,
+      overdueFollowUpCount: leads.filter((lead) => lead.nextFollowUpAt && lead.nextFollowUpAt < today && lead.stage !== "won" && lead.stage !== "lost").length,
+      staleLeadCount: leads.filter((lead) => lead.lastContactedAt && lead.lastContactedAt < staleBefore && lead.stage !== "won" && lead.stage !== "lost").length,
+      highIntentCount: leads.filter((lead) => lead.intentLevel === "high" && lead.stage !== "won" && lead.stage !== "lost").length,
+      stageCounts
+    };
+  }
+
   createLeadIntake(input: CreateLeadIntakeInput): LeadPipelineItem {
     const now = new Date().toISOString();
     const customerId = this.buildId("cust", customers);
@@ -90,6 +135,14 @@ export class DemoRepositoryService {
       customerId,
       source: input.lead.source,
       stage: input.lead.stage ?? "new",
+      intentLevel: input.lead.intentLevel ?? "medium",
+      ownerId: input.lead.ownerId ?? "user-sales-1",
+      budgetRange: input.lead.budgetRange ?? `${Math.round(input.customer.budgetMin / 10000)}-${Math.round(input.customer.budgetMax / 10000)} 万`,
+      houseInfo: input.lead.houseInfo ?? `${input.customer.city} 客户需求待补充`,
+      requirementSummary: input.lead.requirementSummary ?? input.lead.summary,
+      nextFollowUpAt: input.lead.nextFollowUpAt,
+      lastContactedAt: now.slice(0, 10),
+      lastContactSummary: input.lead.lastContactSummary ?? "新线索已录入，等待首次跟进。",
       expectedSignDate: input.lead.expectedSignDate,
       summary: input.lead.summary,
       painPoints: input.lead.painPoints
@@ -136,6 +189,102 @@ export class DemoRepositoryService {
 
   getProjects() {
     return projects;
+  }
+
+  getUsers() {
+    return users;
+  }
+
+  getWorkflowPhases() {
+    return workflowPhases;
+  }
+
+  getProjectTasks(projectId: string) {
+    this.ensureProject(projectId);
+    return projectTasks.filter((task) => task.projectId === projectId);
+  }
+
+  getProjectTaskBoard(projectId: string): ProjectTaskBoard {
+    const project = this.ensureProject(projectId);
+    const tasks = this.getProjectTasks(projectId);
+    const today = "2026-04-19";
+    const activeRiskTasks = tasks.filter((task) => task.status === "blocked" || task.status === "waiting_client");
+    const blockedSpaceIds = new Set(activeRiskTasks.map((task) => task.spaceId ?? "space-project"));
+    const projectLevelSpace = {
+      id: "space-project",
+      createdAt: project.createdAt,
+      updatedAt: project.updatedAt,
+      createdBy: project.createdBy,
+      projectId,
+      name: "全项目",
+      type: "other" as const,
+      areaSqm: project.areaSqm,
+      constraints: ["跨空间事项"]
+    };
+    const projectSpaces = [...spaces.filter((space) => space.projectId === projectId), projectLevelSpace];
+
+    return {
+      project: {
+        id: project.id,
+        code: project.code,
+        name: project.name,
+        status: project.status
+      },
+      summary: {
+        totalTaskCount: tasks.length,
+        blockedTaskCount: tasks.filter((task) => task.status === "blocked").length,
+        waitingClientCount: tasks.filter((task) => task.status === "waiting_client").length,
+        overdueTaskCount: tasks.filter((task) => task.dueDate && task.dueDate < today && task.status !== "done" && task.status !== "canceled").length,
+        blockedSpaceCount: blockedSpaceIds.size
+      },
+      spaces: projectSpaces.map((space) => ({
+        space,
+        phases: workflowPhases
+          .map((phase) => ({
+            phase,
+            tasks: tasks
+              .filter((task) => (task.spaceId ?? "space-project") === space.id && task.phaseId === phase.id)
+              .map((task) => ({
+                task,
+                assignee: users.find((user) => user.id === task.assigneeId),
+                phase,
+                space
+              }))
+          }))
+          .filter((phaseGroup) => phaseGroup.tasks.length > 0)
+      })).filter((spaceGroup) => spaceGroup.phases.length > 0)
+    };
+  }
+
+  getMyTasks(assigneeId: string) {
+    return projectTasks
+      .filter((task) => task.assigneeId === assigneeId)
+      .map((task) => ({
+        task,
+        assignee: users.find((user) => user.id === task.assigneeId),
+        phase: workflowPhases.find((phase) => phase.id === task.phaseId),
+        space: task.spaceId ? spaces.find((space) => space.id === task.spaceId) : undefined
+      }))
+      .sort((a, b) => (a.task.dueDate ?? "").localeCompare(b.task.dueDate ?? ""));
+  }
+
+  updateTaskStatus(taskId: string, input: UpdateTaskStatusInput) {
+    const task = this.ensureTask(taskId);
+    task.status = input.status;
+    task.updatedAt = new Date().toISOString();
+    task.completedAt = input.status === "done" ? task.updatedAt : undefined;
+    return task;
+  }
+
+  updateTaskAssignee(taskId: string, input: UpdateTaskAssigneeInput) {
+    const task = this.ensureTask(taskId);
+    const assignee = users.find((user) => user.id === input.assigneeId);
+    if (!assignee) {
+      throw new NotFoundException(`User ${input.assigneeId} was not found`);
+    }
+    task.assigneeId = input.assigneeId;
+    task.updatedAt = new Date().toISOString();
+    return task;
   }
 
   getPortfolioOverview(): PortfolioOverview {
@@ -569,5 +718,21 @@ export class DemoRepositoryService {
 
   private buildId(prefix: string, collection: Array<{ id: string }>) {
     return `${prefix}-${collection.length + 1}`;
+  }
+
+  private ensureProject(projectId: string) {
+    const project = projects.find((item) => item.id === projectId);
+    if (!project) {
+      throw new NotFoundException(`Project ${projectId} was not found`);
+    }
+    return project;
+  }
+
+  private ensureTask(taskId: string) {
+    const task = projectTasks.find((item) => item.id === taskId);
+    if (!task) {
+      throw new NotFoundException(`Task ${taskId} was not found`);
+    }
+    return task;
   }
 }

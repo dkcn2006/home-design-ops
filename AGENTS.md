@@ -34,3 +34,13 @@ Co-authored-by: Codex <codex@openai.com>
 ```
 
 该规则只约束 Codex 自动提交，不要求用户手动提交时添加该署名。
+
+## Kimi 提交规范
+
+当 kimi 在本仓库中自动创建 git commit 时，commit message 末尾必须追加：
+
+```text
+Co-authored-by: Kimi <kimi@moonshot.cn>
+```
+
+该规则只约束 Codex 自动提交，不要求用户手动提交时添加该署名。
