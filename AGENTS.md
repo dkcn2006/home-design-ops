@@ -1,5 +1,14 @@
 # Project Instructions
 
+## Language for plans and proposals
+
+For any product plan, technical plan, roadmap, implementation proposal, architecture proposal, design proposal, or decision memo in this repository:
+
+- write the main content in Simplified Chinese
+- keep code identifiers, API paths, file paths, type names, command names, and proper nouns in their original form when clearer
+- if an English version is explicitly requested, provide English only for that request
+- prefer concrete, executable wording over abstract strategy language
+
 ## Design source of truth
 
 For any frontend design, UI polish, layout adjustment, component styling, or page redesign work in this repository:
