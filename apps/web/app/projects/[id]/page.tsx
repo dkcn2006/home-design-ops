@@ -151,7 +151,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         <div className="cards-2">
           <article className="timeline-card">
             <div className="doc-block-title">当前有效报价</div>
-            <h3>当前报价</h3>
+            <h3 style={{ marginTop: 8 }}>当前报价</h3>
             {currentQuotation ? (
               <>
                 <p className="muted">{currentQuotation.summary}</p>
@@ -169,7 +169,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </article>
           <article className="timeline-card">
             <div className="doc-block-title">变更留痕</div>
-            <h3>变更记录</h3>
+            <h3 style={{ marginTop: 8 }}>变更记录</h3>
             <ul className="clean" style={{ marginTop: 14 }}>
               {archive.changeOrders.map((item) => (
                 <li key={item.id}>

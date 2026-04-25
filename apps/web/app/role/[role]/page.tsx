@@ -73,7 +73,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
         ))}
       </section>
 
-      <section className="grid stats">
+      <section className="stats">
         {workbench.metrics.map((metric) => (
           <article className={`stat-card${metric.tone === "attention" ? " stat-card-emphasis" : ""}`} key={metric.label}>
             <div className="stat-card-head">
