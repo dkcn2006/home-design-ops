@@ -1,6 +1,6 @@
 # 实现概览
 
-这个仓库已经包含一套面向 MVP 的 `home-design-ops` monorepo 工程结构。
+这个仓库已经包含一套面向 MVP 的“家装运营协同系统” monorepo 工程结构。
 
 ## 工作区结构
 

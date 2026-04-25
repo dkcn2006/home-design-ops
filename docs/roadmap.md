@@ -1,6 +1,6 @@
 # Roadmap：家装运营工作区演进路线
 
-这份路线图用于把 `home-design-ops` 从当前“项目档案 MVP”推进为一个面向家装设计公司的运营工作区。路线图以 [docs/prd.md](./prd.md) 为准，优先验证两条最小业务闭环：
+这份路线图用于把“家装运营协同系统”从当前“项目档案 MVP”推进为一个面向家装设计公司的运营工作区。路线图以 [docs/prd.md](./prd.md) 为准，优先验证两条最小业务闭环：
 
 - `Lead + Sales Pipeline`：帮助公司跟踪潜在客户，减少漏跟，提升线索到项目的转化率。
 - `ProjectTask + Space + WorkflowPhase + Assignee + Board + My Work`：让团队围绕项目、空间、阶段、负责人和客户确认推进执行。
@@ -81,7 +81,7 @@ V1 优先稳定这些对象：
 
 ```mermaid
 gantt
-  title home-design-ops Roadmap
+  title 家装运营协同系统 Roadmap
   dateFormat  YYYY-MM-DD
   axisFormat  %m-%d
 
