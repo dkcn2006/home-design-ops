@@ -1,37 +1,36 @@
-# Implementation Overview
+# 实现概览
 
-This repository now includes a working MVP-oriented monorepo structure for `home-design-ops`.
+这个仓库已经包含一套面向 MVP 的 `home-design-ops` monorepo 工程结构。
 
-## Workspace layout
+## 工作区结构
 
 - `apps/web`
-  - Next.js App Router application
-  - role-based dashboards and project archive views
+  - Next.js App Router 应用
+  - 基于角色的工作台和项目档案视图
 - `apps/api`
   - NestJS REST API
-  - in-memory demo repository plus Prisma schema for the long-term PostgreSQL model
+  - 当前使用内存 demo 仓储，同时保留面向长期 PostgreSQL 模型的 Prisma schema
 - `packages/shared`
-  - shared domain types, enums, and demo seed data
+  - 共享领域类型、枚举和 demo seed 数据
 
-## MVP scope implemented
+## 已实现的 MVP 范围
 
-- customer and lead tracking
-- project archive overview
-- requirement sheets
-- design / rendering / construction drawing versions
-- quotations and change orders
-- milestones and inspections
-- confirmation records and attachments
-- AI suggestion endpoints for:
-  - requirement extraction
-  - SU layout assistance
-  - rendering guidance
-  - construction drawing review
-  - inspection report drafting
+- 客户与线索管理
+- 项目档案概览
+- 需求单
+- 设计版本、效果图版本和施工图版本
+- 报价与变更单
+- 里程碑与巡检
+- 确认记录和附件
+- AI 建议接口：
+  - 需求提取
+  - SU 布局辅助
+  - 效果图建议
+  - 施工图校核
+  - 巡检报告草稿
 
-## Technical notes
+## 技术说明
 
-- The API currently uses shared demo data through a singleton repository so the product can be explored without a live database.
-- Prisma schema is included to define the PostgreSQL target model and reduce future migration churn.
-- AI behavior is implemented as structured orchestration stubs with deterministic outputs, so the UI and API contracts are ready before a model provider is connected.
-
+- API 当前通过单例仓储使用共享 demo 数据，因此无需真实数据库也能体验产品流程。
+- Prisma schema 已经包含 PostgreSQL 目标模型，用于降低后续迁移成本。
+- AI 行为目前是结构化编排桩，返回确定性结果，便于在接入真实模型服务前先稳定 UI 和 API 契约。

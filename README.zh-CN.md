@@ -2,7 +2,7 @@
 
 一个面向家装设计行业的业务协同与 AI 提效 MVP 工程仓库。
 
-[English README](./README.md)
+[中文主 README](./README.md)
 
 ## 当前已实现内容
 

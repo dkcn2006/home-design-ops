@@ -1,219 +1,216 @@
-# Design System
+# 设计系统
 
-This file defines the visual direction for `home-design-ops`.
-When implementing or revising frontend UI, follow this document before inventing new styles.
+本文档定义 `home-design-ops` 的视觉方向。实现或调整前端 UI 时，先遵循本文档，再考虑新增样式。
 
-## Design direction
+## 设计方向
 
-Adopt a Notion-inspired product style for this repository.
+本仓库采用接近 Notion 的产品风格。
 
-This does not mean copying Notion literally.
-It means using these qualities as the primary reference:
+这不是要求逐字复制 Notion，而是把下面这些气质作为主要参考：
 
-- quiet
-- document-like
-- structured
-- readable
-- low-noise
-- trustworthy
+- 安静
+- 文档化
+- 结构清晰
+- 易读
+- 低噪音
+- 可信
 
-The project should feel like:
+产品应该呈现为：
 
-- a Notion-style workspace for renovation operations
-- a project archive system with calm editorial spacing
-- a practical internal tool with a warm Chinese business context
+- 一个面向家装运营的 Notion 风格工作区
+- 一个拥有克制编辑排版感的项目档案系统
+- 一个带有温暖中国业务语境的实用内部工具
 
-Avoid making it look like:
+避免做成：
 
-- a glossy landing page
-- a glassmorphism-heavy dashboard
-- a template SaaS admin panel
-- a dark, neon, or over-branded product
+- 光鲜的营销落地页
+- 大量玻璃拟态的 dashboard
+- 模板化 SaaS 管理后台
+- 深色、霓虹或过度品牌化的产品
 
-## Core visual language
+## 核心视觉语言
 
-Keep the warm renovation context, but express it through a restrained Notion-like system.
+保留温暖的家装语境，但通过克制、接近 Notion 的系统表达。
 
-- Use light paper-like backgrounds.
-- Prefer solid surfaces over frosted glass effects.
-- Borders should be visible but soft.
-- Use modest corner radii rather than oversized rounded cards.
-- Shadows should be minimal and rare.
-- Layout should feel like a workspace, not a visual showcase.
-- Typography should do more of the hierarchy work than decoration.
+- 使用浅色、接近纸张的背景。
+- 优先使用实色表面，而不是毛玻璃效果。
+- 边框应该可见但柔和。
+- 使用适度圆角，不使用过大的圆角卡片。
+- 阴影应尽量少用，只在确实需要层级时使用。
+- 布局应该像工作区，而不是视觉展示页。
+- 层级主要依靠排版完成，而不是装饰。
 
-## Color direction
+## 色彩方向
 
-Use a muted neutral palette with one warm accent.
+使用柔和的中性色，并保留一个温暖强调色。
 
-- `--bg`: warm paper workspace background
-- `--card`: solid document/card surface
-- `--ink`: primary text
-- `--muted`: supporting text
-- `--accent`: restrained warm brown highlight
-- `--accent-soft`: quiet warm tag background
-- `--olive`: muted secondary emphasis
-- `--line`: light separators
+- `--bg`：温暖的纸质工作区背景
+- `--card`：稳定的文档或卡片表面
+- `--ink`：主要文字
+- `--muted`：辅助文字
+- `--accent`：克制的暖棕色强调
+- `--accent-soft`：安静的暖色标签背景
+- `--olive`：柔和的次级强调
+- `--line`：浅色分隔线
 
-### Color intent
+### 色彩意图
 
-- Most UI should remain neutral.
-- Accent is for selected action, light emphasis, and important pills.
-- Large sections should not rely on color blocks for hierarchy.
-- Backgrounds should stay warm-neutral, close to paper and plaster.
-- Do not introduce saturated blue, purple, or glossy gradients as primary identity.
+- 大多数 UI 应保持中性。
+- 强调色用于选中动作、轻量重点和重要 pill。
+- 大面积区块不应依赖色块制造层级。
+- 背景应保持温暖中性，接近纸张和灰泥。
+- 不要引入高饱和蓝色、紫色或亮面渐变作为主视觉身份。
 
-## Typography
+## 字体
 
-- Prioritize Chinese readability.
-- Prefer `"PingFang SC"`, `"Noto Sans SC"`, `"Microsoft YaHei"`, sans-serif.
-- Headlines should be simple, direct, and slightly editorial.
-- Body copy should stay concise and operational.
-- Labels, metadata, and helper text should remain soft and quiet.
-- Avoid oversized marketing-style typography on workflow screens.
+- 优先保证中文可读性。
+- 优先使用 `"PingFang SC"`、`"Noto Sans SC"`、`"Microsoft YaHei"`、sans-serif。
+- 标题应简单、直接，并带一点编辑排版感。
+- 正文应保持简洁、面向操作。
+- 标签、元信息和辅助文本应柔和、安静。
+- 工作流页面避免使用营销页式的超大字号。
 
-## Layout rules
+## 布局规则
 
-- Prefer page sections that read like structured documents.
-- Use panels, grouped blocks, lists, and calm tables.
-- Important pages should have:
-  - a hero or header region
-  - summary stats or key context
-  - one or more operational sections
-- Default page rhythm:
+- 页面区块应尽量像结构化文档。
+- 使用面板、分组块、列表和安静的表格。
+- 重要页面应包含：
+  - hero 或 header 区域
+  - 摘要指标或关键上下文
+  - 一个或多个操作区块
+- 默认页面节奏：
   - header / hero
   - summary
   - working area
   - detail area
 
-## Component guidance
+## 组件指导
 
 ### Cards
 
-- Cards should feel like document blocks.
-- Prefer borders and background contrast over shadow.
-- Keep spacing generous and visual noise low.
-- Make headers readable without decorative chrome.
+- Cards 应像文档块。
+- 优先用边框和背景对比表达层级，而不是阴影。
+- 保持充足留白，降低视觉噪音。
+- 标题区域应清晰，不依赖装饰性外壳。
 
 ### Tables
 
-- Tables should remain simple and readable.
-- Avoid dense enterprise-grid styling.
-- Keep rows clean with clear column intent.
-- Use subtle separators like a document database, not heavy gridlines.
+- Tables 应保持简单、易读。
+- 避免高密度企业表格风格。
+- 行内容要干净，列意图要明确。
+- 使用类似文档数据库的轻量分隔线，而不是粗重网格线。
 
 ### Forms
 
-- Forms should feel like editing structured notes.
-- Inputs should be clean, light, and rectangular with modest radius.
-- Group related fields clearly.
-- Multi-column forms are good on desktop, but must collapse cleanly on mobile.
+- Forms 应像编辑结构化笔记。
+- Inputs 应干净、轻盈、近似矩形，并使用适度圆角。
+- 相关字段要清晰分组。
+- 桌面端可以使用多列布局，但移动端必须清晰折叠。
 
 ### Buttons
 
-- Primary buttons should be quiet and confident, not flashy.
-- Secondary buttons should feel like subtle utility controls.
-- Avoid glossy, floating, or over-stylized buttons.
+- Primary buttons 应安静、明确，不要浮夸。
+- Secondary buttons 应像轻量工具控制。
+- 避免亮面、悬浮或过度风格化按钮。
 
-### Tags and pills
+### Tags 和 pills
 
-- Use rounded pills for status, module identity, and compact metadata.
-- Tags should help scanning, not dominate the page.
-- Tags should feel like Notion-style property chips more than badges from a marketing site.
+- 使用圆角 pills 表达状态、模块身份和紧凑元信息。
+- Tags 应帮助扫描，不应支配页面。
+- Tags 应更像 Notion 风格的属性 chip，而不是营销站点里的 badge。
 
-## Interaction style
+## 交互风格
 
-- Motion should be subtle.
-- Prefer calm transitions over flashy micro-animations.
-- Hover feedback should rely on background, border, and text emphasis shifts.
-- Do not introduce animation unless it helps orientation.
+- 动效应克制。
+- 优先使用平静的过渡，而不是强烈微动画。
+- Hover 反馈应依赖背景、边框和文字强调变化。
+- 除非有助于定位和理解，否则不要引入动画。
 
-## Page patterns for this project
+## 本项目页面模式
 
-### Home page
+### 首页
 
-Should communicate:
+需要传达：
 
-- system scope
-- current operational status
-- next actions
-- entry points into major workflows
+- 系统范围
+- 当前运营状态
+- 下一步动作
+- 进入主要工作流的入口
 
-### Role pages
+### 角色页面
 
-Should feel like focused workbenches.
+应该像聚焦的工作台。
 
-- keep role identity clear
-- show metrics, current focus, and shared project facts
-- avoid turning role pages into marketing pages
+- 保持角色身份清晰
+- 展示指标、当前焦点和共享项目事实
+- 避免把角色页面做成营销页
 
-### Project archive page
+### 项目档案页
 
-This is the core page of the product.
-It should feel like the single source of truth.
+这是产品的核心页面，应像单一事实来源。
 
-- Organize information like a well-structured operating document.
-- Keep customer, design, quotation, delivery, and confirmation sections clearly separated.
-- Support dense information, but preserve scanning comfort.
+- 像结构良好的运营文档一样组织信息。
+- 清楚分隔客户、设计、报价、交付和确认模块。
+- 支持高信息密度，同时保留良好的扫描体验。
 
-### Client portal page
+### 客户门户页
 
-Should be simpler and clearer than internal pages.
+应比内部页面更简单、更清楚。
 
-- Reduce internal jargon.
-- Highlight actionable items.
-- Keep trust and clarity above density.
-- Make the tone calmer and more human than internal dashboards.
+- 减少内部术语。
+- 突出可操作事项。
+- 可信和清晰优先于信息密度。
+- 语气应比内部 dashboard 更平静、更人性化。
 
-### Sales lead page
+### 销售线索页
 
-Should combine intake efficiency and pipeline visibility.
+应兼顾录入效率和 pipeline 可见性。
 
-- Forms should be welcoming and fast to complete.
-- Stage boards should be easy to scan.
-- Pipeline cards should emphasize customer identity, source, budget, and current next step.
-- The page should feel like editing and reviewing a living workspace database.
+- Forms 应友好且填写迅速。
+- 阶段看板应易于扫描。
+- Pipeline cards 应突出客户身份、来源、预算和当前下一步。
+- 页面应像在编辑和查看一个持续更新的工作区数据库。
 
-## Implementation rules for AI
+## AI 实现规则
 
-When asked to implement a page or redesign an existing page:
+当用户要求实现页面、重设计现有页面、调整组件样式或做前端 polish 时：
 
-1. Reuse existing CSS variables before adding new ones.
-2. Preserve a warm-neutral Notion-like visual language.
-3. Prefer extending existing component classes and layout patterns over inventing a brand-new system.
-4. Keep mobile behavior explicit.
-5. Avoid visual noise.
-6. Avoid dark mode unless explicitly requested.
-7. Avoid purple, electric blue, glossy gradients, and generic template aesthetics.
-8. Make operations pages feel trustworthy, calm, and document-oriented.
+1. 先复用现有 CSS variables，再考虑新增变量。
+2. 保持温暖中性、接近 Notion 的运营工具视觉语言。
+3. 优先扩展已有组件 class 和布局模式，不重新发明一套系统。
+4. 明确处理移动端行为。
+5. 避免视觉噪音。
+6. 除非用户明确要求，否则不要做 dark mode。
+7. 避免紫色、电蓝色、亮面渐变和通用模板审美。
+8. 让运营页面显得可信、平静、文档化。
 
-## What good output looks like
+## 好的输出应该像什么
 
-Good output should feel like:
+好的输出应该像：
 
-- a serious renovation workspace rendered with Notion-like restraint
-- an internal tool that still has taste
-- a system designed for real collaboration, not demo-only marketing visuals
+- 一个用 Notion 式克制语言呈现的严肃家装工作区
+- 一个有审美但仍然实用的内部工具
+- 一个为真实协作设计的系统，而不是只服务 demo 的营销视觉
 
-## What bad output looks like
+## 不好的输出是什么
 
-Bad output includes:
+不好的输出包括：
 
-- flashy gradients everywhere
-- generic startup hero sections on workflow pages
-- dense enterprise tables with no visual hierarchy
-- too many colors
-- too many shadows
-- inconsistent card shapes
-- pages that look unrelated to each other
-- oversized glassmorphism surfaces
-- buttons and badges that attract more attention than the content
+- 到处都是浮夸渐变
+- 在工作流页面使用通用创业公司 hero 区
+- 没有视觉层级的高密度企业表格
+- 颜色过多
+- 阴影过多
+- 卡片形状不一致
+- 页面之间看起来互不相关
+- 过大的玻璃拟态表面
+- 按钮和 badge 比内容本身更抢眼
 
-## Default instruction for AI sessions
+## AI 会话默认指令
 
-If the user asks for UI, page redesign, component styling, or frontend polish:
+如果用户要求 UI、页面重设计、组件样式或前端 polish：
 
-- read this file first
-- keep the current warm Notion-inspired operational design system
-- implement directly in code
-- prefer concrete page improvements over abstract design commentary
+- 先阅读本文件
+- 保持当前温暖、接近 Notion 的运营设计系统
+- 直接在代码中实现
+- 优先做具体页面改进，而不是停留在抽象设计评论

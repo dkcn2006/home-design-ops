@@ -1,90 +1,98 @@
 # home-design-ops
 
-An MVP-oriented monorepo for a home renovation operations system that connects sales, design, detailing, delivery, client confirmations, and workflow-native AI assistance.
+一个面向家装设计行业的业务协同与 AI 提效 MVP 工程仓库。
 
-[中文说明 / Chinese Version](./README.zh-CN.md)
+中文说明也保留在 [README.zh-CN.md](./README.zh-CN.md)。后续以中文文档为主。
 
-## What is implemented
+## 当前已实现内容
 
-This repository now includes a concrete implementation foundation for the V1 plan:
+这个仓库已经不只是蓝图材料，而是落下了一版可继续开发的工程骨架：
 
 - `apps/web`
-  - Next.js App Router frontend
-  - role dashboards for sales, designer, and project manager
-  - project archive center
-  - client portal view
+  - 基于 Next.js App Router 的前端应用
+  - 包含销售、设计师、项目经理工作台
+  - 包含项目档案中心
+  - 包含客户端门户视图
 - `apps/api`
-  - NestJS REST API
-  - resource-oriented endpoints for customers, leads, projects, requirements, design outputs, quotations, changes, milestones, inspections, confirmations, attachments, and AI helpers
+  - 基于 NestJS 的 REST API
+  - 已覆盖客户、线索、项目、需求单、设计版本、效果图版本、施工图版本、报价、变更、节点、巡检、确认记录、附件、AI 助手接口
 - `packages/shared`
-  - shared domain models
-  - demo seed data
-  - AI response contracts
+  - 共享领域模型
+  - 演示种子数据
+  - AI 返回结构
 - `docs/implementation-overview.md`
-  - a concise architecture and implementation summary
+  - 当前实现架构与边界说明
 
-## Implemented MVP scope
+## 已落地的 MVP 范围
 
-- customer and lead tracking
-- project archive as the core data hub
-- SU design versions, rendering versions, and construction drawing versions
-- quotations and change orders
-- milestones and inspection records
-- confirmation records and attachment metadata
-- AI orchestration stubs for:
-  - requirement extraction
-  - SU layout assistance
-  - rendering guidance
-  - construction drawing review
-  - inspection digest generation
+- 客户与线索
+- 项目档案中心
+- SU 模型图、效果图、施工图版本管理
+- 报价与变更
+- 项目节点与巡检记录
+- 客户确认记录与附件元数据
+- AI 助手接口雏形：
+  - 需求整理
+  - SU 方案辅助
+  - 效果图分级输出建议
+  - 施工图校核
+  - 巡检日报摘要
 
-## Tech stack
+## 技术栈
 
-- Frontend: Next.js + React + TypeScript
-- API: NestJS + TypeScript
-- Data model target: PostgreSQL via Prisma schema
-- Shared contracts: workspace package
-- File storage target: object storage metadata model
+- 前端：Next.js + React + TypeScript
+- 后端：NestJS + TypeScript
+- 数据模型目标：PostgreSQL + Prisma Schema
+- 共享契约：workspace shared package
+- 文件存储目标：对象存储元数据模型
 
-## Getting started
+## 启动方式
 
-### Requirements
+### 环境要求
 
 - Node.js `>= 20.0.0`
 - npm `>= 8`
 
-The current repo includes `.nvmrc` with the recommended version:
+仓库已经提供了推荐 Node 版本：
 
 ```bash
 nvm use
 ```
 
-### Install
+### 安装依赖
 
 ```bash
 npm install
 ```
 
-### Run
+### 本地启动
 
 ```bash
 npm run dev:api
 npm run dev:web
 ```
 
-### Build
+### 构建
 
 ```bash
 npm run build
 ```
 
-## Current implementation note
+## 当前实现说明
 
-The API and frontend are wired around shared demo data so the product flow can be explored immediately. The PostgreSQL target model is already defined through Prisma schema, which reduces future migration churn when replacing the in-memory repository with persistent storage.
+目前前后端围绕共享演示数据工作，这样可以先把业务链路、页面结构和 API 契约跑通。与此同时，PostgreSQL 的目标数据模型已经通过 Prisma Schema 落下，后续从内存仓储切换到真实数据库时会更平滑。
 
-## Why this project exists
+## 项目背景
 
-This project is personal.
+这个项目的起点很个人，也很实际。
 
-My younger brother works in the home renovation design industry, and I work in IT. I want to use AI in a way that helps real renovation teams reduce repeated revisions, information gaps, and preventable rework, and hopefully help his team operate more efficiently and improve income.
+我的弟弟从事家装设计行业，我自己从事 IT 行业。我希望把技术上的理解和他在家装行业里的真实经验结合起来，探索一套真正适用于家装公司的协同系统与 AI 提效方案。
 
+更直接一点说，这个项目也是想帮助我弟弟和他的公司：
+
+- 让销售、设计师、深化设计、项目经理之间的协作更顺畅
+- 让 SU 模型图、效果图、施工图这些高成本环节更高效
+- 让需求整理、方案汇报、报价联动、施工校核这些关键步骤减少重复和返工
+- 让一家还在艰难阶段中的公司，借助 AI 获得更强的竞争力
+
+他因为一些个人机遇，目前还处在人生比较艰难的阶段。我希望这个项目不只是一个技术练习，而是一个真正可能帮到他、帮到团队、帮到业务的起点。

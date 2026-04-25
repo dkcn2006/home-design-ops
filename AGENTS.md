@@ -1,26 +1,36 @@
-# Project Instructions
+# 项目指令
 
-## Language for plans and proposals
+## 计划和提案语言
 
-For any product plan, technical plan, roadmap, implementation proposal, architecture proposal, design proposal, or decision memo in this repository:
+在本仓库中编写任何产品计划、技术计划、roadmap、实现提案、架构提案、设计提案或决策备忘录时：
 
-- write the main content in Simplified Chinese
-- keep code identifiers, API paths, file paths, type names, command names, and proper nouns in their original form when clearer
-- if an English version is explicitly requested, provide English only for that request
-- prefer concrete, executable wording over abstract strategy language
+- 主体内容使用简体中文
+- code identifiers、API paths、file paths、type names、command names 和 proper nouns 在更清晰时保留原文
+- 如果用户明确要求英文版本，则该请求只提供英文
+- 优先使用具体、可执行的表述，避免抽象策略话术
 
-## Design source of truth
+## 设计事实来源
 
-For any frontend design, UI polish, layout adjustment, component styling, or page redesign work in this repository:
+在本仓库中处理任何前端设计、UI polish、布局调整、组件样式或页面重设计时：
 
-- read `DESIGN.md` first
-- treat `DESIGN.md` as the design source of truth
-- preserve the current warm operational design language
-- avoid introducing a conflicting visual system unless the user explicitly asks for a redesign
+- 先阅读 `DESIGN.md`
+- 将 `DESIGN.md` 作为设计事实来源
+- 保留当前温暖的运营设计语言
+- 除非用户明确要求重设计，否则不要引入冲突的视觉系统
 
-## Frontend implementation preference
+## 前端实现偏好
 
-- prefer extending existing styles in `apps/web/app/globals.css`
-- keep pages visually related to each other
-- prioritize clarity, hierarchy, and operational usability
-- ensure desktop and mobile layouts both remain usable
+- 优先扩展 `apps/web/app/globals.css` 中的现有样式
+- 让页面之间保持视觉关联
+- 优先保证清晰度、层级和运营可用性
+- 确保桌面端和移动端布局都保持可用
+
+## Codex 提交规范
+
+当 Codex 在本仓库中自动创建 git commit 时，commit message 末尾必须追加：
+
+```text
+Co-authored-by: Codex <codex@openai.com>
+```
+
+该规则只约束 Codex 自动提交，不要求用户手动提交时添加该署名。
