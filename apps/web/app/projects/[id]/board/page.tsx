@@ -28,143 +28,169 @@ const roleLabels = {
   project_manager: "项目经理"
 } as const;
 
-function StatusChip({ status }: { status: TaskStatus }) {
-  const extraClass =
-    status === "blocked"
-      ? "status-risk-high"
-      : status === "waiting_client"
-        ? "status-priority-medium"
-        : status === "waiting_internal"
-          ? "status-priority-medium"
-          : status === "done"
-            ? "status-confirmed"
-            : status === "canceled"
-              ? "status-risk-low"
-              : "";
-  return <span className={`status-chip ${extraClass}`}>{statusLabels[status]}</span>;
+function getCardClass(status: TaskStatus) {
+  switch (status) {
+    case "blocked":
+      return "atelier-board-task-blocked";
+    case "in_progress":
+      return "atelier-board-task-inprogress";
+    case "waiting_client":
+      return "atelier-board-task-waiting";
+    default:
+      return "";
+  }
+}
+
+function getPriorityClass(priority: string) {
+  if (priority === "urgent" || priority === "high") return "atelier-board-priority-high";
+  if (priority === "medium") return "atelier-board-priority-med";
+  return "atelier-board-priority-low";
 }
 
 export default async function ProjectBoardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const board: ProjectTaskBoard = await getProjectTaskBoard(id);
 
+  const hasBlockedInSpace = (spaceGroup: (typeof board.spaces)[0]) =>
+    spaceGroup.phases.some((p) => p.tasks.some((t) => t.task.status === "blocked"));
+
   return (
-    <>
-      <section className="workspace-header">
-        <div className="workspace-emoji">📋</div>
-        <div className="workspace-copy">
-          <div className="workspace-overline">project board / execution view</div>
-          <h1>{board.project.name}</h1>
+    <div className="atelier-board">
+      {/* Header + Stats */}
+      <section className="atelier-board-header">
+        <div>
+          <h1>任务看板</h1>
           <p>
-            按空间与阶段查看任务执行状态，快速判断阻塞点、待客户确认事项和逾期风险。
-            这是项目档案的执行视图补充，不是档案替代。
+            {board.project.name} — 按空间与阶段查看任务执行状态，快速判断阻塞点、待客户确认事项和逾期风险。
           </p>
         </div>
-      </section>
-
-      <section className="doc-properties">
-        <div className="doc-property">
-          <span>项目编号</span>
-          <strong>{board.project.code}</strong>
-        </div>
-        <div className="doc-property">
-          <span>状态</span>
-          <strong>{board.project.status}</strong>
-        </div>
-        <div className="doc-property">
-          <span>总任务</span>
-          <strong>{board.summary.totalTaskCount}</strong>
-        </div>
-        <div className="doc-property">
-          <span>阻塞</span>
-          <strong style={{ color: board.summary.blockedTaskCount > 0 ? "#a04f42" : undefined }}>
-            {board.summary.blockedTaskCount}
-          </strong>
-        </div>
-        <div className="doc-property">
-          <span>待客户确认</span>
-          <strong>{board.summary.waitingClientCount}</strong>
-        </div>
-        <div className="doc-property">
-          <span>逾期</span>
-          <strong style={{ color: board.summary.overdueTaskCount > 0 ? "#a04f42" : undefined }}>
-            {board.summary.overdueTaskCount}
-          </strong>
-        </div>
-      </section>
-
-      <section style={{ marginBottom: 18 }}>
-        <Link href={`/projects/${id}` as Route} className="ghost-button">
-          ← 返回项目档案
-        </Link>
-      </section>
-
-      {board.spaces.map((spaceGroup) => (
-        <section className="panel board-space" key={spaceGroup.space.id} style={{ marginTop: 22 }}>
-          <div className="section-title">
-            <h2>{spaceGroup.space.name}</h2>
-            <span>
-              {spaceGroup.space.areaSqm} ㎡ ·{" "}
-              {spaceGroup.phases.reduce((sum, p) => sum + p.tasks.length, 0)} 个任务
-            </span>
+        <div className="atelier-board-stats">
+          <div className="atelier-board-stat">
+            <span>总任务</span>
+            <strong>{board.summary.totalTaskCount}</strong>
           </div>
+          <div className="atelier-board-stat-divider" />
+          <div className="atelier-board-stat">
+            <span className="atelier-board-stat-dot atelier-board-stat-dot-error">已阻塞</span>
+            <strong className="atelier-board-stat-error">{board.summary.blockedTaskCount}</strong>
+          </div>
+          <div className="atelier-board-stat-divider" />
+          <div className="atelier-board-stat">
+            <span className="atelier-board-stat-dot atelier-board-stat-dot-primary">待确认</span>
+            <strong className="atelier-board-stat-primary">{board.summary.waitingClientCount}</strong>
+          </div>
+          <div className="atelier-board-stat-divider" />
+          <div className="atelier-board-stat">
+            <span>逾期</span>
+            <strong>{board.summary.overdueTaskCount}</strong>
+          </div>
+        </div>
+      </section>
 
-          <div className="phase-grid">
-            {spaceGroup.phases.map((phaseGroup) => (
-              <article className="phase-column" key={phaseGroup.phase.id}>
-                <div className="section-title">
-                  <h3>{phaseGroup.phase.name}</h3>
-                  <span>{phaseGroup.tasks.length}</span>
-                </div>
-                <div className="stage-stack">
-                  {phaseGroup.tasks.map(({ task, assignee }) => (
-                    <div className="task-card" key={task.id}>
-                      <div className="task-card-header">
-                        <strong>{task.title}</strong>
-                        <span
-                          className={`status-chip status-priority-${task.priority}`}
-                          title={`优先级: ${priorityLabels[task.priority]}`}
-                        >
-                          {priorityLabels[task.priority]}
-                        </span>
-                      </div>
-                      <div className="task-meta-row">
-                        <StatusChip status={task.status} />
-                        {assignee ? (
-                          <span title={assignee.name}>
-                            {assignee.avatarInitials} · {roleLabels[task.ownerRole]}
+      {/* Filter Bar */}
+      <div className="atelier-board-filter">
+        <div className="atelier-board-filter-left">
+          <span>负责人:</span>
+          <div className="atelier-board-avatars">
+            <div className="atelier-board-avatar">销</div>
+            <div className="atelier-board-avatar">设</div>
+            <div className="atelier-board-avatar">深</div>
+          </div>
+        </div>
+        <div className="atelier-board-filter-right">
+          <button className="atelier-board-filter-btn">阶段 ▾</button>
+          <button className="atelier-board-filter-btn">优先级 ▾</button>
+          <button className="atelier-board-filter-icon">☰</button>
+        </div>
+      </div>
+
+      {/* Board Canvas */}
+      <div className="atelier-board-canvas">
+        {board.spaces.map((spaceGroup) => (
+          <section className="atelier-board-space" key={spaceGroup.space.id}>
+            <div className="atelier-board-space-header">
+              <h2>{spaceGroup.space.name}</h2>
+              {hasBlockedInSpace(spaceGroup) && (
+                <span className="atelier-board-space-badge">
+                  <span>⚠</span> 存在阻塞
+                </span>
+              )}
+            </div>
+
+            <div className="atelier-board-phases">
+              {spaceGroup.phases.map((phaseGroup) => (
+                <div className="atelier-board-phase" key={phaseGroup.phase.id}>
+                  <div className="atelier-board-phase-header">
+                    <h3>{phaseGroup.phase.name}</h3>
+                    <span>{phaseGroup.tasks.length}</span>
+                  </div>
+                  <div className="atelier-board-tasks">
+                    {phaseGroup.tasks.map(({ task, assignee }) => (
+                      <div
+                        className={`atelier-board-task ${getCardClass(task.status)}`}
+                        key={task.id}
+                      >
+                        <div className="atelier-board-task-top">
+                          <span className={`atelier-board-priority ${getPriorityClass(task.priority)}`}>
+                            {priorityLabels[task.priority]}
                           </span>
-                        ) : (
-                          <span>{roleLabels[task.ownerRole]}</span>
-                        )}
-                        {task.dueDate ? <span>截止 {task.dueDate}</span> : null}
-                      </div>
-                      {task.linkedEntities.length > 0 && (
-                        <div className="task-entity-row">
-                          {task.linkedEntities.map((entity) => (
-                            <span className="pill" key={`${entity.type}-${entity.entityId}`}>
-                              {entity.label}
-                            </span>
-                          ))}
+                          <span className="atelier-board-task-more">⋯</span>
                         </div>
-                      )}
-                      {task.blockedReason && (
-                        <div className="task-blocked-reason">{task.blockedReason}</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      ))}
 
-      {board.spaces.length === 0 && (
-        <section className="panel" style={{ marginTop: 22 }}>
-          <div className="empty-state">当前项目暂无任务数据。</div>
-        </section>
-      )}
-    </>
+                        <h4>{task.title}</h4>
+
+                        {task.blockedReason && (
+                          <div className="atelier-board-task-blocked-reason">
+                            <span>⚠</span>
+                            <p>{task.blockedReason}</p>
+                          </div>
+                        )}
+
+                        {task.linkedEntities.length > 0 && (
+                          <div className="atelier-board-task-entities">
+                            {task.linkedEntities.map((entity) => (
+                              <span key={`${entity.type}-${entity.entityId}`}>{entity.label}</span>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="atelier-board-task-bottom">
+                          <div className="atelier-board-task-date">
+                            <span>◷</span>
+                            {task.dueDate ? (
+                              <span>{task.dueDate}</span>
+                            ) : (
+                              <span>未设截止</span>
+                            )}
+                          </div>
+                          <div className="atelier-board-task-owner">
+                            {assignee ? assignee.avatarInitials : roleLabels[task.ownerRole].slice(0, 1)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {phaseGroup.tasks.length === 0 && (
+                      <div className="atelier-board-task-empty">
+                        <span>+</span>
+                        <span>暂无任务</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+
+        {board.spaces.length === 0 && (
+          <div className="atelier-board-empty">当前项目暂无任务数据</div>
+        )}
+      </div>
+
+      {/* Back link */}
+      <div className="atelier-board-back">
+        <Link href={`/projects/${id}` as Route}>← 返回项目档案</Link>
+      </div>
+    </div>
   );
 }
