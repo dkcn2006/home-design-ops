@@ -394,6 +394,106 @@ V1 围绕 `Lead + Sales Pipeline` 和 `ProjectTask + Space + WorkflowPhase + Ass
 - `/my-work` 或 `/tasks`：个人任务收件箱。
 - `/client/[id]`：客户门户，用于客户查看项目摘要和确认事项。
 
+### 9.1 UI/UX 设计概要（新增）
+遵循 DESIGN.md 的温暖 Notion 风格：低噪、留白充裕、柔和阴影、圆角卡片、可读性优先。桌面端支持高信息密度操作，移动端保证关键信息可读、可操作。
+
+#### 9.1.1 / 运营首页
+- **顶部摘要卡片**：总项目数、活跃任务数、阻塞任务数、待客户确认数、今日待跟进线索数，数字突出，支持点击下钻到对应视图。
+
+- **我的工作速览**：展示当前登录用户最近 5 条待办任务，含标题、项目、空间、阶段、优先级、截止日期，可快速跳转至“我的工作”页。
+
+- **角色入口速览**：按登录用户角色展示高优先级快捷入口（如销售看到“今日需跟进线索”、设计师看到“待输出/修改任务”）。
+
+- **项目/线索风险提示**：列表展示高风险项目（阻塞 > 3 或逾期 > 5）和长期未跟进线索（超 7 天），每项可点击进入详情。
+
+- **布局**：上下排布，卡片横向弹性分布，桌面 3 列，移动端单列堆叠。
+
+#### 9.1.2 `/sales/leads` 线索销售 Pipeline
+- **顶部指标栏**：线索总数、今日需跟进数、高意向数、转化率，数字 + 简要趋势指示。
+
+- **阶段横向看板**：8 个阶段泳道（new 到 lost），每列展示线索卡片，卡片含客户名、意向等级、负责人、下次跟进时间。逾期跟进卡片用橙色边框标记，高意向卡片用星标或强调色。卡片可拖拽切换阶段。
+
+- **筛选与搜索**：支持按负责人、来源、意向等级、跟进日期范围筛选，模糊搜索客户名/电话。
+
+- **线索详情侧边抽屉**：点击卡片弹出，显示完整线索信息、跟进摘要、关联项目入口，可快速修改阶段或负责人，支持添加跟进记录。
+
+- **移动端**：阶段横向滑动切换，卡片列表纵向滚动，筛选折叠为顶部按钮。
+
+#### 9.1.3 `/projects/[id]` 项目档案
+- **项目信息头部**：项目编号、名称、客户、地址、面积、预算、总体状态标签，大标题布局。
+
+- **详情卡片分组**：客户信息、空间列表（标签形式可点击）、需求单、设计版本时间线、效果图与施工图版本列表、报价列表、变更记录、确认记录、里程碑、巡检快照，每组以可折叠卡片展示。
+
+- **看板入口**：固定在头部或悬浮按钮“查看项目看板”。
+
+- **关联任务预览**：底部展示该项目最近的 5 条任务及状态，可跳转至看板。
+
+- **布局**：左侧主内容区，右侧快速导航锚点，移动端单栏。
+
+#### 9.1.4 `/projects/[id]/board` 项目看板
+- **顶部摘要条**：总任务数、阻塞任务数、待客户确认数、逾期任务数、存在阻塞的空间数，异常数字用红色/橙色高亮。
+
+- **按空间分组**：每个空间一个水平区块，空间名作为分隔标题，色标区分空间类型。空间内按阶段（列）排列任务卡片，阶段列头显示阶段名和该阶段任务计数。
+
+- **任务卡片**：显示标题、状态标签（颜色编码）、优先级图标、负责人头像/姓名、截止日期、关联实体摘要（如“基于 CD1”、“待报价确认”）。阻塞任务卡片显示 blockedReason，waiting_client 卡片显示橙色虚线边框。
+
+- **交互**：点击任务卡片打开详情抽屉或跳转到任务详情页（MVP 可内联编辑状态和负责人）；支持按人、阶段、优先级筛选；可返回项目档案。
+
+- **移动端**：空间纵向排列，阶段列变为横向滑动区域，任务卡片可点击查看。
+
+#### 9.1.5 `/role/[role]` 角色工作台
+- **角色专属指标区**：展示与该角色相关的汇总数字，如“待设计输出”、“待深化确认”、“待客户确认”、“逾期任务”等，大卡片。
+
+- **任务分组列表**：按状态分组（todo、in_progress、waiting_client、blocked）折叠或标签页展示，每组展示任务标题、项目/空间、截止日期，可快速修改状态或转派。
+
+- **上下文提醒**：如销售工作台显示“客户确认后需推进报价的任务”、项目经理显示“交底前检查清单完成度”。
+
+- **布局**：指标卡片上方一行，下方为任务列表，支持筛选和搜索。
+
+#### 9.1.6 `/my-work` 个人任务收件箱
+- **筛选栏**：按项目、空间、阶段、状态、优先级、截止日期筛选，搜索标题。
+
+- **任务列表/看板切换**：默认列表模式，高信息密度；可选简易看板模式（Todo/Doing/Done 三列）。
+
+- **任务行**：显示标题、项目名、空间/阶段、状态、优先级、截止日期，延迟任务红色截止日期。可快速勾选切换状态（todo -> in_progress -> done），行内编辑负责人（仅自己可见操作）。
+
+- **空状态**：插画 + “所有任务已清，休息一下吧”。
+
+- **移动端**：列表模式，滑动操作（完成/推迟），筛选收缩为弹出层。
+
+#### 9.1.7 `/client/[id]` 客户门户
+- **项目摘要区**：只读展示项目名称、地址、当前阶段、设计公司/负责人名字，不展示内部管理细节。
+
+- **待确认事项卡片**：每个确认项一张卡片，展示标题、说明、对象（如“客厅效果图 v2”）、创建时间、确认截止时间（如有）。按钮“确认”和“驳回/有修改意见”，驳回时弹出备注输入框。
+
+- **确认记录**：已处理确认项的简单历史列表，展示状态和时间。
+
+- **布局**：干净、大字号，按钮醒目，以浅灰色背景突出确认卡片，移动端适配良好。
+
+---
+
+### 用于 Google Stitch 生成的提示词（英文）
+1. 运营首页 `/`   
+“Design a dashboard homepage for a home decoration project management system, warm Notion-like minimal style with soft shadows and rounded cards. Top summary cards: total projects, active tasks, blocked tasks, awaiting client confirmation, today's leads to follow up. Below, a 'My Work' quick section showing 5 recent tasks with title, project, space, phase, priority, due date. A risk alert list showing projects with >3 blocks or leads not followed up >7 days. Desktop 3-column layout, responsive stacking on mobile. Use light beige / off-white background, dark gray text, accent orange for overdue or blocked states.”
+
+2. 线索Pipeline `/sales/leads`   
+“Design a sales leads pipeline page for a home decoration CRM, warm minimal style. Top metrics bar: total leads, today's follow-ups, high intent, conversion rate. Below a horizontal Kanban board with 8 columns: New, Contacted, Measured, Proposal, Quoted, Negotiating, Won, Lost. Each column shows lead cards with client name, intent level badge, owner avatar, next follow-up date. Overdue follow-up cards have an orange border, high-intent cards have a star. Clicking a card opens a side drawer with lead details and follow-up summary. Provide filter bar for source, intent, owner, date. Mobile: swipeable stage tabs, cards list.”
+
+3. 项目档案 `/projects/[id]`   
+“Design a project profile page for a home decoration system, clean Notion-like layout. Header with project name, ID, client, address, area, budget, status badge. Below, collapsible cards: customer info, space tags, requirement sheet, design version timeline, rendering versions, construction drawing versions, quotations, change orders, confirmations, milestones, inspections. A floating button 'View Board' linking to project board. At bottom, recent 5 tasks preview. Desktop with sidebar quick nav, mobile single column with accordion cards. Use soft gray borders and subtle hover effects.”
+
+4. 项目看板 `/projects/[id]/board`   
+“Design a project task board for home decoration, warm minimal style. Top bar summary: total tasks, blocked, waiting client, overdue, spaces with blocks. Below, sections grouped by space (e.g., Living+Kitchen, Master Bedroom, Bathroom). Each space shows horizontal phase columns: Requirement, Floor Plan, SU Model, Rendering, Construction Drawing, Quotation, Handover, Construction, Acceptance. Task cards show title, status color label, priority icon, assignee avatar, due date, linked entity (e.g., 'Based on CD1'). Blocked cards show blockedReason, waiting_client cards have orange dashed border. Click to open task detail drawer. Filter by assignee, phase, priority. Mobile: spaces stacked, phases horizontally scrollable.”
+
+5. 角色工作台 `/role/[role]`   
+“Design a role-specific workspace for home decoration app (e.g., designer, sales, project manager), warm minimal. Top metric cards relevant to role: tasks to do, waiting client, blocked, overdue. Below, tasks grouped by status tabs (To Do, In Progress, Waiting Client, Blocked). Each task row shows title, project/space, phase, due date, assignee. Sales view also highlights follow-up leads and client confirmation items. Designer view shows design output and revision items. Project manager view shows pre-handover checklist status. Support filters and quick status change. Desktop: metrics row + tabbed list, mobile: stacked.”
+
+6. 我的工作 `/my-work`   
+“Design a personal task inbox page for a home decoration collaboration tool, warm minimal. Top filter bar: project, space, phase, status, priority, due date, search. Toggle between list view (high density) and simple board view (Todo/Doing/Done). List items show title, project name, space/phase label, status badge, priority icon, due date (red if overdue). Inline quick status change and assignee edit. Empty state: illustration with 'All tasks done, take a break'. Mobile optimised with swipe actions and collapsible filters. Use the same soft Notion-like design language.”
+
+7. 客户门户 `/client/[id]`   
+“Design a client portal page for a home decoration project, clean and friendly. Top section: project name, address, current phase, designer/company name (read-only). Below, 'Pending Confirmations' cards, each with title, description, object (e.g., 'Living Room Rendering v2'), date, and two prominent buttons: 'Confirm' and 'Reject / Request Changes' (reject opens a note input). Below, a simple history of completed confirmations with status and timestamp. Large readable text, minimal internal jargon, high contrast buttons, light gray card backgrounds. Mobile-first friendly, comfortable touch targets.”
+
 ## 10. 数据模型摘要
 
 已有或需要保留的核心实体：
