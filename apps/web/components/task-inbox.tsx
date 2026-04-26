@@ -3,20 +3,26 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
-import type { ProjectTaskCard, TaskStatus } from "@home-design-ops/shared";
+import type {
+  ProjectTaskCard,
+  TaskStatus,
+  WorkspaceActivityItem
+} from "@home-design-ops/shared";
 
-type FilterKey = "all" | "inbox" | "today" | "blocked" | "dueSoon";
+type FilterKey = "all" | "in_progress" | "waiting_client" | "blocked";
 
 interface TaskInboxProps {
   tasks: ProjectTaskCard[];
   stats: {
-    total: number;
-    done: number;
+    todo: number;
+    waitingClient: number;
     blocked: number;
     overdue: number;
-    dueSoon: number;
   };
+  activities: WorkspaceActivityItem[];
   assigneeId: string;
+  assigneeName: string;
+  greeting: string;
 }
 
 const statusLabels: Record<TaskStatus, string> = {
@@ -30,22 +36,12 @@ const statusLabels: Record<TaskStatus, string> = {
   canceled: "已取消"
 };
 
-const priorityLabels = {
-  urgent: "紧急",
-  high: "高",
-  medium: "中",
-  low: "低"
-} as const;
-
-const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-
-const filterLabels: Record<FilterKey, string> = {
-  all: "全部",
-  inbox: "收件箱",
-  today: "今天",
-  blocked: "阻塞",
-  dueSoon: "即将到期"
-};
+const filterTabs: { key: FilterKey; label: string; showDot?: boolean }[] = [
+  { key: "all", label: "全部待办" },
+  { key: "in_progress", label: "进行中" },
+  { key: "waiting_client", label: "待客户确认", showDot: true },
+  { key: "blocked", label: "已阻塞" }
+];
 
 function toDateKey(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -56,54 +52,88 @@ function isOverdue(dueDate?: string, status?: TaskStatus): boolean {
   return toDateKey(new Date(dueDate)) < toDateKey(new Date());
 }
 
-function isDueSoon(dueDate?: string, status?: TaskStatus): boolean {
-  if (!dueDate || status === "done" || status === "canceled") return false;
-  const due = new Date(dueDate);
-  const today = new Date();
-  const sevenDays = new Date(today);
-  sevenDays.setDate(today.getDate() + 7);
-  const dueKey = toDateKey(due);
-  const todayKey = toDateKey(today);
-  const endKey = toDateKey(sevenDays);
-  return dueKey >= todayKey && dueKey <= endKey;
+function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffHours < 1) return "刚刚";
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return "昨天";
+  if (diffDays < 7) return `${diffDays} 天前`;
+  return dateStr.slice(0, 10);
 }
 
-function isToday(dueDate?: string): boolean {
-  if (!dueDate) return false;
-  return toDateKey(new Date(dueDate)) === toDateKey(new Date());
+function getActivityDotClass(
+  type: WorkspaceActivityItem["type"],
+  index: number
+): string {
+  // Map types to colors for visual variety
+  switch (type) {
+    case "confirmation":
+      return "atelier-workspace-timeline-dot-primary";
+    case "inspection":
+      return "atelier-workspace-timeline-dot-error";
+    case "milestone":
+      return "atelier-workspace-timeline-dot-primary";
+    case "change_order":
+      return "atelier-workspace-timeline-dot-warn";
+    default:
+      // Alternate for follow_up
+      return index % 2 === 0
+        ? "atelier-workspace-timeline-dot-default"
+        : "atelier-workspace-timeline-dot-default";
+  }
 }
 
-export default function TaskInbox({ tasks, stats, assigneeId }: TaskInboxProps) {
+function getActivityIcon(type: WorkspaceActivityItem["type"]): string {
+  switch (type) {
+    case "confirmation":
+      return "✓";
+    case "inspection":
+      return "⚠";
+    case "milestone":
+      return "🚩";
+    case "change_order":
+      return "📝";
+    default:
+      return "•";
+  }
+}
+
+export default function TaskInbox({
+  tasks,
+  stats,
+  activities,
+  assigneeName,
+  greeting
+}: TaskInboxProps) {
   const [filter, setFilter] = useState<FilterKey>("all");
-  const [search, setSearch] = useState("");
+
+  const priorityCount = tasks.filter(
+    (t) =>
+      t.task.status !== "done" &&
+      t.task.status !== "canceled" &&
+      (t.task.priority === "urgent" || t.task.priority === "high")
+  ).length;
 
   const filteredTasks = useMemo(() => {
-    let result = tasks.filter((t) => t.task.status !== "canceled");
+    let result = tasks.filter(
+      (t) => t.task.status !== "done" && t.task.status !== "canceled"
+    );
 
     switch (filter) {
-      case "inbox":
-        result = result.filter(
-          (t) => t.task.status === "backlog" || t.task.status === "todo"
-        );
+      case "in_progress":
+        result = result.filter((t) => t.task.status === "in_progress");
         break;
-      case "today":
-        result = result.filter((t) => isToday(t.task.dueDate));
+      case "waiting_client":
+        result = result.filter((t) => t.task.status === "waiting_client");
         break;
       case "blocked":
         result = result.filter((t) => t.task.status === "blocked");
         break;
-      case "dueSoon":
-        result = result.filter((t) =>
-          isDueSoon(t.task.dueDate, t.task.status)
-        );
-        break;
-    }
-
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      result = result.filter((t) =>
-        t.task.title.toLowerCase().includes(q)
-      );
     }
 
     return result.sort((a, b) => {
@@ -112,8 +142,8 @@ export default function TaskInbox({ tasks, stats, assigneeId }: TaskInboxProps) 
       if (aOverdue && !bOverdue) return -1;
       if (!aOverdue && bOverdue) return 1;
 
-      const pDiff =
-        priorityOrder[a.task.priority] - priorityOrder[b.task.priority];
+      const pOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+      const pDiff = pOrder[a.task.priority] - pOrder[b.task.priority];
       if (pDiff !== 0) return pDiff;
 
       if (a.task.dueDate && b.task.dueDate) {
@@ -124,179 +154,257 @@ export default function TaskInbox({ tasks, stats, assigneeId }: TaskInboxProps) 
       }
       return 0;
     });
-  }, [tasks, filter, search]);
+  }, [tasks, filter]);
 
-  const visibleCount = filteredTasks.length;
-  const totalCount = tasks.length;
+  const displayedActivities = activities.slice(0, 6);
 
   return (
-    <div className="atelier-inbox">
+    <div className="atelier-workspace">
       {/* Header */}
-      <div className="atelier-inbox-header">
+      <div className="atelier-workspace-header">
         <div>
-          <h1>我的任务</h1>
-          <p className="atelier-inbox-subtitle">
-            {visibleCount} / {totalCount} 项任务
-            {assigneeId !== "user-sales-1" && ` · 视角: ${assigneeId}`}
+          <h1>
+            {greeting}，{assigneeName}
+          </h1>
+          <p>
+            你有 {priorityCount} 项高优先级任务需要处理
+            {stats.overdue > 0 && (
+              <span className="atelier-workspace-header-alert">
+                ，其中 {stats.overdue} 项已逾期
+              </span>
+            )}
           </p>
         </div>
-        <div className="atelier-inbox-actions">
-          <div className="atelier-inbox-search">
-            <span className="atelier-inbox-search-icon">&#9906;</span>
-            <input
-              type="text"
-              placeholder="搜索任务..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      </div>
+
+      {/* Two-column layout */}
+      <div className="atelier-workspace-grid">
+        {/* Left Column */}
+        <div className="atelier-workspace-main">
+          {/* Metric Cards */}
+          <div className="atelier-workspace-metrics">
+            <div className="atelier-workspace-metric">
+              <div className="atelier-workspace-metric-deco" />
+              <span>待办任务</span>
+              <strong>{stats.todo}</strong>
+            </div>
+            <div className="atelier-workspace-metric atelier-workspace-metric-accent">
+              <div className="atelier-workspace-metric-deco atelier-workspace-metric-deco-accent" />
+              <span>待客户确认</span>
+              <strong>{stats.waitingClient}</strong>
+            </div>
+            <div className="atelier-workspace-metric">
+              <div className="atelier-workspace-metric-deco atelier-workspace-metric-deco-error" />
+              <span>已阻塞</span>
+              <strong>{stats.blocked}</strong>
+            </div>
+            <div className="atelier-workspace-metric atelier-workspace-metric-danger">
+              <div className="atelier-workspace-metric-deco atelier-workspace-metric-deco-danger" />
+              <span>已逾期</span>
+              <strong>{stats.overdue}</strong>
+            </div>
           </div>
-          <button className="atelier-inbox-btn-primary">+ 新建任务</button>
-        </div>
-      </div>
 
-      {/* Stats */}
-      <div className="atelier-inbox-stats">
-        <div className="atelier-inbox-stat">
-          <span>总任务</span>
-          <strong>{stats.total}</strong>
-        </div>
-        <div className="atelier-inbox-stat-divider" />
-        <div className="atelier-inbox-stat">
-          <span>已完成</span>
-          <strong>{stats.done}</strong>
-        </div>
-        <div className="atelier-inbox-stat-divider" />
-        <div className="atelier-inbox-stat">
-          <span>已阻塞</span>
-          <strong>{stats.blocked}</strong>
-        </div>
-        <div className="atelier-inbox-stat-divider" />
-        <div className="atelier-inbox-stat">
-          <span>已逾期</span>
-          <strong
-            className={
-              stats.overdue > 0 ? "atelier-inbox-stat-alert" : undefined
-            }
-          >
-            {stats.overdue}
-          </strong>
-        </div>
-        <div className="atelier-inbox-stat-divider" />
-        <div className="atelier-inbox-stat">
-          <span>即将到期</span>
-          <strong
-            className={
-              stats.dueSoon > 0 ? "atelier-inbox-stat-warn" : undefined
-            }
-          >
-            {stats.dueSoon}
-          </strong>
-        </div>
-      </div>
+          {/* Tasks Section */}
+          <div className="atelier-workspace-tasks">
+            {/* Tabs */}
+            <div className="atelier-workspace-tabs">
+              {filterTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  className={`atelier-workspace-tab ${
+                    filter === tab.key
+                      ? "atelier-workspace-tab-active"
+                      : ""
+                  }`}
+                  onClick={() => setFilter(tab.key)}
+                >
+                  {tab.label}
+                  {tab.showDot && stats.waitingClient > 0 && (
+                    <span className="atelier-workspace-tab-dot" />
+                  )}
+                </button>
+              ))}
+            </div>
 
-      {/* Filters */}
-      <div className="atelier-inbox-filters">
-        {(Object.keys(filterLabels) as FilterKey[]).map((key) => (
-          <button
-            key={key}
-            className={`atelier-inbox-filter ${
-              filter === key ? "atelier-inbox-filter-active" : ""
-            }`}
-            onClick={() => setFilter(key)}
-          >
-            {filterLabels[key]}
-          </button>
-        ))}
-      </div>
-
-      {/* Task Table */}
-      {filteredTasks.length > 0 ? (
-        <div className="atelier-inbox-table-wrap">
-          <table className="atelier-inbox-table">
-            <thead>
-              <tr>
-                <th>任务</th>
-                <th>负责人</th>
-                <th>截止</th>
-                <th>优先级</th>
-                <th>状态</th>
-                <th>位置</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTasks.map(({ task, assignee, phase, space }) => {
-                const overdue = isOverdue(task.dueDate, task.status);
-                return (
-                  <tr
-                    key={task.id}
-                    className={overdue ? "atelier-inbox-row-overdue" : ""}
-                  >
-                    <td className="atelier-inbox-cell-title">
-                      <Link
-                        href={`/projects/${task.projectId}/board` as Route}
-                      >
-                        {task.title}
-                      </Link>
-                      {task.blockedReason && (
-                        <span className="atelier-inbox-blocked-hint">
-                          &#9888; {task.blockedReason}
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="atelier-inbox-assignee">
-                        <div className="atelier-inbox-avatar">
-                          {assignee ? assignee.name.charAt(0) : "?"}
-                        </div>
-                        <span>{assignee?.name ?? "未分配"}</span>
-                      </div>
-                    </td>
-                    <td
-                      className={
-                        overdue ? "atelier-inbox-cell-overdue" : undefined
-                      }
-                    >
-                      {task.dueDate ? (
-                        <span className="atelier-inbox-date">
-                          <span>&#128197;</span>
-                          {task.dueDate}
-                        </span>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                    <td>
-                      <span
-                        className={`atelier-inbox-badge atelier-inbox-priority-${task.priority}`}
-                      >
-                        {priorityLabels[task.priority]}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className={`atelier-inbox-badge atelier-inbox-status-${task.status}`}
-                      >
-                        {statusLabels[task.status]}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="atelier-inbox-project">
-                        {space?.name ?? "全项目"} · {phase?.name ?? "-"}
-                      </span>
-                    </td>
+            {/* Table */}
+            <div className="atelier-workspace-table-wrap">
+              <table className="atelier-workspace-table">
+                <thead>
+                  <tr>
+                    <th>任务名称</th>
+                    <th>项目 / 空间</th>
+                    <th>阶段</th>
+                    <th>截止日期</th>
+                    <th>负责人</th>
+                    <th className="atelier-workspace-table-th-right">状态</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {filteredTasks.map(
+                    ({ task, assignee, phase, space }) => {
+                      const overdue = isOverdue(
+                        task.dueDate,
+                        task.status
+                      );
+                      const isBlocked = task.status === "blocked";
+                      return (
+                        <tr
+                          key={task.id}
+                          className={
+                            isBlocked
+                              ? "atelier-workspace-table-row-blocked"
+                              : ""
+                          }
+                        >
+                          <td
+                            className={`atelier-workspace-table-title ${
+                              overdue
+                                ? "atelier-workspace-table-title-overdue"
+                                : ""
+                            }`}
+                          >
+                            <Link
+                              href={
+                                `/projects/${task.projectId}/board` as Route
+                              }
+                            >
+                              {task.title}
+                            </Link>
+                          </td>
+                          <td className="atelier-workspace-table-project">
+                            {task.projectId} · {space?.name ?? "全项目"}
+                          </td>
+                          <td>
+                            <span className="atelier-workspace-phase">
+                              {phase?.name ?? "-"}
+                            </span>
+                          </td>
+                          <td
+                            className={
+                              overdue
+                                ? "atelier-workspace-table-date-overdue"
+                                : "atelier-workspace-table-date"
+                            }
+                          >
+                            {overdue
+                              ? "已逾期"
+                              : task.dueDate ?? "-"}
+                          </td>
+                          <td>
+                            <div className="atelier-workspace-avatar">
+                              <div
+                                className={
+                                  isBlocked
+                                    ? "atelier-workspace-avatar-img atelier-workspace-avatar-grayscale"
+                                    : "atelier-workspace-avatar-img"
+                                }
+                              >
+                                {assignee?.avatarInitials ??
+                                  assignee?.name?.charAt(0) ??
+                                  "?"}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="atelier-workspace-table-td-right">
+                            {task.status === "blocked" ? (
+                              <span className="atelier-workspace-badge atelier-workspace-badge-blocked">
+                                <span>⊘</span> 已阻塞
+                              </span>
+                            ) : overdue ? (
+                              <span className="atelier-workspace-badge atelier-workspace-badge-overdue">
+                                已逾期
+                              </span>
+                            ) : task.status === "waiting_client" ? (
+                              <span className="atelier-workspace-badge atelier-workspace-badge-waiting">
+                                待确认
+                              </span>
+                            ) : task.status === "in_progress" ? (
+                              <span className="atelier-workspace-badge atelier-workspace-badge-progress">
+                                <span className="atelier-workspace-badge-dot" />
+                                进行中
+                              </span>
+                            ) : (
+                              <span className="atelier-workspace-badge atelier-workspace-badge-default">
+                                {statusLabels[task.status]}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* View all button */}
+            {filteredTasks.length > 0 && (
+              <button
+                className="atelier-workspace-viewall"
+                onClick={() => setFilter("all")}
+              >
+                查看全部任务
+                <span>→</span>
+              </button>
+            )}
+
+            {filteredTasks.length === 0 && (
+              <div className="atelier-workspace-empty">
+                <span>📋</span>
+                <p>该分类下暂无任务</p>
+              </div>
+            )}
+          </div>
         </div>
-      ) : (
-        <div className="atelier-inbox-empty">
-          <span className="atelier-inbox-empty-icon">&#128203;</span>
-          <p>没有找到符合条件的任务</p>
-          <span>调整过滤器或搜索关键词以查看其他任务</span>
-        </div>
-      )}
+
+        {/* Right Column: Timeline */}
+        <aside className="atelier-workspace-aside">
+          <div className="atelier-workspace-timeline-card">
+            <h3>
+              <span>🔄</span> 设计动态 & 修订
+            </h3>
+            <div className="atelier-workspace-timeline">
+              <div className="atelier-workspace-timeline-line" />
+              {displayedActivities.map((item, index) => (
+                <div
+                  className="atelier-workspace-timeline-item"
+                  key={item.id}
+                >
+                  <div
+                    className={`atelier-workspace-timeline-dot ${getActivityDotClass(
+                      item.type,
+                      index
+                    )}`}
+                  >
+                    <span>{getActivityIcon(item.type)}</span>
+                  </div>
+                  <div className="atelier-workspace-timeline-content">
+                    <p>
+                      {item.title}
+                      {item.summary && item.summary.length > 20 && (
+                        <span className="atelier-workspace-timeline-mention">
+                          {" "}
+                          @{assigneeName.split("·")[0]?.trim() ?? "你"}
+                        </span>
+                      )}
+                    </p>
+                    {item.summary && item.summary.length > 10 && (
+                      <div className="atelier-workspace-timeline-quote">
+                        &ldquo;{item.summary.slice(0, 60)}
+                        {item.summary.length > 60 ? "..." : ""}&rdquo;
+                      </div>
+                    )}
+                    <span className="atelier-workspace-timeline-time">
+                      {formatRelativeTime(item.occurredAt)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

@@ -4758,3 +4758,624 @@ ul.clean li:hover {
     font-size: 18px;
   }
 }
+
+/* ============================================================
+   Atelier Designer Workspace (Tasks Page)
+   ============================================================ */
+
+.atelier-workspace {
+  max-width: 1200px;
+}
+
+/* Header */
+.atelier-workspace-header {
+  margin-bottom: 32px;
+}
+
+.atelier-workspace-header h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--at-on-surface);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.atelier-workspace-header p {
+  font-size: 14px;
+  color: var(--at-outline);
+  margin: 0;
+}
+
+.atelier-workspace-header-alert {
+  color: var(--at-error);
+  font-weight: 700;
+}
+
+/* Two-column Grid */
+.atelier-workspace-grid {
+  display: flex;
+  gap: 32px;
+}
+
+.atelier-workspace-main {
+  flex: 3;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.atelier-workspace-aside {
+  flex: 1;
+  min-width: 280px;
+}
+
+/* Metrics */
+.atelier-workspace-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.atelier-workspace-metric {
+  background: var(--at-surface-container-lowest);
+  border-radius: var(--at-radius);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(218, 193, 185, 0.15);
+  box-shadow: 0 12px 32px rgba(146, 70, 39, 0.06);
+  transition: transform 300ms ease;
+}
+
+.atelier-workspace-metric:hover {
+  transform: translateY(-4px);
+}
+
+.atelier-workspace-metric-deco {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--at-surface-container-high);
+  opacity: 0.5;
+  transition: transform 300ms ease;
+}
+
+.atelier-workspace-metric:hover .atelier-workspace-metric-deco {
+  transform: scale(1.1);
+}
+
+.atelier-workspace-metric span {
+  font-size: 13px;
+  color: var(--at-on-secondary-container);
+  position: relative;
+  z-index: 1;
+}
+
+.atelier-workspace-metric strong {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--at-on-surface);
+  margin-top: 8px;
+  display: block;
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* Accent metric */
+.atelier-workspace-metric-accent {
+  border-color: var(--at-secondary-container);
+}
+
+.atelier-workspace-metric-accent strong {
+  color: var(--at-primary);
+}
+
+.atelier-workspace-metric-deco-accent {
+  background: var(--at-secondary-container);
+  opacity: 0.2;
+}
+
+/* Danger metric */
+.atelier-workspace-metric-danger {
+  background: rgba(186, 26, 26, 0.04);
+}
+
+.atelier-workspace-metric-danger span {
+  color: var(--at-error);
+  font-weight: 600;
+}
+
+.atelier-workspace-metric-danger strong {
+  color: var(--at-error);
+}
+
+.atelier-workspace-metric-deco-danger {
+  background: var(--at-error-container);
+  opacity: 0.3;
+}
+
+.atelier-workspace-metric-deco-error {
+  background: var(--at-error-container);
+  opacity: 0.2;
+}
+
+/* Tasks Section */
+.atelier-workspace-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Tabs */
+.atelier-workspace-tabs {
+  display: flex;
+  gap: 28px;
+  border-bottom: 1px solid var(--at-outline-variant);
+  padding-bottom: 2px;
+}
+
+.atelier-workspace-tab {
+  position: relative;
+  padding-bottom: 10px;
+  margin-bottom: -3px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--at-on-secondary-container);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 150ms ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.atelier-workspace-tab:hover {
+  color: var(--at-on-surface);
+}
+
+.atelier-workspace-tab-active {
+  color: var(--at-primary);
+  font-weight: 700;
+  border-bottom: 2px solid var(--at-primary);
+}
+
+.atelier-workspace-tab-dot {
+  position: absolute;
+  top: -2px;
+  right: -10px;
+  width: 7px;
+  height: 7px;
+  background: var(--at-primary);
+  border-radius: 50%;
+}
+
+/* Table */
+.atelier-workspace-table-wrap {
+  background: var(--at-surface-container-lowest);
+  border: 1px solid rgba(218, 193, 185, 0.15);
+  border-radius: var(--at-radius);
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(146, 70, 39, 0.06);
+}
+
+.atelier-workspace-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.atelier-workspace-table thead th {
+  padding: 14px 20px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--at-on-secondary-container);
+  background: var(--at-surface-container-low);
+  border-bottom: 1px solid rgba(218, 193, 185, 0.2);
+  white-space: nowrap;
+}
+
+.atelier-workspace-table-th-right {
+  text-align: right;
+}
+
+.atelier-workspace-table tbody tr {
+  border-bottom: 1px solid rgba(218, 193, 185, 0.1);
+  transition: background 150ms ease;
+  cursor: pointer;
+}
+
+.atelier-workspace-table tbody tr:hover {
+  background: rgba(146, 70, 39, 0.02);
+}
+
+.atelier-workspace-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.atelier-workspace-table tbody td {
+  padding: 16px 20px;
+  vertical-align: middle;
+  color: var(--at-on-surface);
+}
+
+.atelier-workspace-table-title a {
+  font-weight: 600;
+  color: var(--at-on-surface);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.atelier-workspace-table-title a:hover {
+  color: var(--at-primary);
+}
+
+.atelier-workspace-table-title-overdue a {
+  color: var(--at-error);
+}
+
+.atelier-workspace-table-project {
+  color: var(--at-on-secondary-container);
+  font-size: 13px;
+}
+
+.atelier-workspace-table-date {
+  color: var(--at-on-secondary-container);
+  font-size: 13px;
+}
+
+.atelier-workspace-table-date-overdue {
+  color: var(--at-error);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.atelier-workspace-table-row-blocked {
+  opacity: 0.8;
+}
+
+.atelier-workspace-table-td-right {
+  text-align: right;
+}
+
+/* Phase pill */
+.atelier-workspace-phase {
+  display: inline-block;
+  padding: 4px 10px;
+  background: var(--at-surface-container-high);
+  color: var(--at-on-secondary-container);
+  font-size: 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Avatar */
+.atelier-workspace-avatar {
+  display: flex;
+  align-items: center;
+}
+
+.atelier-workspace-avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--at-surface-container-high);
+  color: var(--at-on-secondary-container);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  border: 2px solid var(--at-surface-container-lowest);
+}
+
+.atelier-workspace-avatar-grayscale {
+  filter: grayscale(100%);
+  opacity: 0.7;
+}
+
+/* Badges */
+.atelier-workspace-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.atelier-workspace-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.atelier-workspace-badge-progress {
+  background: rgba(0, 104, 96, 0.1);
+  color: var(--at-tertiary);
+}
+
+.atelier-workspace-badge-progress .atelier-workspace-badge-dot {
+  background: var(--at-tertiary);
+}
+
+.atelier-workspace-badge-waiting {
+  background: rgba(255, 200, 180, 0.3);
+  color: var(--at-on-primary-fixed-variant);
+  border: 1px solid var(--at-secondary-container);
+}
+
+.atelier-workspace-badge-overdue {
+  background: rgba(186, 26, 26, 0.08);
+  color: var(--at-error);
+}
+
+.atelier-workspace-badge-blocked {
+  background: var(--at-surface-variant);
+  color: var(--at-on-surface-variant);
+}
+
+.atelier-workspace-badge-default {
+  background: var(--at-surface-container-high);
+  color: var(--at-on-secondary-container);
+}
+
+/* View all button */
+.atelier-workspace-viewall {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 14px;
+  background: var(--at-surface-container-lowest);
+  border: 1px solid rgba(218, 193, 185, 0.15);
+  border-radius: var(--at-radius);
+  color: var(--at-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease;
+  font-family: inherit;
+}
+
+.atelier-workspace-viewall:hover {
+  background: var(--at-surface-container-low);
+}
+
+.atelier-workspace-viewall span {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Empty state */
+.atelier-workspace-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 60px 24px;
+  background: var(--at-surface-container-low);
+  border: 1px dashed var(--at-outline-variant);
+  border-radius: var(--at-radius);
+  text-align: center;
+}
+
+.atelier-workspace-empty span:first-child {
+  font-size: 32px;
+  opacity: 0.5;
+}
+
+.atelier-workspace-empty p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--at-on-surface);
+}
+
+/* Timeline Card */
+.atelier-workspace-timeline-card {
+  background: var(--at-surface-container-lowest);
+  border: 1px solid rgba(218, 193, 185, 0.15);
+  border-radius: var(--at-radius);
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(146, 70, 39, 0.06);
+  height: fit-content;
+}
+
+.atelier-workspace-timeline-card h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--at-on-surface);
+  margin: 0 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.atelier-workspace-timeline-card h3 span {
+  font-size: 18px;
+}
+
+/* Timeline */
+.atelier-workspace-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.atelier-workspace-timeline-line {
+  position: absolute;
+  left: 9px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--at-outline-variant);
+  opacity: 0.3;
+  border-radius: 2px;
+}
+
+.atelier-workspace-timeline-item {
+  display: flex;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.atelier-workspace-timeline-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--at-surface-container-lowest);
+  margin-top: 2px;
+}
+
+.atelier-workspace-timeline-dot span {
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.atelier-workspace-timeline-dot-primary {
+  background: var(--at-primary-container);
+}
+
+.atelier-workspace-timeline-dot-primary span {
+  color: var(--at-on-primary);
+}
+
+.atelier-workspace-timeline-dot-default {
+  background: var(--at-surface-variant);
+}
+
+.atelier-workspace-timeline-dot-default span {
+  color: var(--at-on-surface-variant);
+}
+
+.atelier-workspace-timeline-dot-error {
+  background: var(--at-error);
+}
+
+.atelier-workspace-timeline-dot-error span {
+  color: var(--at-on-error);
+}
+
+.atelier-workspace-timeline-dot-warn {
+  background: var(--at-secondary-container);
+}
+
+.atelier-workspace-timeline-dot-warn span {
+  color: var(--at-on-secondary-container);
+}
+
+.atelier-workspace-timeline-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.atelier-workspace-timeline-content p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--at-on-surface);
+}
+
+.atelier-workspace-timeline-mention {
+  color: var(--at-primary);
+  font-weight: 600;
+}
+
+.atelier-workspace-timeline-quote {
+  margin: 8px 0;
+  padding: 10px 12px;
+  background: var(--at-surface-container-low);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--at-on-secondary-container);
+  font-style: italic;
+  border-left: 2px solid var(--at-outline-variant);
+  line-height: 1.5;
+}
+
+.atelier-workspace-timeline-time {
+  font-size: 11px;
+  color: var(--at-outline);
+  opacity: 0.8;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .atelier-workspace-grid {
+    flex-direction: column;
+  }
+
+  .atelier-workspace-aside {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .atelier-workspace-metrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .atelier-workspace-metric {
+    padding: 16px;
+  }
+
+  .atelier-workspace-metric strong {
+    font-size: 24px;
+  }
+
+  .atelier-workspace-tabs {
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .atelier-workspace-tab {
+    white-space: nowrap;
+  }
+
+  .atelier-workspace-table-wrap {
+    overflow-x: auto;
+  }
+
+  .atelier-workspace-table {
+    min-width: 720px;
+  }
+
+  .atelier-workspace-timeline-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .atelier-workspace-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .atelier-workspace-header h1 {
+    font-size: 20px;
+  }
+
+  .atelier-workspace-metric strong {
+    font-size: 22px;
+  }
+}
