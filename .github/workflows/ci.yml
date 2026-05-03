@@ -36,11 +36,11 @@ jobs:
       - name: Type check (api)
         run: npm run typecheck --workspace @home-design-ops/api
 
-      - name: Test
-        run: npm run test
-
       - name: Build shared
         run: npm run build --workspace @home-design-ops/shared
+
+      - name: Test
+        run: npm run test
 
       - name: Build API
         run: npm run build --workspace @home-design-ops/api
