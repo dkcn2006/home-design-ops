@@ -13,5 +13,8 @@
     "build": "npm run build --workspace @home-design-ops/shared && npm run build --workspace @home-design-ops/api && npm run build --workspace @home-design-ops/web",
     "lint": "npm run lint --workspace @home-design-ops/shared && npm run lint --workspace @home-design-ops/api && npm run lint --workspace @home-design-ops/web",
     "test": "npm run test --workspace @home-design-ops/shared && npm run test --workspace @home-design-ops/api && npm run test --workspace @home-design-ops/web"
+  },
+  "dependencies": {
+    "lucide-react": "^1.14.0"
   }
 }

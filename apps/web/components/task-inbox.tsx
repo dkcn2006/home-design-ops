@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import type {
@@ -8,6 +8,17 @@ import type {
   TaskStatus,
   WorkspaceActivityItem
 } from "@home-design-ops/shared";
+import {
+  CheckCircle,
+  AlertTriangle,
+  Flag,
+  FileText,
+  Circle,
+  Ban,
+  ClipboardList,
+  RefreshCw,
+  ArrowRight
+} from "lucide-react";
 
 type FilterKey = "all" | "in_progress" | "waiting_client" | "blocked";
 
@@ -88,18 +99,18 @@ function getActivityDotClass(
   }
 }
 
-function getActivityIcon(type: WorkspaceActivityItem["type"]): string {
+function getActivityIcon(type: WorkspaceActivityItem["type"]): ReactNode {
   switch (type) {
     case "confirmation":
-      return "✓";
+      return <CheckCircle size={14} strokeWidth={2} />;
     case "inspection":
-      return "⚠";
+      return <AlertTriangle size={14} strokeWidth={2} />;
     case "milestone":
-      return "🚩";
+      return <Flag size={14} strokeWidth={2} />;
     case "change_order":
-      return "📝";
+      return <FileText size={14} strokeWidth={2} />;
     default:
-      return "•";
+      return <Circle size={14} strokeWidth={2} />;
   }
 }
 
@@ -309,7 +320,7 @@ export default function TaskInbox({
                           <td className="atelier-workspace-table-td-right">
                             {task.status === "blocked" ? (
                               <span className="atelier-workspace-badge atelier-workspace-badge-blocked">
-                                <span>⊘</span> 已阻塞
+                                <Ban size={14} strokeWidth={2} /> 已阻塞
                               </span>
                             ) : overdue ? (
                               <span className="atelier-workspace-badge atelier-workspace-badge-overdue">
@@ -345,13 +356,13 @@ export default function TaskInbox({
                 onClick={() => setFilter("all")}
               >
                 查看全部任务
-                <span>→</span>
+                <ArrowRight size={16} strokeWidth={1.5} />
               </button>
             )}
 
             {filteredTasks.length === 0 && (
               <div className="atelier-workspace-empty">
-                <span>📋</span>
+                <ClipboardList size={24} strokeWidth={1.5} />
                 <p>该分类下暂无任务</p>
               </div>
             )}
@@ -362,7 +373,7 @@ export default function TaskInbox({
         <aside className="atelier-workspace-aside">
           <div className="atelier-workspace-timeline-card">
             <h3>
-              <span>🔄</span> 设计动态 & 修订
+              <RefreshCw size={18} strokeWidth={1.5} /> 设计动态 & 修订
             </h3>
             <div className="atelier-workspace-timeline">
               <div className="atelier-workspace-timeline-line" />
@@ -377,7 +388,7 @@ export default function TaskInbox({
                       index
                     )}`}
                   >
-                    <span>{getActivityIcon(item.type)}</span>
+                    {getActivityIcon(item.type)}
                   </div>
                   <div className="atelier-workspace-timeline-content">
                     <p>

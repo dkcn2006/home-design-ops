@@ -2,6 +2,13 @@ import Link from "next/link";
 import type { Route } from "next";
 import type { ProjectTaskBoard, TaskStatus } from "@home-design-ops/shared";
 import { getProjectTaskBoard } from "../../../../lib/data";
+import {
+  SlidersHorizontal,
+  AlertTriangle,
+  Clock,
+  Plus,
+  ArrowLeft
+} from "lucide-react";
 
 const statusLabels: Record<TaskStatus, string> = {
   backlog: "待排期",
@@ -100,7 +107,9 @@ export default async function ProjectBoardPage({ params }: { params: Promise<{ i
         <div className="atelier-board-filter-right">
           <button className="atelier-board-filter-btn">阶段 ▾</button>
           <button className="atelier-board-filter-btn">优先级 ▾</button>
-          <button className="atelier-board-filter-icon">☰</button>
+          <button className="atelier-board-filter-icon">
+            <SlidersHorizontal size={18} strokeWidth={1.5} />
+          </button>
         </div>
       </div>
 
@@ -112,7 +121,7 @@ export default async function ProjectBoardPage({ params }: { params: Promise<{ i
               <h2>{spaceGroup.space.name}</h2>
               {hasBlockedInSpace(spaceGroup) && (
                 <span className="atelier-board-space-badge">
-                  <span>⚠</span> 存在阻塞
+                  <AlertTriangle size={14} strokeWidth={2} /> 存在阻塞
                 </span>
               )}
             </div>
@@ -141,7 +150,7 @@ export default async function ProjectBoardPage({ params }: { params: Promise<{ i
 
                         {task.blockedReason && (
                           <div className="atelier-board-task-blocked-reason">
-                            <span>⚠</span>
+                            <AlertTriangle size={14} strokeWidth={2} />
                             <p>{task.blockedReason}</p>
                           </div>
                         )}
@@ -156,7 +165,7 @@ export default async function ProjectBoardPage({ params }: { params: Promise<{ i
 
                         <div className="atelier-board-task-bottom">
                           <div className="atelier-board-task-date">
-                            <span>◷</span>
+                            <Clock size={14} strokeWidth={1.5} />
                             {task.dueDate ? (
                               <span>{task.dueDate}</span>
                             ) : (
@@ -171,7 +180,7 @@ export default async function ProjectBoardPage({ params }: { params: Promise<{ i
                     ))}
                     {phaseGroup.tasks.length === 0 && (
                       <div className="atelier-board-task-empty">
-                        <span>+</span>
+                        <Plus size={16} strokeWidth={2} />
                         <span>暂无任务</span>
                       </div>
                     )}
@@ -189,7 +198,9 @@ export default async function ProjectBoardPage({ params }: { params: Promise<{ i
 
       {/* Back link */}
       <div className="atelier-board-back">
-        <Link href={`/projects/${id}` as Route}>← 返回项目档案</Link>
+        <Link href={`/projects/${id}` as Route}>
+          <ArrowLeft size={16} strokeWidth={1.5} /> 返回项目档案
+        </Link>
       </div>
     </div>
   );

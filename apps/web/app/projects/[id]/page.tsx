@@ -1,6 +1,19 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { getArchive } from "../../../lib/data";
+import {
+  ListChecks,
+  Check,
+  AlertTriangle,
+  HelpCircle,
+  Image,
+  Receipt,
+  MapPin,
+  Layers,
+  FileStack,
+  User,
+  LayoutTemplate
+} from "lucide-react";
 
 function getConfirmationLabel(status: "pending" | "confirmed" | "rejected") {
   if (status === "confirmed") return "已确认";
@@ -81,12 +94,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           {/* Requirement Sheet */}
           <div className="atelier-archive-card">
             <h3>
-              <span>☰</span> 需求清单
+              <ListChecks size={18} strokeWidth={1.5} /> 需求清单
             </h3>
             <ul className="atelier-archive-checklist">
               {archive.requirementSheet.goals.map((item) => (
                 <li key={item}>
-                  <span className="atelier-archive-check">✓</span>
+                  <span className="atelier-archive-check"><Check size={16} strokeWidth={2} /></span>
                   <div>
                     <strong>{item}</strong>
                   </div>
@@ -94,7 +107,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               ))}
               {archive.requirementSheet.risks.map((item) => (
                 <li key={item}>
-                  <span className="atelier-archive-check atelier-archive-check-warn">!</span>
+                  <span className="atelier-archive-check atelier-archive-check-warn"><AlertTriangle size={16} strokeWidth={2} /></span>
                   <div>
                     <strong>{item}</strong>
                     <span className="atelier-archive-check-note">风险项</span>
@@ -103,7 +116,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               ))}
               {archive.requirementSheet.pendingQuestions.map((item) => (
                 <li key={item}>
-                  <span className="atelier-archive-check atelier-archive-check-pending">?</span>
+                  <span className="atelier-archive-check atelier-archive-check-pending"><HelpCircle size={16} strokeWidth={2} /></span>
                   <div>
                     <strong>{item}</strong>
                     <span className="atelier-archive-check-note">待确认</span>
@@ -117,7 +130,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <div className="atelier-archive-card">
             <div className="atelier-archive-card-header">
               <h3>
-                <span>◈</span> 效果图版本
+                <Image size={18} strokeWidth={1.5} /> 效果图版本
               </h3>
               <span className="atelier-archive-viewall">查看全部</span>
             </div>
@@ -140,7 +153,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           {/* Quotations & Changes */}
           <div className="atelier-archive-card">
             <h3>
-              <span>◐</span> 报价与变更
+              <Receipt size={18} strokeWidth={1.5} /> 报价与变更
             </h3>
             {currentQuotation ? (
               <div className="atelier-archive-quotation">
@@ -183,7 +196,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           {/* Space Tags */}
           <div className="atelier-archive-card">
             <h3>
-              <span>◉</span> 空间标签
+              <MapPin size={18} strokeWidth={1.5} /> 空间标签
             </h3>
             <div className="atelier-archive-tags">
               {spaceTags.map((tag) => (
@@ -200,7 +213,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           {/* Design Versions Timeline */}
           <div className="atelier-archive-card">
             <h3>
-              <span>◐</span> 方案版本
+              <Layers size={18} strokeWidth={1.5} /> 方案版本
             </h3>
             <div className="atelier-archive-timeline">
               {archive.designVersions.map((item, index) => (
@@ -223,7 +236,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           {/* Construction Drawings */}
           <div className="atelier-archive-card">
             <h3>
-              <span>▣</span> 施工图版本
+              <FileStack size={18} strokeWidth={1.5} /> 施工图版本
             </h3>
             <div className="atelier-archive-timeline">
               {archive.constructionDrawingVersions.map((item, index) => (
@@ -246,7 +259,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           {/* Customer Info */}
           <div className="atelier-archive-card">
             <h3>
-              <span>◑</span> 客户信息
+              <User size={18} strokeWidth={1.5} /> 客户信息
             </h3>
             <div className="atelier-archive-contact">
               <div className="atelier-archive-contact-row">
@@ -359,7 +372,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         href={`/projects/${id}/board` as Route}
         className="atelier-archive-fab"
       >
-        <span>▣</span>
+        <LayoutTemplate size={18} strokeWidth={1.5} />
         <span>查看看板</span>
       </Link>
     </div>
