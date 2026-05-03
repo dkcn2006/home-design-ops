@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Module, Param, Patch, Post } from "@nestjs/common";
-import type { CreateLeadIntakeInput, UpdateLeadStageInput } from "@home-design-ops/shared";
-import { DemoRepositoryService } from "../services/demo-repository.service";
+import { Body, Controller, Get, Inject, Module, Param, Patch, Post } from "@nestjs/common";
+import { CreateLeadIntakeDto, UpdateLeadStageDto } from "../dto";
+import { LEAD_REPOSITORY } from "../repositories";
+import type { LeadRepository } from "../repositories";
 
 @Controller("leads")
 class LeadsController {
-  constructor(private readonly repository: DemoRepositoryService) {}
+  constructor(
+    @Inject(LEAD_REPOSITORY) private readonly repository: LeadRepository
+  ) {}
 
   @Get()
   findAll() {
@@ -17,19 +20,21 @@ class LeadsController {
   }
 
   @Post("intake")
-  createIntake(@Body() body: CreateLeadIntakeInput) {
+  createIntake(@Body() body: CreateLeadIntakeDto) {
     return this.repository.createLeadIntake(body);
   }
 
   @Patch(":id/stage")
-  updateStage(@Param("id") id: string, @Body() body: UpdateLeadStageInput) {
+  updateStage(@Param("id") id: string, @Body() body: UpdateLeadStageDto) {
     return this.repository.updateLeadStage(id, body);
   }
 }
 
 @Controller("sales/leads")
 class SalesLeadsController {
-  constructor(private readonly repository: DemoRepositoryService) {}
+  constructor(
+    @Inject(LEAD_REPOSITORY) private readonly repository: LeadRepository
+  ) {}
 
   @Get()
   getSalesLeads() {

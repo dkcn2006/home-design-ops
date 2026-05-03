@@ -1,4 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import type {
+  CustomerRepository,
+  DashboardRepository,
+  LeadRepository,
+  ProjectRepository,
+  TaskRepository
+} from "../repositories";
 import {
   attachments,
   changeOrders,
@@ -42,9 +49,17 @@ import type {
   WorkspaceHome,
   WorkspaceRiskItem
 } from "@home-design-ops/shared";
+import { createDateContext, type DateContext } from "@home-design-ops/shared";
 
 @Injectable()
-export class DemoRepositoryService {
+export class DemoRepositoryService
+  implements CustomerRepository, LeadRepository, ProjectRepository, TaskRepository, DashboardRepository
+{
+  private readonly date: DateContext;
+
+  constructor() {
+    this.date = createDateContext(process.env.DEMO_TODAY);
+  }
   getCustomers() {
     return customers;
   }
@@ -78,7 +93,7 @@ export class DemoRepositoryService {
   }
 
   getLeadSummary(): LeadSummary {
-    const today = "2026-04-19";
+    const { today } = this.date;
     const staleBefore = "2026-04-09";
     const stageCounts = leads.reduce(
       (result, lead) => {
@@ -207,7 +222,7 @@ export class DemoRepositoryService {
   getProjectTaskBoard(projectId: string): ProjectTaskBoard {
     const project = this.ensureProject(projectId);
     const tasks = this.getProjectTasks(projectId);
-    const today = "2026-04-19";
+    const today = this.date.today;
     const activeRiskTasks = tasks.filter((task) => task.status === "blocked" || task.status === "waiting_client");
     const blockedSpaceIds = new Set(activeRiskTasks.map((task) => task.spaceId ?? "space-project"));
     const projectLevelSpace = {
@@ -360,7 +375,7 @@ export class DemoRepositoryService {
     return {
       metrics: {
         ...overview.metrics,
-        overdueTasks: tasks.filter((item) => item.status !== "done" && item.dueDate < "2026-04-19").length,
+        overdueTasks: tasks.filter((item) => item.status !== "done" && this.date.isOverdue(item.dueDate)).length,
         activeRisks: risks.length
       },
       tasks: tasks.slice(0, 8),
@@ -440,6 +455,48 @@ export class DemoRepositoryService {
     confirmation.status = input.status;
     confirmation.note = input.note?.trim() || confirmation.note;
     confirmation.updatedAt = new Date().toISOString();
+
+    // 联动更新关联的 waiting_client 任务
+    const linkedProjectTask = projectTasks.find(
+      (task) =>
+        task.projectId === projectId &&
+        task.status === "waiting_client" &&
+        task.linkedEntities.some(
+          (entity) => entity.type === "confirmation_record" && entity.entityId === confirmationId
+        )
+    );
+    if (linkedProjectTask) {
+      if (input.status === "confirmed") {
+        linkedProjectTask.status = "done";
+        linkedProjectTask.completedAt = new Date().toISOString();
+        linkedProjectTask.blockedReason = undefined;
+      } else if (input.status === "rejected") {
+        linkedProjectTask.status = "blocked";
+        linkedProjectTask.blockedReason = input.note?.trim()
+          ? `客户驳回：${input.note.trim()}`
+          : "客户驳回确认，等待重新沟通。";
+      }
+      linkedProjectTask.updatedAt = new Date().toISOString();
+    }
+
+    // 同步更新 workItems 中对应的客户确认任务
+    const linkedWorkItem = workItems.find(
+      (item) =>
+        item.projectId === projectId &&
+        item.type === "client_confirmation" &&
+        (item.status === "todo" || item.status === "in_progress" || item.status === "blocked")
+    );
+    if (linkedWorkItem) {
+      if (input.status === "confirmed") {
+        linkedWorkItem.status = "done";
+      } else if (input.status === "rejected") {
+        linkedWorkItem.status = "blocked";
+        linkedWorkItem.summary = input.note?.trim()
+          ? `客户驳回：${input.note.trim()}`
+          : linkedWorkItem.summary;
+      }
+      linkedWorkItem.updatedAt = new Date().toISOString();
+    }
 
     return confirmation;
   }

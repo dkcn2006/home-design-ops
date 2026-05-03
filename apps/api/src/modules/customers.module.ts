@@ -1,9 +1,12 @@
-import { Controller, Get, Module } from "@nestjs/common";
-import { DemoRepositoryService } from "../services/demo-repository.service";
+import { Controller, Get, Inject, Module } from "@nestjs/common";
+import { CUSTOMER_REPOSITORY } from "../repositories";
+import type { CustomerRepository } from "../repositories";
 
 @Controller("customers")
 class CustomersController {
-  constructor(private readonly repository: DemoRepositoryService) {}
+  constructor(
+    @Inject(CUSTOMER_REPOSITORY) private readonly repository: CustomerRepository
+  ) {}
 
   @Get()
   findAll() {
@@ -15,4 +18,3 @@ class CustomersController {
   controllers: [CustomersController]
 })
 export class CustomersModule {}
-

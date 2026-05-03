@@ -7,8 +7,167 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  sales
+  designer
+  detailer
+  project_manager
+  client
+  admin
+}
+
+enum UserStatus {
+  active
+  inactive
+}
+
+enum LeadStage {
+  new
+  contacted
+  measured
+  proposal
+  quoted
+  negotiating
+  won
+  lost
+}
+
+enum LeadSource {
+  walk_in
+  referral
+  xiaohongshu
+  douyin
+  local_ads
+  partner
+  other
+}
+
+enum LeadIntentLevel {
+  high
+  medium
+  low
+}
+
+enum WorkflowPhaseCategory {
+  sales
+  design
+  detailing
+  quotation
+  delivery
+  acceptance
+}
+
+enum TaskStatus {
+  backlog
+  todo
+  in_progress
+  blocked
+  waiting_client
+  waiting_internal
+  done
+  canceled
+}
+
+enum TaskPriority {
+  urgent
+  high
+  medium
+  low
+}
+
+enum AttachmentCategory {
+  meeting_note
+  layout_model
+  rendering
+  construction_drawing
+  quotation
+  inspection
+  contract
+  other
+}
+
+enum ConfirmationType {
+  proposal
+  quotation
+  change_order
+  milestone
+  completion
+}
+
+enum ConfirmationStatus {
+  pending
+  confirmed
+  rejected
+}
+
+enum VersionStatus {
+  draft
+  review
+  current
+  archived
+}
+
+enum MilestoneStatus {
+  not_started
+  in_progress
+  blocked
+  done
+}
+
+enum InspectionSeverity {
+  low
+  medium
+  high
+}
+
+enum WorkItemStatus {
+  todo
+  in_progress
+  blocked
+  done
+}
+
+enum WorkItemPriority {
+  high
+  medium
+  low
+}
+
+enum WorkItemType {
+  lead_follow_up
+  design_output
+  client_confirmation
+  quotation
+  milestone
+  inspection_issue
+  acceptance
+}
+
+enum ProjectStatus {
+  discovery
+  design
+  detailing
+  delivery
+  completed
+}
+
+enum QuotationStatus {
+  draft
+  submitted
+  approved
+}
+
+enum SpaceType {
+  living_room
+  kitchen
+  bedroom
+  bathroom
+  balcony
+  other
+}
+
 model Customer {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   name             String
   phone            String
   email            String?
@@ -18,26 +177,115 @@ model Customer {
   budgetMax        Int
   city             String
   notes            String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
   createdBy        String
   projects         Project[]
   leads            Lead[]
 }
 
 model Lead {
-  id               String   @id @default(cuid())
-  customerId       String
-  source           String
-  stage            String
-  expectedSignDate DateTime?
-  summary          String
-  painPoints       String[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  createdBy        String
-  customer         Customer @relation(fields: [customerId], references: [id])
-  projects         Project[]
+  id                  String          @id @default(cuid())
+  customerId          String
+  source              LeadSource
+  stage               LeadStage
+  intentLevel         LeadIntentLevel
+  ownerId             String
+  budgetRange         String
+  houseInfo           String
+  requirementSummary  String
+  nextFollowUpAt      DateTime?
+  lastContactedAt     DateTime?
+  lastContactSummary  String?
+  expectedSignDate    DateTime?
+  summary             String
+  painPoints          String[]
+  lostReason          String?
+  projectId           String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  createdBy           String
+  customer            Customer        @relation(fields: [customerId], references: [id])
+  projects            Project[]
+}
+
+model User {
+  id             String     @id @default(cuid())
+  name           String
+  role           UserRole
+  status         UserStatus @default(active)
+  avatarInitials String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  createdBy      String
+  assignedTasks  ProjectTask[] @relation("AssignedTasks")
+  reportedTasks  ProjectTask[] @relation("ReportedTasks")
+}
+
+model WorkflowPhase {
+  id          String                @id @default(cuid())
+  name        String
+  order       Int
+  category    WorkflowPhaseCategory
+  description String
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  createdBy   String
+  tasks       ProjectTask[]
+}
+
+model Space {
+  id          String   @id @default(cuid())
+  projectId   String
+  name        String
+  type        SpaceType
+  areaSqm     Float
+  constraints String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  tasks       ProjectTask[]
+}
+
+model ProjectTask {
+  id            String        @id @default(cuid())
+  projectId     String
+  spaceId       String?
+  phaseId       String
+  title         String
+  description   String
+  status        TaskStatus
+  priority      TaskPriority
+  assigneeId    String
+  ownerRole     UserRole
+  reporterId    String
+  dueDate       DateTime?
+  blockedReason String?
+  linkedEntities Json         @default("[]")
+  completedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  createdBy     String
+  project       Project       @relation(fields: [projectId], references: [id])
+  space         Space?        @relation(fields: [spaceId], references: [id])
+  phase         WorkflowPhase @relation(fields: [phaseId], references: [id])
+  assignee      User          @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  reporter      User          @relation("ReportedTasks", fields: [reporterId], references: [id])
+}
+
+model RequirementSheet {
+  id              String   @id @default(cuid())
+  projectId       String   @unique
+  summary         String
+  goals           String[]
+  risks           String[]
+  pendingQuestions String[]
+  lifestyleTags   String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String
+  project         Project  @relation(fields: [projectId], references: [id])
 }
 
 model Project {
@@ -48,7 +296,7 @@ model Project {
   name                              String
   location                          String
   areaSqm                           Float
-  status                            String
+  status                            ProjectStatus
   currentRequirementSheetId         String
   currentDesignVersionId            String?
   currentRenderingVersionId         String?
@@ -58,5 +306,159 @@ model Project {
   createdBy                         String
   customer                          Customer @relation(fields: [customerId], references: [id])
   lead                              Lead     @relation(fields: [leadId], references: [id])
+  spaces                            Space[]
+  tasks                             ProjectTask[]
+  requirementSheet                  RequirementSheet?
+  designVersions                    DesignVersion[]
+  renderingVersions                 RenderingVersion[]
+  constructionDrawingVersions       ConstructionDrawingVersion[]
+  quotations                        Quotation[]
+  changeOrders                      ChangeOrder[]
+  milestones                        ProjectMilestone[]
+  inspections                       InspectionRecord[]
+  confirmations                     ConfirmationRecord[]
+  attachments                       Attachment[]
 }
 
+model DesignVersion {
+  id                String       @id @default(cuid())
+  projectId         String
+  version           String
+  summary           String
+  changeLog         String[]
+  status            VersionStatus
+  fileAttachmentIds String[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  createdBy         String
+  project           Project      @relation(fields: [projectId], references: [id])
+}
+
+model RenderingVersion {
+  id                String       @id @default(cuid())
+  projectId         String
+  version           String
+  styleDirection    String
+  highlights        String[]
+  status            VersionStatus
+  fileAttachmentIds String[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  createdBy         String
+  project           Project      @relation(fields: [projectId], references: [id])
+}
+
+model ConstructionDrawingVersion {
+  id                String       @id @default(cuid())
+  projectId         String
+  version           String
+  summary           String
+  checks            String[]
+  status            VersionStatus
+  fileAttachmentIds String[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  createdBy         String
+  project           Project      @relation(fields: [projectId], references: [id])
+}
+
+model Quotation {
+  id          String         @id @default(cuid())
+  projectId   String
+  linkedVersionId String
+  amount      Float
+  currency    String
+  summary     String
+  lineItems   Json
+  status      QuotationStatus
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  createdBy   String
+  project     Project        @relation(fields: [projectId], references: [id])
+}
+
+model ChangeOrder {
+  id                 String            @id @default(cuid())
+  projectId          String
+  linkedVersionId    String
+  title              String
+  reason             String
+  amountDelta        Float
+  confirmationStatus ConfirmationStatus
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  createdBy          String
+  project            Project           @relation(fields: [projectId], references: [id])
+}
+
+model ProjectMilestone {
+  id          String          @id @default(cuid())
+  projectId   String
+  name        String
+  plannedDate DateTime
+  actualDate  DateTime?
+  status      MilestoneStatus
+  ownerRole   UserRole
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  createdBy   String
+  project     Project         @relation(fields: [projectId], references: [id])
+  inspections InspectionRecord[]
+}
+
+model InspectionRecord {
+  id          String   @id @default(cuid())
+  projectId   String
+  milestoneId String
+  summary     String
+  issues      Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  milestone   ProjectMilestone @relation(fields: [milestoneId], references: [id])
+}
+
+model ConfirmationRecord {
+  id        String            @id @default(cuid())
+  projectId String
+  targetId  String
+  type      ConfirmationType
+  status    ConfirmationStatus
+  clientName String
+  note      String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  createdBy String
+  project   Project           @relation(fields: [projectId], references: [id])
+}
+
+model Attachment {
+  id            String            @id @default(cuid())
+  projectId     String?
+  filename      String
+  category      AttachmentCategory
+  url           String
+  linkedEntityId String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  createdBy     String
+  project       Project?          @relation(fields: [projectId], references: [id])
+}
+
+model WorkItem {
+  id        String          @id @default(cuid())
+  role      UserRole
+  type      WorkItemType
+  status    WorkItemStatus
+  priority  WorkItemPriority
+  title     String
+  summary   String
+  dueDate   DateTime
+  targetPath String
+  projectId String?
+  leadId    String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  createdBy String
+}

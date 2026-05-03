@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Module, Param, Patch } from "@nestjs/common";
-import type { UpdateConfirmationInput } from "@home-design-ops/shared";
-import { DemoRepositoryService } from "../services/demo-repository.service";
+import { Body, Controller, Get, Inject, Module, Param, Patch } from "@nestjs/common";
+import { UpdateConfirmationDto } from "../dto";
+import { PROJECT_REPOSITORY } from "../repositories";
+import type { ProjectRepository } from "../repositories";
 
 @Controller("projects/:id/confirmations")
 class ConfirmationsController {
-  constructor(private readonly repository: DemoRepositoryService) {}
+  constructor(
+    @Inject(PROJECT_REPOSITORY) private readonly repository: ProjectRepository
+  ) {}
 
   @Get()
   findAll(@Param("id") id: string) {
@@ -15,7 +18,7 @@ class ConfirmationsController {
   update(
     @Param("id") projectId: string,
     @Param("confirmationId") confirmationId: string,
-    @Body() body: UpdateConfirmationInput
+    @Body() body: UpdateConfirmationDto
   ) {
     return this.repository.updateConfirmation(projectId, confirmationId, body);
   }

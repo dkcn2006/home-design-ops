@@ -1,11 +1,28 @@
 import { Injectable } from "@nestjs/common";
-import {
+import type {
   AiDrawingReview,
   AiInspectionDigest,
   AiLayoutSuggestion,
   AiRenderingSuggestion,
-  AiRequirementSuggestion
+  AiRequirementSuggestion,
+  ProjectTask
 } from "@home-design-ops/shared";
+
+export interface AiTaskDraft {
+  title: string;
+  description: string;
+  priority: ProjectTask["priority"];
+  ownerRole: ProjectTask["ownerRole"];
+  suggestedDueDate: string;
+  reason: string;
+}
+
+export interface AiRiskSummary {
+  headline: string;
+  affectedTasks: string[];
+  suggestedActions: string[];
+  responsibleRole: ProjectTask["ownerRole"];
+}
 
 @Injectable()
 export class AiOrchestrationService {
@@ -23,7 +40,7 @@ export class AiOrchestrationService {
 
   buildLayoutSuggestion(brief: string, budget?: number): AiLayoutSuggestion {
     return {
-      layoutDirection: `建议以“动线优先 + 收纳集中”的布局逻辑推进，结合 ${budget ? `约 ${budget} 预算` : "当前预算"} 做适配。`,
+      layoutDirection: `建议以"动线优先 + 收纳集中"的布局逻辑推进，结合 ${budget ? `约 ${budget} 预算` : "当前预算"} 做适配。`,
       storageIdeas: ["高柜与岛台分工明确", "餐边柜兼顾展示与收纳", "优先利用转角和高位柜体"],
       circulationAlerts: ["保持岛台主通道不低于 900mm", "高柜开门半径与冰箱门扇需复核"]
     };
@@ -56,5 +73,71 @@ export class AiOrchestrationService {
       followUps: ["跟进高优先级未解决问题", "同步给设计与项目经理", "在下个节点前确认整改结果"]
     };
   }
-}
 
+  /**
+   * 根据需求文本生成任务草稿
+   */
+  generateTaskDraft(requirementSummary: string): AiTaskDraft[] {
+    const normalized = requirementSummary.trim() || "客户有基本装修需求";
+    const today = new Date().toISOString().slice(0, 10);
+
+    const drafts: AiTaskDraft[] = [
+      {
+        title: "梳理客户需求结构化记录",
+        description: `将沟通内容"${normalized.slice(0, 40)}"整理为结构化需求单，明确功能分区、预算区间和风格偏好。`,
+        priority: "high",
+        ownerRole: "sales",
+        suggestedDueDate: today,
+        reason: "需求澄清是后续设计和报价的基础"
+      },
+      {
+        title: "初版平面布局方案",
+        description: "基于需求记录输出平面布局方向，标注动线、收纳集中区和关键尺寸。",
+        priority: "high",
+        ownerRole: "designer",
+        suggestedDueDate: today,
+        reason: "客户已表达明确的功能动线诉求"
+      },
+      {
+        title: "预算区间复核与报价初稿",
+        description: "根据需求中的预算范围和布局方向，输出大类报价初稿。",
+        priority: "medium",
+        ownerRole: "sales",
+        suggestedDueDate: today,
+        reason: "预算匹配度直接影响客户决策"
+      }
+    ];
+
+    if (normalized.includes("厨房") || normalized.includes("岛台") || normalized.includes("收纳")) {
+      drafts.push({
+        title: "厨房设备点位与收纳方案深化",
+        description: "针对厨房功能区输出设备点位图和收纳方案，确认高柜、岛台关系。",
+        priority: "high",
+        ownerRole: "detailer",
+        suggestedDueDate: today,
+        reason: "厨房是需求描述中的高频关注点"
+      });
+    }
+
+    return drafts;
+  }
+
+  /**
+   * 根据阻塞任务生成项目风险摘要
+   */
+  generateRiskSummary(blockedTasks: Array<{ title: string; blockedReason?: string }>): AiRiskSummary {
+    const titles = blockedTasks.map((t) => t.title);
+    const reasons = blockedTasks.map((t) => t.blockedReason).filter(Boolean);
+
+    return {
+      headline: `当前项目存在 ${blockedTasks.length} 个阻塞任务，可能影响整体进度。`,
+      affectedTasks: titles,
+      suggestedActions: [
+        "优先排查阻塞任务的外部依赖",
+        reasons.length > 0 ? `关注核心阻塞原因：${reasons[0]}` : "检查任务间的依赖关系",
+        "如阻塞超过 2 个工作日，建议召开跨角色对齐会议"
+      ],
+      responsibleRole: "project_manager"
+    };
+  }
+}

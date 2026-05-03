@@ -1,91 +1,94 @@
-import { Controller, Get, Module, Param, Query } from "@nestjs/common";
+import { Controller, Get, Inject, Module, Param, Query } from "@nestjs/common";
 import type { UserRole } from "@home-design-ops/shared";
-import { DemoRepositoryService } from "../services/demo-repository.service";
+import { DASHBOARD_REPOSITORY, PROJECT_REPOSITORY } from "../repositories";
+import type { DashboardRepository, ProjectRepository } from "../repositories";
 
 @Controller("projects")
 class ProjectsController {
-  constructor(private readonly repository: DemoRepositoryService) {}
+  constructor(
+    @Inject(PROJECT_REPOSITORY) private readonly projectRepository: ProjectRepository,
+    @Inject(DASHBOARD_REPOSITORY) private readonly dashboardRepository: DashboardRepository
+  ) {}
 
   @Get()
   findAll() {
-    return this.repository.getProjects();
+    return this.projectRepository.getProjects();
   }
 
   @Get("overview")
   getOverview() {
-    return this.repository.getPortfolioOverview();
+    return this.dashboardRepository.getPortfolioOverview();
   }
 
   @Get("workspace-home")
   getWorkspaceHome() {
-    return this.repository.getWorkspaceHome();
+    return this.projectRepository.getWorkspaceHome();
   }
 
   @Get("dashboard")
   getDashboardByRole(@Query("role") role: UserRole = "sales") {
-    return this.repository.getDashboard(role);
+    return this.dashboardRepository.getDashboard(role);
   }
 
   @Get("role-workbench")
   getRoleWorkbench(@Query("role") role: UserRole = "sales") {
-    return this.repository.getRoleWorkbench(role);
+    return this.dashboardRepository.getRoleWorkbench(role);
   }
 
   @Get(":id/archive")
   getArchive(@Param("id") id: string) {
-    return this.repository.getProjectArchive(id);
+    return this.projectRepository.getProjectArchive(id);
   }
 
   @Get(":id/tasks")
   getProjectTasks(@Param("id") id: string) {
-    return this.repository.getProjectTasks(id);
+    return this.projectRepository.getProjectTasks(id);
   }
 
   @Get(":id/task-board")
   getProjectTaskBoard(@Param("id") id: string) {
-    return this.repository.getProjectTaskBoard(id);
+    return this.projectRepository.getProjectTaskBoard(id);
   }
 
   @Get(":id/requirements")
   getRequirement(@Param("id") id: string) {
-    return this.repository.getRequirementSheet(id);
+    return this.projectRepository.getRequirementSheet(id);
   }
 
   @Get(":id/design-versions")
   getDesignVersions(@Param("id") id: string) {
-    return this.repository.getDesignVersions(id);
+    return this.projectRepository.getDesignVersions(id);
   }
 
   @Get(":id/renderings")
   getRenderings(@Param("id") id: string) {
-    return this.repository.getRenderingVersions(id);
+    return this.projectRepository.getRenderingVersions(id);
   }
 
   @Get(":id/construction-drawings")
   getConstructionDrawings(@Param("id") id: string) {
-    return this.repository.getConstructionDrawingVersions(id);
+    return this.projectRepository.getConstructionDrawingVersions(id);
   }
 
   @Get(":id/quotations")
   getQuotations(@Param("id") id: string) {
-    return this.repository.getQuotations(id);
+    return this.projectRepository.getQuotations(id);
   }
 
   @Get(":id/change-orders")
   getChangeOrders(@Param("id") id: string) {
-    return this.repository.getChangeOrders(id);
+    return this.projectRepository.getChangeOrders(id);
   }
 
   @Get(":id/milestones")
   getMilestones(@Param("id") id: string) {
-    return this.repository.getMilestones(id);
+    return this.projectRepository.getMilestones(id);
   }
 
   @Get(":id/inspections")
   getInspections(@Param("id") id: string) {
-    return this.repository.getInspections(id);
+    return this.projectRepository.getInspections(id);
   }
-
 }
 
 @Module({

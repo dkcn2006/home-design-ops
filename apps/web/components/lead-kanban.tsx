@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import type { LeadPipelineItem, LeadStage, LeadSource } from "@home-design-ops/shared";
 import { updateLeadStageAction } from "../lib/actions";
 
@@ -12,6 +12,13 @@ interface LeadKanbanProps {
   intentLabels: Record<string, string>;
 }
 
+type ToastType = "success" | "error";
+interface Toast {
+  id: number;
+  message: string;
+  type: ToastType;
+}
+
 export function LeadKanban({
   pipeline,
   stageOrder,
@@ -21,6 +28,7 @@ export function LeadKanban({
 }: LeadKanbanProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   const selectedItem = selectedId
     ? pipeline.find((item) => item.lead.id === selectedId)
@@ -29,13 +37,71 @@ export function LeadKanban({
   const getColumnCount = (stage: LeadStage) =>
     pipeline.filter((item) => item.lead.stage === stage).length;
 
+  const todayISO = new Date().toISOString().slice(0, 10);
   const isOverdue = (date?: string) => {
     if (!date) return false;
-    return date <= "2026-04-19";
+    return date < todayISO;
+  };
+
+  const showToast = useCallback((message: string, type: ToastType) => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3000);
+  }, []);
+
+  const handleCardKeyDown = useCallback(
+    (e: React.KeyboardEvent, leadId: string) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setSelectedId(leadId);
+      }
+    },
+    []
+  );
+
+  const handleDrawerKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedId(null);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (selectedId) {
+      document.addEventListener("keydown", handleDrawerKeyDown as unknown as EventListener);
+      return () => document.removeEventListener("keydown", handleDrawerKeyDown as unknown as EventListener);
+    }
+  }, [selectedId, handleDrawerKeyDown]);
+
+  const handleStageSubmit = (formData: FormData) => {
+    startTransition(async () => {
+      try {
+        await updateLeadStageAction(formData);
+        showToast("阶段更新成功", "success");
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : "阶段更新失败", "error");
+      }
+    });
   };
 
   return (
     <div className="atelier-kanban-wrap">
+      {/* Toasts */}
+      {toasts.map((toast) => (
+        <div
+          key={toast.id}
+          className={`atelier-toast atelier-toast-${toast.type}`}
+          role="status"
+          aria-live="polite"
+        >
+          {toast.message}
+        </div>
+      ))}
+
       {/* Kanban Board */}
       <div className={`atelier-kanban-board ${selectedItem ? "atelier-kanban-board-shrink" : ""}`}>
         {stageOrder.map((stage) => {
@@ -59,8 +125,10 @@ export function LeadKanban({
                       key={item.lead.id}
                       className={`atelier-kanban-card ${isSelected ? "atelier-kanban-card-selected" : ""} ${overdue ? "atelier-kanban-card-overdue" : ""}`}
                       onClick={() => setSelectedId(item.lead.id)}
+                      onKeyDown={(e) => handleCardKeyDown(e, item.lead.id)}
                       role="button"
                       tabIndex={0}
+                      aria-pressed={isSelected}
                     >
                       <div className="atelier-kanban-card-top">
                         <h4>{item.customer.name}</h4>
@@ -88,13 +156,10 @@ export function LeadKanban({
 
                       {/* Stage update form */}
                       <form
-                        action={(formData) => {
-                          startTransition(() => {
-                            updateLeadStageAction(formData);
-                          });
-                        }}
+                        action={handleStageSubmit}
                         className="atelier-kanban-card-form"
                         onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
                       >
                         <input type="hidden" name="leadId" value={item.lead.id} />
                         <select name="stage" defaultValue={item.lead.stage}>
@@ -104,7 +169,7 @@ export function LeadKanban({
                             </option>
                           ))}
                         </select>
-                        <button type="submit" disabled={isPending}>
+                        <button type="submit" disabled={isPending} aria-label="更新阶段">
                           {isPending ? "…" : "→"}
                         </button>
                       </form>
@@ -122,7 +187,7 @@ export function LeadKanban({
 
       {/* Drawer */}
       {selectedItem && (
-        <aside className="atelier-drawer">
+        <aside className="atelier-drawer" role="dialog" aria-modal="true" aria-label="线索详情">
           <div className="atelier-drawer-header">
             <div>
               <span className="atelier-drawer-kicker">
@@ -137,6 +202,7 @@ export function LeadKanban({
               className="atelier-drawer-close"
               onClick={() => setSelectedId(null)}
               type="button"
+              aria-label="关闭详情"
             >
               ✕
             </button>

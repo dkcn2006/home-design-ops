@@ -1,5 +1,45 @@
+/**
+ * =============================================================================
+ *  globals.css — 结构说明
+ * =============================================================================
+ *
+ *  本文档是项目的主样式表，按以下章节组织：
+ *
+ *  §1  Design Tokens (:root)
+ *       温暖运营调色板、字体栈、阴影、圆角。
+ *       与 DESIGN.md 中“色彩调色板”章节一一对应。
+ *
+ *  §2  Legacy Base Styles (line ~34–1158)
+ *       早期页面样式，保留以保证兼容性。
+ *       新页面优先使用 §3 Atelier 主题。
+ *
+ *  §3  Atelier Theme (line ~1159–末尾)
+ *       当前主要视觉系统：家装运营工作台。
+ *       包含 sidebar、topbar、page header、kanban、board、
+ *       drawer、table、form、empty state、toast 等组件。
+ *
+ *  §4  Utility / Responsive / Animation
+ *       媒体查询、关键帧动画、工具类。
+ *
+ *  设计事实来源：DESIGN.md
+ * =============================================================================
+ */
+
 :root {
-  /* Warm editorial palette */
+  /* ───────────────────────────────────────────
+     §1  Design Tokens — 温暖运营调色板
+     ───────────────────────────────────────────
+     与 DESIGN.md 对应关系：
+     --bg            → 页面主背景
+     --card          → 卡片表面
+     --ink           → 主文字
+     --muted         → 次要文字
+     --accent        → 棕色强调
+     --olive         → 橄榄绿辅助
+     --line          → 边框/分隔线
+     --shadow        → 阴影系统
+     --radius        → 圆角系统
+     ─────────────────────────────────────────── */
   --bg: #f4f0e8;
   --bg-warm: #ede8dd;
   --card: #fffcf7;
@@ -144,7 +184,7 @@ body {
   max-width: 1400px;
 }
 
-/* Page Header */
+/* 3.2.1  Page Header */
 .workspace-header {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -1156,11 +1196,22 @@ ul.clean li:hover {
   }
 }
 
-/* ───────────────────────────────────────────
-   Atelier Theme — 家装运营总览页面重构
-   ─────────────────────────────────────────── */
+/* ═════════════════════════════════════════════════════════════════════════════
+   §3  Atelier Theme — 家装运营工作台（当前主视觉系统）
+   ═════════════════════════════════════════════════════════════════════════════
+   本区域包含当前所有活跃页面使用的组件样式：
+   - 3.1  Shell / Sidebar / Topbar
+   - 3.2  Page Header / Section Header
+   - 3.3  Metric Cards / Summary Grid
+   - 3.4  Tables
+   - 3.5  Kanban / Board / Drawer
+   - 3.6  Forms / Inputs / Buttons
+   - 3.7  Badges / Pills / Status Chips
+   - 3.8  Empty State / Loading / Toast
+   - 3.9  Responsive Overrides
+   ═════════════════════════════════════════════════════════════════════════════ */
 
-/* CSS Variables */
+/* 3.0  Atelier CSS Variables */
 .atelier-shell {
   --at-surface: #fff8f6;
   --at-on-surface: #221a17;
@@ -1314,6 +1365,7 @@ ul.clean li:hover {
   margin-left: 4px;
 }
 
+/* ── 3.1  Sidebar ── */
 /* Sidebar Brand */
 .atelier-sidebar-brand {
   display: flex;
@@ -1573,7 +1625,7 @@ ul.clean li:hover {
   font-weight: 700;
 }
 
-/* ── Page Content ── */
+/* ── 3.2  Page Content ── */
 .atelier-page {
   max-width: 1400px;
   margin: 0 auto;
@@ -2377,6 +2429,7 @@ ul.clean li:hover {
   color: var(--atp-on-secondary-container);
 }
 
+/* ── 3.3  Kanban ── */
 /* Kanban Section */
 .atelier-kanban-section {
   margin-bottom: 48px;
@@ -3726,6 +3779,7 @@ ul.clean li:hover {
   color: var(--at-error);
 }
 
+/* 3.4.1  Board Empty State */
 /* Empty */
 .atelier-archive-empty {
   padding: 32px;
@@ -4013,6 +4067,7 @@ ul.clean li:hover {
   background: var(--at-surface-container-high);
 }
 
+/* ── 3.4  Board ── */
 /* Board Canvas */
 .atelier-board-canvas {
   display: flex;
@@ -4307,6 +4362,7 @@ ul.clean li:hover {
   border: 2px solid var(--at-surface-container-lowest);
 }
 
+/* ── 3.5  Empty / Loading / Toast ── */
 /* Empty State */
 .atelier-board-task-empty {
   min-height: 160px;
@@ -5483,5 +5539,139 @@ ul.clean li:hover {
 
   .atelier-workspace-metric strong {
     font-size: 22px;
+  }
+}
+
+/* Empty / Error / Loading states */
+.atelier-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  gap: 16px;
+  color: var(--at-text-secondary);
+}
+
+.atelier-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--at-border);
+  border-top-color: var(--at-accent);
+  border-radius: 50%;
+  animation: atelier-spin 0.8s linear infinite;
+}
+
+@keyframes atelier-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.atelier-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  gap: 12px;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.atelier-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--at-surface);
+  border: 1px solid var(--at-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--at-text-secondary);
+  margin-bottom: 8px;
+}
+
+.atelier-empty-state h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--at-text-primary);
+  margin: 0;
+}
+
+.atelier-empty-state p {
+  font-size: 14px;
+  color: var(--at-text-secondary);
+  max-width: 360px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.atelier-empty-code {
+  font-size: 12px;
+  color: var(--at-text-tertiary);
+  background: var(--at-surface);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.atelier-empty-btn {
+  margin-top: 8px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--at-border);
+  background: var(--at-surface);
+  color: var(--at-text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.atelier-empty-btn:hover {
+  background: var(--at-surface-hover);
+  border-color: var(--at-text-secondary);
+}
+
+/* Focus states for keyboard accessibility */
+.atelier-kanban-card:focus-visible {
+  outline: 2px solid var(--at-accent);
+  outline-offset: 2px;
+}
+
+/* Submit feedback toast */
+.atelier-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+  animation: atelier-toast-in 0.3s ease;
+}
+
+.atelier-toast-success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.atelier-toast-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+@keyframes atelier-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

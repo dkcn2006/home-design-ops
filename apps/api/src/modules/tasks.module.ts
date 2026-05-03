@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Module, Param, Patch, Query } from "@nestjs/common";
-import type { UpdateTaskAssigneeInput, UpdateTaskStatusInput } from "@home-design-ops/shared";
-import { DemoRepositoryService } from "../services/demo-repository.service";
+import { Body, Controller, Get, Inject, Module, Param, Patch, Query } from "@nestjs/common";
+import { UpdateTaskStatusDto, UpdateTaskAssigneeDto } from "../dto";
+import { TASK_REPOSITORY } from "../repositories";
+import type { TaskRepository } from "../repositories";
 
 @Controller("tasks")
 class TasksController {
-  constructor(private readonly repository: DemoRepositoryService) {}
+  constructor(
+    @Inject(TASK_REPOSITORY) private readonly repository: TaskRepository
+  ) {}
 
   @Get("my")
   getMyTasks(@Query("assigneeId") assigneeId = "user-sales-1") {
@@ -12,12 +15,12 @@ class TasksController {
   }
 
   @Patch(":id/status")
-  updateStatus(@Param("id") id: string, @Body() body: UpdateTaskStatusInput) {
+  updateStatus(@Param("id") id: string, @Body() body: UpdateTaskStatusDto) {
     return this.repository.updateTaskStatus(id, body);
   }
 
   @Patch(":id/assignee")
-  updateAssignee(@Param("id") id: string, @Body() body: UpdateTaskAssigneeInput) {
+  updateAssignee(@Param("id") id: string, @Body() body: UpdateTaskAssigneeDto) {
     return this.repository.updateTaskAssignee(id, body);
   }
 }
