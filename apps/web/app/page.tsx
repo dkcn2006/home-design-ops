@@ -39,8 +39,8 @@ function getWeekLabel() {
   const diff = now.getTime() - start.getTime();
   const oneWeek = 1000 * 60 * 60 * 24 * 7;
   const week = Math.floor(diff / oneWeek) + 1;
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `Week ${week} — ${months[now.getMonth()]} ${now.getFullYear()}`;
+  const months = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+  return `第 ${week} 周 — ${now.getFullYear()}年${months[now.getMonth()]}`;
 }
 
 function getPhaseLabel(type: string) {
@@ -116,7 +116,7 @@ export default async function HomePage() {
         <div className="atelier-col-main">
           <div className="atelier-section-header">
             <h2>
-              待办任务 <span>My Work</span>
+              待办任务 <span>我的工作</span>
             </h2>
             <Link href="/tasks" className="atelier-view-all">
               查看全部任务 →
@@ -162,7 +162,7 @@ export default async function HomePage() {
         {/* Risk Alerts */}
         <div className="atelier-col-side">
           <h2>
-            风险预警 <span>Risk Alerts</span>
+            风险预警 <span>风险警报</span>
           </h2>
           <div className="atelier-risk-stack">
             {/* Structural Blocks */}
@@ -213,7 +213,7 @@ export default async function HomePage() {
             {/* CTA Card */}
             <div className="atelier-cta-card">
               <div className="atelier-cta-glow" />
-              <p className="atelier-cta-kicker">Pro Feature</p>
+              <p className="atelier-cta-kicker">高级功能</p>
               <h3>AI 设计方案生成器</h3>
               <p>将客户需求描述快速转化为高保真设计布局。</p>
               <button className="atelier-cta-btn">试用 Beta</button>
@@ -226,7 +226,7 @@ export default async function HomePage() {
       <div className="atelier-quick-row">
         <div className="atelier-section-header">
           <h2>
-            快捷操作 <span>Quick Actions</span>
+            快捷操作 <span>快捷操作</span>
           </h2>
         </div>
         <div className="atelier-quick-grid">

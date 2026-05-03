@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   FolderKanban,
   Palette,
-  Calendar,
   Users,
   Package,
   Sparkles,
@@ -16,7 +15,9 @@ import {
   Settings,
   HelpCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Bell,
+  History
 } from "lucide-react";
 
 export interface SideNavItem {
@@ -31,32 +32,24 @@ export interface AppSidebarProps {
   navItems?: SideNavItem[];
   ctaHref?: string;
   ctaLabel?: string;
-  footerItems?: SideNavItem[];
   collapsed?: boolean;
   onToggle?: () => void;
 }
 
 const defaultNavItems: SideNavItem[] = [
-  { href: "/", label: "Overview", icon: <LayoutDashboard size={20} strokeWidth={1.5} /> },
-  { href: "/projects/proj-1", label: "Projects", icon: <FolderKanban size={20} strokeWidth={1.5} /> },
-  { href: "/", label: "Moodboards", icon: <Palette size={20} strokeWidth={1.5} /> },
-  { href: "/tasks", label: "Schedule", icon: <Calendar size={20} strokeWidth={1.5} /> },
-  { href: "/role/sales", label: "Team", icon: <Users size={20} strokeWidth={1.5} /> },
-  { href: "/sales/leads", label: "Inventory", icon: <Package size={20} strokeWidth={1.5} /> }
-];
-
-const defaultFooterItems: SideNavItem[] = [
-  { href: "/", label: "Settings", icon: <Settings size={18} strokeWidth={1.5} /> },
-  { href: "/", label: "Support", icon: <HelpCircle size={18} strokeWidth={1.5} /> }
+  { href: "/", label: "总览", icon: <LayoutDashboard size={20} strokeWidth={1.5} /> },
+  { href: "/projects/proj-1", label: "项目", icon: <FolderKanban size={20} strokeWidth={1.5} /> },
+  { href: "/tasks", label: "个人工作台", icon: <Palette size={20} strokeWidth={1.5} /> },
+  { href: "/role/sales", label: "团队", icon: <Users size={20} strokeWidth={1.5} /> },
+  { href: "/sales/leads", label: "库存", icon: <Package size={20} strokeWidth={1.5} /> }
 ];
 
 export function AppSidebar({
-  brandTitle = "Design Studio",
-  brandSubtitle = "Atelier Perspective",
+  brandTitle = "设计工作室",
+  brandSubtitle = "工作室视角",
   navItems = defaultNavItems,
-  ctaHref = "/sales/leads",
+  ctaHref = "/",
   ctaLabel = "新建项目",
-  footerItems = defaultFooterItems,
   collapsed = false,
   onToggle
 }: AppSidebarProps) {
@@ -112,13 +105,34 @@ export function AppSidebar({
         {!collapsed && <span>{ctaLabel}</span>}
       </Link>
 
-      <div className="atelier-sidebar-footer">
-        {footerItems.map((item) => (
-          <Link key={item.label} href={item.href as Route} title={collapsed ? item.label : undefined}>
-            <span>{item.icon}</span>
-            {!collapsed && <span>{item.label}</span>}
-          </Link>
-        ))}
+      <div className="atelier-sidebar-toolbar">
+        <button
+          type="button"
+          className="atelier-sidebar-tool"
+          title="通知"
+          aria-label="通知"
+        >
+          <Bell size={18} strokeWidth={1.5} />
+        </button>
+        <button
+          type="button"
+          className="atelier-sidebar-tool"
+          title="历史"
+          aria-label="历史"
+        >
+          <History size={18} strokeWidth={1.5} />
+        </button>
+        <Link href="/" className="atelier-sidebar-tool" title="设置">
+          <Settings size={18} strokeWidth={1.5} />
+        </Link>
+        <Link href="/" className="atelier-sidebar-tool" title="支持">
+          <HelpCircle size={18} strokeWidth={1.5} />
+        </Link>
+      </div>
+
+      <div className="atelier-sidebar-user">
+        <div className="atelier-avatar" />
+        {!collapsed && <span>用户</span>}
       </div>
     </aside>
   );

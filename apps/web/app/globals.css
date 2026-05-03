@@ -1221,7 +1221,7 @@ ul.clean li:hover {
 
 .atelier-shell .main {
   margin-left: var(--at-sidebar-w);
-  padding: calc(var(--at-topbar-h) + 32px) 40px 64px;
+  padding: 32px 40px 64px;
   max-width: none;
   min-height: 100vh;
   transition: margin-left 200ms ease;
@@ -1410,28 +1410,53 @@ ul.clean li:hover {
   box-shadow: 0 4px 12px rgba(146, 70, 39, 0.3);
 }
 
-/* Sidebar Footer */
-.atelier-sidebar-footer {
-  border-top: 1px solid var(--at-outline-variant);
-  padding-top: 12px;
+/* Sidebar Toolbar */
+.atelier-sidebar-toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-around;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--at-outline-variant);
 }
 
-.atelier-sidebar-footer a {
+.atelier-sidebar-tool {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--at-radius-sm);
+  color: var(--at-on-secondary-container);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 180ms ease;
+  flex-shrink: 0;
+}
+
+.atelier-sidebar-tool:hover {
+  background: var(--at-surface-container-high);
+}
+
+/* Sidebar User */
+.atelier-sidebar-user {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--at-outline-variant);
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
-  border-radius: var(--at-radius-sm);
   font-size: 13px;
   color: var(--at-on-secondary-container);
-  transition: background 180ms ease;
 }
 
-.atelier-sidebar-footer a:hover {
-  background: var(--at-surface-container-high);
+.atelier-sidebar-user .atelier-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--at-primary-container), var(--at-secondary));
+  flex-shrink: 0;
 }
 
 /* Sidebar Toggle */
@@ -1494,6 +1519,21 @@ ul.clean li:hover {
   justify-content: center;
   gap: 0;
   padding: 12px 0;
+}
+
+.atelier-sidebar.collapsed .atelier-sidebar-toolbar {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+}
+
+.atelier-sidebar.collapsed .atelier-sidebar-tool {
+  width: 28px;
+  height: 28px;
+}
+
+.atelier-sidebar.collapsed .atelier-sidebar-user {
+  justify-content: center;
 }
 
 /* Mobile Bottom Nav */
@@ -2126,7 +2166,7 @@ ul.clean li:hover {
 
   .atelier-shell .main {
     margin-left: 0;
-    padding: calc(var(--at-topbar-h) + 20px) 20px 100px;
+    padding: 20px 20px 100px;
   }
 
   .atelier-topbar {

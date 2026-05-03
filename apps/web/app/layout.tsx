@@ -20,7 +20,7 @@ const notoSerif = Noto_Serif_SC({
 
 export const metadata: Metadata = {
   title: "家装运营工作台",
-  description: "Home renovation operations workspace"
+  description: "家装运营协同工作台"
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

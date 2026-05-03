@@ -71,7 +71,7 @@ function formatRelativeTime(dateStr: string): string {
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
   if (diffHours < 1) return "刚刚";
-  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffHours < 24) return `${diffHours}小时前`;
   if (diffDays === 1) return "昨天";
   if (diffDays < 7) return `${diffDays} 天前`;
   return dateStr.slice(0, 10);

@@ -5,14 +5,13 @@ import type { Route } from "next";
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, FolderKanban, Palette, Settings } from "lucide-react";
-import { AppHeader } from "./app-header";
 import { AppSidebar } from "./app-sidebar";
 
 const bottomNavItems: { href: string; label: string; icon: ReactNode }[] = [
-  { href: "/", label: "Overview", icon: <LayoutDashboard size={20} strokeWidth={1.5} /> },
-  { href: "/projects/proj-1", label: "Projects", icon: <FolderKanban size={20} strokeWidth={1.5} /> },
-  { href: "/", label: "Mood", icon: <Palette size={20} strokeWidth={1.5} /> },
-  { href: "/", label: "Settings", icon: <Settings size={20} strokeWidth={1.5} /> }
+  { href: "/", label: "总览", icon: <LayoutDashboard size={20} strokeWidth={1.5} /> },
+  { href: "/projects/proj-1", label: "项目", icon: <FolderKanban size={20} strokeWidth={1.5} /> },
+  { href: "/tasks", label: "个人工作台", icon: <Palette size={20} strokeWidth={1.5} /> },
+  { href: "/", label: "设置", icon: <Settings size={20} strokeWidth={1.5} /> }
 ];
 
 export function Shell({ children }: { children: ReactNode }) {
@@ -20,7 +19,6 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className={`shell atelier-shell ${sidebarCollapsed ? "collapsed" : ""}`}>
-      <AppHeader />
       <AppSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((v) => !v)} />
       <main className="main atelier-main">{children}</main>
       <MobileBottomNav />

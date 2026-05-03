@@ -55,11 +55,12 @@ export function LeadKanban({
                   const isSelected = selectedId === item.lead.id;
                   const overdue = isOverdue(item.lead.nextFollowUpAt);
                   return (
-                    <button
+                    <div
                       key={item.lead.id}
                       className={`atelier-kanban-card ${isSelected ? "atelier-kanban-card-selected" : ""} ${overdue ? "atelier-kanban-card-overdue" : ""}`}
                       onClick={() => setSelectedId(item.lead.id)}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                     >
                       <div className="atelier-kanban-card-top">
                         <h4>{item.customer.name}</h4>
@@ -107,7 +108,7 @@ export function LeadKanban({
                           {isPending ? "…" : "→"}
                         </button>
                       </form>
-                    </button>
+                    </div>
                   );
                 })}
                 {items.length === 0 && (
