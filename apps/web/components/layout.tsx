@@ -26,7 +26,11 @@ function MobileBottomNav() {
     setMounted(true);
   }, []);
 
-  const isActive = (href: string) => mounted && pathname === href;
+  const isActive = (href: string) => {
+    if (!mounted || !pathname) return false;
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  };
 
   return (
     <nav className="atelier-mobile-nav">

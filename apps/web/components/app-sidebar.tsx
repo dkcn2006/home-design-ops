@@ -74,7 +74,11 @@ export function AppSidebar({
     setMounted(true);
   }, []);
 
-  const isActive = (href: string) => mounted && pathname === href;
+  const isActive = (href: string) => {
+    if (!mounted || !pathname) return false;
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  };
 
   return (
     <aside className={`sidebar atelier-sidebar ${collapsed ? "collapsed" : ""}`}>
@@ -114,7 +118,7 @@ export function AppSidebar({
         ))}
       </nav>
 
-      <Link href={ctaHref as Route} className="atelier-new-project-btn" title={collapsed ? ctaLabel : undefined}>
+      <Link href="/sales/leads#new-lead" as={"/sales/leads#new-lead" as Route} className="atelier-new-project-btn" title={collapsed ? ctaLabel : undefined}>
         <Plus size={18} strokeWidth={2} />
         {!collapsed && <span>{ctaLabel}</span>}
       </Link>
@@ -122,26 +126,40 @@ export function AppSidebar({
       <div className="atelier-sidebar-toolbar">
         <button
           type="button"
-          className="atelier-sidebar-tool"
-          title="通知"
-          aria-label="通知"
+          className="atelier-sidebar-tool atelier-sidebar-tool-disabled"
+          title="通知 — 暂未开放"
+          aria-label="通知 — 暂未开放"
+          disabled
         >
           <Bell size={18} strokeWidth={1.5} />
         </button>
         <button
           type="button"
-          className="atelier-sidebar-tool"
-          title="历史"
-          aria-label="历史"
+          className="atelier-sidebar-tool atelier-sidebar-tool-disabled"
+          title="历史 — 暂未开放"
+          aria-label="历史 — 暂未开放"
+          disabled
         >
           <History size={18} strokeWidth={1.5} />
         </button>
-        <Link href="/" className="atelier-sidebar-tool" title="设置">
+        <button
+          type="button"
+          className="atelier-sidebar-tool atelier-sidebar-tool-disabled"
+          title="设置 — 暂未开放"
+          aria-label="设置 — 暂未开放"
+          disabled
+        >
           <Settings size={18} strokeWidth={1.5} />
-        </Link>
-        <Link href="/" className="atelier-sidebar-tool" title="支持">
+        </button>
+        <button
+          type="button"
+          className="atelier-sidebar-tool atelier-sidebar-tool-disabled"
+          title="支持 — 暂未开放"
+          aria-label="支持 — 暂未开放"
+          disabled
+        >
           <HelpCircle size={18} strokeWidth={1.5} />
-        </Link>
+        </button>
       </div>
 
       <div className="atelier-sidebar-user">

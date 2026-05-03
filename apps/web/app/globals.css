@@ -1510,6 +1510,15 @@ ul.clean li:hover {
   background: var(--at-surface-container-high);
 }
 
+.atelier-sidebar-tool-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.atelier-sidebar-tool-disabled:hover {
+  background: transparent;
+}
+
 /* Sidebar User */
 .atelier-sidebar-user {
   margin-top: 12px;
@@ -5268,6 +5277,117 @@ ul.clean li:hover {
   text-align: right;
 }
 
+.atelier-workspace-table-row-pending {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.atelier-workspace-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.atelier-workspace-action-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 150ms ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.atelier-workspace-action-btn:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent-muted);
+  color: var(--accent);
+}
+
+.atelier-workspace-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.atelier-workspace-action-btn-primary {
+  background: var(--olive-soft);
+  border-color: var(--olive-soft);
+  color: var(--olive);
+}
+
+.atelier-workspace-action-btn-primary:hover:not(:disabled) {
+  background: var(--olive);
+  border-color: var(--olive);
+  color: #fff;
+}
+
+.atelier-workspace-action-btn-warn {
+  background: var(--amber-soft);
+  border-color: var(--amber-soft);
+  color: var(--amber);
+}
+
+.atelier-workspace-action-btn-warn:hover:not(:disabled) {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: #fff;
+}
+
+/* Block reason modal */
+.atelier-workspace-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 25, 23, 0.25);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.atelier-workspace-modal {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 360px;
+  max-width: 90vw;
+  box-shadow: var(--shadow-lg);
+}
+
+.atelier-workspace-modal h4 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.atelier-workspace-modal textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 80px;
+  margin-bottom: 16px;
+  color: var(--ink);
+  background: var(--card);
+}
+
+.atelier-workspace-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 /* Phase pill */
 .atelier-workspace-phase {
   display: inline-block;
@@ -5728,6 +5848,15 @@ ul.clean li:hover {
   background: #fef2f2;
   color: #991b1b;
   border: 1px solid #fecaca;
+}
+
+@keyframes atelier-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.atelier-spin {
+  animation: atelier-spin 1s linear infinite;
 }
 
 @keyframes atelier-toast-in {
@@ -6975,4 +7104,113 @@ ul.clean li:hover {
   .role-metric-value {
     font-size: 22px;
   }
+}
+
+/* ── Filter Chips ── */
+.atelier-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 0 2px;
+}
+
+.atelier-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent-muted);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.atelier-filter-chip:hover {
+  background: var(--accent-muted);
+}
+
+.atelier-filter-chip-clear {
+  font-size: 12px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.15s;
+}
+
+.atelier-filter-chip-clear:hover {
+  color: var(--accent);
+}
+
+/* Empty result with clear action */
+.atelier-kanban-empty-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.atelier-kanban-empty-action p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.atelier-kanban-empty-action button {
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.atelier-kanban-empty-action button:hover {
+  background: var(--accent-hover);
+}
+
+/* ── Client Form Enhancements ── */
+.client-form-field-error textarea {
+  border-color: var(--error);
+  background: var(--error-soft);
+}
+
+.client-form-required {
+  color: var(--error);
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.client-form-submitted {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--olive-soft);
+  color: var(--olive);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ── Board Task Empty Minimal ── */
+.atelier-board-task-empty-minimal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--muted-light);
 }

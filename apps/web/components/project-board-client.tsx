@@ -218,9 +218,9 @@ export function ProjectBoardClient({ board, filters }: ProjectBoardClientProps) 
             className="atelier-board-filter-select"
             value={filters.status ?? ""}
             onChange={(e) => setFilter("status", e.target.value)}
-            aria-label="按阶段筛选"
+            aria-label="按状态筛选"
           >
-            <option value="">阶段：全部</option>
+            <option value="">状态：全部</option>
             {Object.entries(statusLabels).map(([status, label]) => (
               <option key={status} value={status}>
                 {label}
@@ -292,7 +292,7 @@ export function ProjectBoardClient({ board, filters }: ProjectBoardClientProps) 
                           <span className={`atelier-board-priority ${getPriorityClass(task.priority)}`}>
                             {priorityLabels[task.priority]}
                           </span>
-                          <span className="atelier-board-task-more">⋯</span>
+                          {/* <span className="atelier-board-task-more">⋯</span> */}
                         </div>
 
                         <h4>{task.title}</h4>
@@ -327,7 +327,10 @@ export function ProjectBoardClient({ board, filters }: ProjectBoardClientProps) 
                         </div>
                       </div>
                     ))}
-                    {phaseGroup.tasks.length === 0 && (
+                    {phaseGroup.tasks.length === 0 && hasActiveFilters && (
+                      <div className="atelier-board-task-empty-minimal">—</div>
+                    )}
+                    {phaseGroup.tasks.length === 0 && !hasActiveFilters && (
                       <EmptyState
                         icon={<Plus size={16} strokeWidth={2} />}
                         title="暂无任务"

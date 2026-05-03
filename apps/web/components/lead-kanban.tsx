@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect, useCallback, useMemo } from "react";
+import { useState, useTransition, useEffect, useCallback, useMemo, useRef } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import type { Route } from "next";
 import type { LeadPipelineItem, LeadStage, LeadSource, LeadIntentLevel } from "@home-design-ops/shared";
@@ -48,6 +48,8 @@ export function LeadKanban({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const lastFocusedCardRef = useRef<HTMLDivElement | null>(null);
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -160,7 +162,7 @@ export function LeadKanban({
   );
 
   const handleDrawerKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setSelectedId(null);
       }
@@ -170,16 +172,38 @@ export function LeadKanban({
 
   useEffect(() => {
     if (selectedId) {
-      document.addEventListener("keydown", handleDrawerKeyDown as unknown as EventListener);
-      return () => document.removeEventListener("keydown", handleDrawerKeyDown as unknown as EventListener);
+      document.addEventListener("keydown", handleDrawerKeyDown);
+      // Focus trap: move focus to close button when modal opens
+      setTimeout(() => closeBtnRef.current?.focus(), 50);
+      return () => document.removeEventListener("keydown", handleDrawerKeyDown);
+    } else if (lastFocusedCardRef.current) {
+      // Return focus to the card that opened the modal
+      lastFocusedCardRef.current.focus();
+      lastFocusedCardRef.current = null;
     }
   }, [selectedId, handleDrawerKeyDown]);
 
   const handleStageSubmit = (formData: FormData) => {
+    const leadId = String(formData.get("leadId") ?? "");
+    const newStage = String(formData.get("stage") ?? "") as LeadStage;
+    const item = pipeline.find((i) => i.lead.id === leadId);
+    if (!item) return;
+
+    if (item.lead.stage === newStage) {
+      showToast("阶段未变更", "success");
+      return;
+    }
+
     startTransition(async () => {
       try {
         await updateLeadStageAction(formData);
-        showToast("阶段更新成功", "success");
+        if (newStage === "won") {
+          showToast("阶段更新成功，可转为项目", "success");
+        } else if (newStage === "lost") {
+          showToast("阶段更新成功，请补充流失原因", "success");
+        } else {
+          showToast("阶段更新成功", "success");
+        }
       } catch (err) {
         showToast(err instanceof Error ? err.message : "阶段更新失败", "error");
       }
@@ -255,20 +279,35 @@ export function LeadKanban({
               </option>
             ))}
           </select>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              className="atelier-filter-clear"
-              onClick={clearFilters}
-            >
-              清除筛选
-            </button>
-          )}
         </div>
         <div className="atelier-filter-result-count">
           共 {filteredPipeline.length} 条线索
         </div>
       </div>
+
+      {/* Active Filter Chips */}
+      {hasActiveFilters && (
+        <div className="atelier-filter-chips">
+          {filters.source && (
+            <button type="button" className="atelier-filter-chip" onClick={() => setFilter("source", "")}>
+              来源：{sourceLabels[filters.source]} ✕
+            </button>
+          )}
+          {filters.intent && (
+            <button type="button" className="atelier-filter-chip" onClick={() => setFilter("intent", "")}>
+              意向：{intentLabels[filters.intent]} ✕
+            </button>
+          )}
+          {filters.stage && (
+            <button type="button" className="atelier-filter-chip" onClick={() => setFilter("stage", "")}>
+              阶段：{stageLabels[filters.stage]} ✕
+            </button>
+          )}
+          <button type="button" className="atelier-filter-chip-clear" onClick={clearFilters}>
+            清除全部
+          </button>
+        </div>
+      )}
 
       {/* Kanban Board */}
       <div className="atelier-kanban-board">
@@ -291,8 +330,12 @@ export function LeadKanban({
                   return (
                     <div
                       key={item.lead.id}
+                      ref={isSelected ? lastFocusedCardRef : undefined}
                       className={`atelier-kanban-card ${isSelected ? "atelier-kanban-card-selected" : ""} ${overdue ? "atelier-kanban-card-overdue" : ""}`}
-                      onClick={() => setSelectedId(item.lead.id)}
+                      onClick={() => {
+                        lastFocusedCardRef.current = document.activeElement as HTMLDivElement;
+                        setSelectedId(item.lead.id);
+                      }}
                       onKeyDown={(e) => handleCardKeyDown(e, item.lead.id)}
                       role="button"
                       tabIndex={0}
@@ -350,7 +393,14 @@ export function LeadKanban({
                   );
                 })}
                 {items.length === 0 && (
-                  <EmptyState title="当前阶段暂无线索" className="atelier-kanban-empty-compact" />
+                  <div className="atelier-kanban-empty-action">
+                    <EmptyState title="当前阶段暂无线索" className="atelier-kanban-empty-compact" />
+                    {hasActiveFilters && (
+                      <button type="button" onClick={clearFilters}>
+                        清除筛选条件
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -383,6 +433,7 @@ export function LeadKanban({
               </p>
             </div>
             <button
+              ref={closeBtnRef}
               className="atelier-drawer-close"
               onClick={() => setSelectedId(null)}
               type="button"
@@ -460,10 +511,10 @@ export function LeadKanban({
 
             {/* Quick Actions */}
             <div className="atelier-drawer-actions">
-              <button className="atelier-drawer-action-btn" type="button">
+              <button className="atelier-drawer-action-btn" type="button" title="创建关联任务">
                 <span>📝</span> 创建任务
               </button>
-              <button className="atelier-drawer-action-btn" type="button">
+              <button className="atelier-drawer-action-btn" type="button" title="记录跟进通话">
                 <span>📞</span> 记录通话
               </button>
             </div>
@@ -471,7 +522,7 @@ export function LeadKanban({
 
           {/* Drawer Footer */}
           <div className="atelier-drawer-footer">
-            <button className="atelier-drawer-primary-btn" type="button">
+            <button className="atelier-drawer-primary-btn" type="button" disabled title="消息模板待接入">
               <span>✉</span> 发送跟进消息
             </button>
           </div>
