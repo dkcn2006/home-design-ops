@@ -271,7 +271,7 @@ export function LeadKanban({
       </div>
 
       {/* Kanban Board */}
-      <div className={`atelier-kanban-board ${selectedItem ? "atelier-kanban-board-shrink" : ""}`}>
+      <div className="atelier-kanban-board">
         {stageOrder.map((stage) => {
           const items = filteredPipeline.filter((item) => item.lead.stage === stage);
           return (
@@ -358,9 +358,20 @@ export function LeadKanban({
         })}
       </div>
 
-      {/* Drawer */}
+      {/* Modal */}
       {selectedItem && (
-        <aside className="atelier-drawer" role="dialog" aria-modal="true" aria-label="线索详情">
+        <div
+          className="atelier-modal-backdrop"
+          onClick={() => setSelectedId(null)}
+          role="presentation"
+        >
+        <aside
+          className="atelier-drawer atelier-drawer-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="线索详情"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="atelier-drawer-header">
             <div>
               <span className="atelier-drawer-kicker">
@@ -465,6 +476,7 @@ export function LeadKanban({
             </button>
           </div>
         </aside>
+        </div>
       )}
     </div>
   );

@@ -2470,8 +2470,26 @@ ul.clean li:hover {
   transition: flex 300ms ease;
 }
 
-.atelier-kanban-board-shrink {
-  flex: 0 0 calc(100% - 360px);
+/* Modal Backdrop */
+.atelier-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(28, 25, 23, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: atelierBackdropFade 200ms ease-out;
+}
+
+@keyframes atelierBackdropFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Custom scrollbar */
@@ -2708,28 +2726,32 @@ ul.clean li:hover {
   border: 1px dashed var(--atp-outline-variant);
 }
 
-/* Drawer */
+/* Drawer / Modal */
 .atelier-drawer {
-  width: 360px;
-  flex-shrink: 0;
+  width: 420px;
+  max-width: 100%;
+  max-height: calc(100vh - 48px);
   background: var(--atp-surface-container-lowest);
-  border-left: 1px solid var(--atp-outline-variant);
-  border-radius: var(--atp-radius-xl) 0 0 var(--atp-radius-xl);
-  box-shadow: -12px 0 40px rgba(34, 26, 23, 0.08);
+  border-radius: var(--atp-radius);
+  box-shadow: 0 24px 64px rgba(28, 25, 23, 0.18);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: atelierDrawerSlide 250ms ease-out;
+  animation: atelierModalScale 250ms ease-out;
 }
 
-@keyframes atelierDrawerSlide {
+.atelier-drawer-modal {
+  width: 420px;
+}
+
+@keyframes atelierModalScale {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: scale(0.96) translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -3083,17 +3105,27 @@ ul.clean li:hover {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .atelier-kanban-board-shrink {
-    flex: 1;
+  .atelier-modal-backdrop {
+    padding: 16px;
+    align-items: flex-end;
   }
 
-  .atelier-drawer {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 60;
-    border-radius: var(--atp-radius-xl) 0 0 var(--atp-radius-xl);
+  .atelier-drawer-modal {
+    width: 100%;
+    max-height: calc(100vh - 32px);
+    border-radius: var(--atp-radius) var(--atp-radius) 0 0;
+    animation: atelierModalSlideUp 250ms ease-out;
+  }
+
+  @keyframes atelierModalSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
@@ -3125,9 +3157,13 @@ ul.clean li:hover {
 }
 
 @media (max-width: 480px) {
-  .atelier-drawer {
-    width: 100%;
+  .atelier-modal-backdrop {
+    padding: 0;
+  }
+
+  .atelier-drawer-modal {
     border-radius: 0;
+    max-height: 100vh;
   }
 }
 
