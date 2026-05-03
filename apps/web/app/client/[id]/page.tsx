@@ -77,7 +77,7 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ i
         </div>
       </section>
 
-      <section className="panel" style={{ marginTop: 22 }}>
+      <section className="panel">
         <div className="section-title">
           <h2>待确认事项</h2>
           <span>请直接提交意见</span>
@@ -127,7 +127,7 @@ export default async function ClientPortalPage({ params }: { params: Promise<{ i
         </div>
       </section>
 
-      <section className="panel" style={{ marginTop: 22 }}>
+      <section className="panel">
         <div className="section-title">
           <h2>资料清单</h2>
           <span>当前项目资料</span>

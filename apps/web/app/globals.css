@@ -155,7 +155,7 @@ body {
 
 .nav a {
   padding: 9px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   color: var(--muted);
   font-size: 13px;
   font-weight: 500;
@@ -564,42 +564,42 @@ ul.clean li:hover {
 }
 
 .status-pending {
-  background: #fbf3e8;
-  color: #9a5b2f;
-  border-color: #e7cfb5;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-muted);
 }
 
 .status-confirmed {
-  background: #eef5ec;
-  color: #466244;
-  border-color: #cad8c5;
+  background: var(--olive-soft);
+  color: var(--olive);
+  border-color: var(--olive-soft);
 }
 
 .status-rejected {
-  background: #f9ece8;
-  color: #a04f42;
-  border-color: #e7c8bf;
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
 }
 
 .status-risk-high,
 .status-priority-high {
-  background: #f9ece8;
-  color: #a04f42;
-  border-color: #e7c8bf;
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
 }
 
 .status-risk-medium,
 .status-priority-medium {
-  background: #fbf3e8;
-  color: #9a5b2f;
-  border-color: #e7cfb5;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-muted);
 }
 
 .status-risk-low,
 .status-priority-low {
-  background: #eef5ec;
-  color: #466244;
-  border-color: #cad8c5;
+  background: var(--olive-soft);
+  color: var(--olive);
+  border-color: var(--olive-soft);
 }
 
 /* Pills & Badges */
@@ -1078,11 +1078,11 @@ ul.clean li:hover {
 
 .task-blocked-reason {
   font-size: 12px;
-  color: #a04f42;
+  color: var(--accent);
   padding: 10px 12px;
   border-radius: var(--radius-sm);
-  background: #f9ece8;
-  border: 1px solid #e7c8bf;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-muted);
   line-height: 1.5;
 }
 
@@ -1211,39 +1211,54 @@ ul.clean li:hover {
    - 3.9  Responsive Overrides
    ═════════════════════════════════════════════════════════════════════════════ */
 
-/* 3.0  Atelier CSS Variables */
+/* 3.0  Atelier CSS Variables
+   映射关系：--at-* 是 Atelier 主题的具体色值，与 §1 :root 变量在语义上对应。
+   安全映射（不破坏视觉）：radius、font-family 直接引用 :root。
+   颜色保持独立（Atelier 使用更偏 Material 的暖色调）。 */
 .atelier-shell {
+  /* Surface / Background */
   --at-surface: #fff8f6;
   --at-on-surface: #221a17;
-  --at-primary: #924627;
-  --at-on-primary: #ffffff;
-  --at-secondary: #7e5445;
-  --at-on-secondary: #ffffff;
-  --at-on-secondary-container: #7b5242;
-  --at-tertiary: #006860;
-  --at-on-tertiary: #ffffff;
   --at-surface-container: #fbeae5;
   --at-surface-container-high: #f5e5e0;
   --at-surface-container-low: #fff1ec;
   --at-surface-container-lowest: #ffffff;
+
+  /* Primary / Accent */
+  --at-primary: #924627;
+  --at-on-primary: #ffffff;
+  --at-primary-container: #b15e3c;
+  --at-on-primary-container: #fffbff;
+
+  /* Secondary */
+  --at-secondary: #7e5445;
+  --at-on-secondary: #ffffff;
+  --at-on-secondary-container: #7b5242;
+  --at-secondary-container: #ffc8b4;
+
+  /* Tertiary / Olive */
+  --at-tertiary: #006860;
+  --at-on-tertiary: #ffffff;
+  --at-tertiary-container: #00837a;
+
+  /* Outline / Border */
   --at-outline: #87736b;
   --at-outline-variant: #dac1b9;
+
+  /* Error */
   --at-error: #ba1a1a;
   --at-error-container: #ffdad6;
   --at-on-error: #ffffff;
-  --at-primary-container: #b15e3c;
-  --at-on-primary-container: #fffbff;
-  --at-secondary-container: #ffc8b4;
-  --at-tertiary-container: #00837a;
 
+  /* Layout / Shape — 直接引用 :root 变量 */
   --at-topbar-h: 64px;
   --at-sidebar-w: 256px;
-  --at-radius-sm: 6px;
-  --at-radius: 10px;
+  --at-radius-sm: var(--radius-sm);
+  --at-radius: var(--radius);
   --at-radius-xl: 16px;
 
-  font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", -apple-system,
-    BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Typography — 直接引用 :root 字体栈 */
+  font-family: var(--font-body);
   color: var(--at-on-surface);
 }
 
@@ -5542,6 +5557,11 @@ ul.clean li:hover {
   }
 }
 
+.panel + .panel,
+.role-workbench-grid + .role-workbench-grid {
+  margin-top: 22px;
+}
+
 /* Empty / Error / Loading states */
 .atelier-loading {
   display: flex;
@@ -5654,9 +5674,9 @@ ul.clean li:hover {
 }
 
 .atelier-toast-success {
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
+  background: var(--olive-soft);
+  color: var(--olive);
+  border: 1px solid var(--olive-soft);
 }
 
 .atelier-toast-error {

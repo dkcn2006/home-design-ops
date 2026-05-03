@@ -85,7 +85,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
         ))}
       </section>
 
-      <section className="cards-2 role-workbench-grid" style={{ marginTop: 22 }}>
+      <section className="cards-2 role-workbench-grid">
         <article className="panel">
           <div className="section-title">
             <h2>当前待办</h2>
@@ -139,7 +139,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: Use
         </article>
       </section>
 
-      <section className="cards-2 role-workbench-grid" style={{ marginTop: 22 }}>
+      <section className="cards-2 role-workbench-grid">
         <article className="panel">
           <div className="section-title">
             <h2>风险预警</h2>
