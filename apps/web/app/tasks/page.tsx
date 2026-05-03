@@ -1,15 +1,8 @@
 import { getMyTasks, getWorkspaceHome } from "../../lib/data";
 import TaskInbox from "../../components/task-inbox";
-import type { TaskStatus } from "@home-design-ops/shared";
+import { createDateContext } from "@home-design-ops/shared";
 
-function toDateKey(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
-
-function isOverdue(dueDate?: string, status?: TaskStatus): boolean {
-  if (!dueDate || status === "done" || status === "canceled") return false;
-  return toDateKey(new Date(dueDate)) < toDateKey(new Date());
-}
+const { today, isOverdue } = createDateContext(process.env.DEMO_TODAY);
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -40,7 +33,7 @@ export default async function MyTasksPage({
     waitingClient: tasks.filter((t) => t.task.status === "waiting_client").length,
     blocked: tasks.filter((t) => t.task.status === "blocked").length,
     overdue: tasks.filter((t) =>
-      isOverdue(t.task.dueDate, t.task.status)
+      t.task.status !== "done" && t.task.status !== "canceled" && isOverdue(t.task.dueDate)
     ).length
   };
 
@@ -62,6 +55,7 @@ export default async function MyTasksPage({
       assigneeId={id}
       assigneeName={assigneeName}
       greeting={getGreeting()}
+      today={today}
     />
   );
 }

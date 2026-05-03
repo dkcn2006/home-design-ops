@@ -7,9 +7,9 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   FolderKanban,
-  Palette,
+  ClipboardList,
   Users,
-  Package,
+  Handshake,
   Sparkles,
   Plus,
   Settings,
@@ -36,20 +36,34 @@ export interface AppSidebarProps {
   onToggle?: () => void;
 }
 
-const defaultNavItems: SideNavItem[] = [
+/**
+ * 主导航配置 —— 侧边栏与移动端底部导航共用
+ * 计划：总览、线索、我的任务、项目、团队、客户确认
+ */
+export const mainNavConfig: SideNavItem[] = [
   { href: "/", label: "总览", icon: <LayoutDashboard size={20} strokeWidth={1.5} /> },
+  { href: "/sales/leads", label: "线索", icon: <Handshake size={20} strokeWidth={1.5} /> },
+  { href: "/tasks", label: "我的任务", icon: <ClipboardList size={20} strokeWidth={1.5} /> },
   { href: "/projects/proj-1", label: "项目", icon: <FolderKanban size={20} strokeWidth={1.5} /> },
-  { href: "/tasks", label: "个人工作台", icon: <Palette size={20} strokeWidth={1.5} /> },
-  { href: "/role/sales", label: "团队", icon: <Users size={20} strokeWidth={1.5} /> },
-  { href: "/sales/leads", label: "库存", icon: <Package size={20} strokeWidth={1.5} /> }
+  { href: "/role/sales", label: "团队", icon: <Users size={20} strokeWidth={1.5} /> }
+];
+
+/**
+ * 移动端底部导航 —— 只保留最高频入口
+ */
+export const mobileNavConfig: SideNavItem[] = [
+  { href: "/", label: "总览", icon: <LayoutDashboard size={20} strokeWidth={1.5} /> },
+  { href: "/sales/leads", label: "线索", icon: <Handshake size={20} strokeWidth={1.5} /> },
+  { href: "/tasks", label: "任务", icon: <ClipboardList size={20} strokeWidth={1.5} /> },
+  { href: "/projects/proj-1", label: "项目", icon: <FolderKanban size={20} strokeWidth={1.5} /> }
 ];
 
 export function AppSidebar({
   brandTitle = "设计工作室",
   brandSubtitle = "工作室视角",
-  navItems = defaultNavItems,
-  ctaHref = "/",
-  ctaLabel = "新建项目",
+  navItems = mainNavConfig,
+  ctaHref = "/sales/leads",
+  ctaLabel = "新建线索",
   collapsed = false,
   onToggle
 }: AppSidebarProps) {

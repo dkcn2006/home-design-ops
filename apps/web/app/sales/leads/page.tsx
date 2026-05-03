@@ -1,4 +1,4 @@
-import type { LeadSource, LeadStage } from "@home-design-ops/shared";
+import type { LeadSource, LeadStage, LeadIntentLevel } from "@home-design-ops/shared";
 import { createLeadIntakeAction } from "../../../lib/actions";
 import { getLeadPipeline, getLeadSummary } from "../../../lib/data";
 import { LeadKanban } from "../../../components/lead-kanban";
@@ -41,8 +41,27 @@ const intentLabels = {
   low: "低意向"
 } as const;
 
-export default async function SalesLeadsPage() {
+interface PageProps {
+  searchParams: Promise<{
+    source?: string;
+    intent?: string;
+    owner?: string;
+    stage?: string;
+    sort?: string;
+  }>;
+}
+
+export default async function SalesLeadsPage({ searchParams }: PageProps) {
+  const filters = await searchParams;
   const [pipeline, summary] = await Promise.all([getLeadPipeline(), getLeadSummary()]);
+
+  const activeFilters = {
+    source: filters.source as LeadSource | undefined,
+    intent: filters.intent as LeadIntentLevel | undefined,
+    owner: filters.owner,
+    stage: filters.stage as LeadStage | undefined,
+    sort: filters.sort ?? "followUp"
+  };
 
   return (
     <div className="atelier-pipeline">
@@ -82,38 +101,7 @@ export default async function SalesLeadsPage() {
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="atelier-filter-bar">
-        <div className="atelier-filter-group">
-          <span className="atelier-filter-pill">
-            <span>☰</span> 筛选
-          </span>
-          <select className="atelier-filter-select">
-            <option>来源：全部</option>
-            {Object.entries(sourceLabels).map(([source, label]) => (
-              <option key={source} value={source}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <select className="atelier-filter-select">
-            <option>意向：全部</option>
-            <option value="high">高意向</option>
-            <option value="medium">中意向</option>
-            <option value="low">低意向</option>
-          </select>
-          <select className="atelier-filter-select">
-            <option>负责人：全部</option>
-            <option>销售团队</option>
-          </select>
-        </div>
-        <div className="atelier-filter-date">
-          <span>📅</span>
-          <span>2026年1月 - 2026年12月</span>
-        </div>
-      </div>
-
-      {/* Kanban Board */}
+      {/* Kanban Board with Filters */}
       <section className="atelier-kanban-section">
         <LeadKanban
           pipeline={pipeline}
@@ -121,6 +109,7 @@ export default async function SalesLeadsPage() {
           stageLabels={stageLabels}
           sourceLabels={sourceLabels}
           intentLabels={intentLabels}
+          filters={activeFilters}
         />
       </section>
 

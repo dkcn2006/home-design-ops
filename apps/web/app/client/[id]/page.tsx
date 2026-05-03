@@ -1,146 +1,199 @@
-import { submitConfirmationAction } from "../../../lib/actions";
 import { getArchive } from "../../../lib/data";
+import { ClientConfirmationForm } from "../../../components/client-confirmation-form";
 
 function getConfirmationLabel(status: "pending" | "confirmed" | "rejected") {
-  if (status === "confirmed") {
-    return "已确认";
-  }
-  if (status === "rejected") {
-    return "已驳回";
-  }
+  if (status === "confirmed") return "已确认";
+  if (status === "rejected") return "已驳回";
   return "待确认";
+}
+
+function getConfirmationTypeLabel(type: string) {
+  const map: Record<string, string> = {
+    design_version: "设计方案确认",
+    rendering_version: "效果图确认",
+    construction_drawing: "施工图确认",
+    quotation: "报价确认",
+    change_order: "变更单确认",
+    material_selection: "材料选型确认",
+    milestone: "里程碑节点确认"
+  };
+  return map[type] ?? type;
 }
 
 export default async function ClientPortalPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const archive = await getArchive(id);
   const pendingItems = archive.confirmations.filter((item) => item.status === "pending");
+  const resolvedItems = archive.confirmations.filter((item) => item.status !== "pending");
   const currentQuotation = archive.quotations[0];
 
   return (
-    <>
-      <section className="workspace-header client-workspace-header">
-        <div className="workspace-emoji">🤝</div>
-        <div className="workspace-copy">
-          <div className="workspace-overline">client portal / shared project page</div>
-          <h1>客户确认页面</h1>
+    <div className="client-portal">
+      {/* Header */}
+      <header className="client-portal-header">
+        <div className="client-portal-header-top">
+          <span className="client-portal-overline">客户确认中心</span>
+          <h1>{archive.project.name}</h1>
           <p>
-            这里用于同步当前项目的有效版本、近期进度和待确认事项。客户可以直接提交确认或反馈，信息会同步回项目档案，减少口头确认和聊天记录遗漏。
+            {archive.customer.name} · 待确认 {pendingItems.length} 项
           </p>
         </div>
-      </section>
+        <div className="client-portal-header-meta">
+          <div className="client-portal-meta-item">
+            <span>当前方案</span>
+            <strong>{archive.designVersions.find((v) => v.id === archive.project.currentDesignVersionId)?.version ?? "-"}</strong>
+          </div>
+          <div className="client-portal-meta-item">
+            <span>效果图</span>
+            <strong>{archive.renderingVersions.find((v) => v.id === archive.project.currentRenderingVersionId)?.version ?? "-"}</strong>
+          </div>
+          <div className="client-portal-meta-item">
+            <span>报价</span>
+            <strong>{currentQuotation ? `¥${currentQuotation.amount.toLocaleString()}` : "待定"}</strong>
+          </div>
+          <div className="client-portal-meta-item">
+            <span>项目状态</span>
+            <strong>{archive.project.status}</strong>
+          </div>
+        </div>
+      </header>
 
-      <section className="doc-properties client-doc-properties">
-        <div className="doc-property">
-          <span>客户</span>
-          <strong>{archive.customer.name}</strong>
+      {/* Pending Confirmations — Primary Focus */}
+      <section className="client-portal-section">
+        <div className="client-portal-section-header">
+          <h2>
+            待确认事项
+            {pendingItems.length > 0 && (
+              <span className="client-portal-badge client-portal-badge-pending">{pendingItems.length}</span>
+            )}
+          </h2>
+          <span>请审阅以下内容并提交确认或反馈</span>
         </div>
-        <div className="doc-property">
-          <span>项目</span>
-          <strong>{archive.project.name}</strong>
-        </div>
-        <div className="doc-property">
-          <span>待确认事项</span>
-          <strong>{pendingItems.length} 项</strong>
-        </div>
-      </section>
 
-      <section className="panel">
-        <div className="cards-2">
-          <article className="kanban-card">
-            <div className="section-title">
-              <h3>当前有效版本</h3>
-              <span>当前可执行内容</span>
-            </div>
-            <ul className="clean">
-              <li>SU 方案：{archive.designVersions.find((item) => item.id === archive.project.currentDesignVersionId)?.version}</li>
-              <li>效果图：{archive.renderingVersions.find((item) => item.id === archive.project.currentRenderingVersionId)?.version}</li>
-              <li>施工图：{archive.constructionDrawingVersions.find((item) => item.id === archive.project.currentConstructionDrawingVersionId)?.version}</li>
-              <li>报价：{currentQuotation ? `¥${currentQuotation.amount.toLocaleString()}` : "暂无"}</li>
-            </ul>
-          </article>
-          <article className="kanban-card">
-            <div className="section-title">
-              <h3>项目进度</h3>
-              <span>近期安排</span>
-            </div>
-            <ul className="clean">
-              {archive.milestones.map((item) => (
-                <li key={item.id}>
-                  <strong>{item.name}</strong>
-                  <div className="muted">计划日期：{item.plannedDate}</div>
-                  <div className="muted">状态：{item.status}</div>
-                </li>
-              ))}
-            </ul>
-          </article>
-        </div>
-      </section>
-
-      <section className="panel">
-        <div className="section-title">
-          <h2>待确认事项</h2>
-          <span>请直接提交意见</span>
-        </div>
-        <div className="cards-2">
-          {archive.confirmations.map((item) => (
-            <article className={`timeline-card client-confirmation-card${item.status === "pending" ? " is-pending" : ""}`} key={item.id}>
-              <div className="section-title">
-                <h3>{item.type}</h3>
-                <span className={`status-chip status-${item.status}`}>{getConfirmationLabel(item.status)}</span>
-              </div>
-              <p className="muted">对应记录：{item.targetId}</p>
-              <p className="muted">当前说明：{item.note ?? "暂无"}</p>
-
-              {item.status === "pending" ? (
-                <form action={submitConfirmationAction} className="confirmation-form">
-                  <input type="hidden" name="projectId" value={archive.project.id} />
-                  <input type="hidden" name="confirmationId" value={item.id} />
-                  <label className="field">
-                    <span>补充说明</span>
-                    <textarea
-                      name="note"
-                      rows={4}
-                      defaultValue={item.note ?? ""}
-                      placeholder="如果有需要，可补充本次确认或反馈说明"
-                    />
-                  </label>
-                  <div className="button-row">
-                    <button type="submit" name="status" value="confirmed" className="primary-button">
-                      确认通过
-                    </button>
-                    <button type="submit" name="status" value="rejected" className="ghost-button">
-                      提交反馈
-                    </button>
+        {pendingItems.length === 0 ? (
+          <div className="client-portal-empty">
+            <p>当前没有待确认事项</p>
+            <span>所有确认均已完成，如有新的版本或变更，团队会在此同步</span>
+          </div>
+        ) : (
+          <div className="client-portal-confirmations">
+            {pendingItems.map((item, index) => (
+              <article className="client-confirmation-card client-confirmation-card-pending" key={item.id}>
+                <div className="client-confirmation-card-header">
+                  <div className="client-confirmation-number">{index + 1}</div>
+                  <div className="client-confirmation-title">
+                    <h3>{getConfirmationTypeLabel(item.type)}</h3>
+                    <span className="client-confirmation-target">{item.targetId}</span>
                   </div>
-                </form>
-              ) : (
-                <div className="footer-note">
-                  <strong>已处理：</strong> 当前事项已经完成处理，如需再次调整，可在后续版本中追加新的确认记录。
+                  <span className="client-portal-badge client-portal-badge-pending">待确认</span>
                 </div>
-              )}
-            </article>
-          ))}
-        </div>
-        <div className="footer-note">
-          <strong>说明：</strong> 这里只展示需要客户关注的核心信息，更多内部执行细节由项目团队在内部工作区处理。
-        </div>
+
+                {item.note && (
+                  <div className="client-confirmation-note">
+                    <p>{item.note}</p>
+                  </div>
+                )}
+
+                <ClientConfirmationForm
+                  projectId={archive.project.id}
+                  confirmationId={item.id}
+                  defaultNote={item.note ?? ""}
+                />
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
-      <section className="panel">
-        <div className="section-title">
-          <h2>资料清单</h2>
-          <span>当前项目资料</span>
-        </div>
-        <ul className="clean">
-          {archive.attachments.map((item) => (
-            <li key={item.id}>
-              <strong>{item.filename}</strong>
-              <div className="muted">{item.category}</div>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </>
+      {/* Resolved Confirmations — Collapsed */}
+      {resolvedItems.length > 0 && (
+        <section className="client-portal-section client-portal-section-resolved">
+          <details className="client-portal-details">
+            <summary>
+              <h2>历史确认记录</h2>
+              <span>{resolvedItems.length} 项已处理</span>
+            </summary>
+            <div className="client-portal-confirmations">
+              {resolvedItems.map((item) => (
+                <article
+                  className={`client-confirmation-card client-confirmation-card-${item.status}`}
+                  key={item.id}
+                >
+                  <div className="client-confirmation-card-header">
+                    <div className="client-confirmation-title">
+                      <h3>{getConfirmationTypeLabel(item.type)}</h3>
+                      <span className="client-confirmation-target">{item.targetId}</span>
+                    </div>
+                    <span className={`client-portal-badge client-portal-badge-${item.status}`}>
+                      {getConfirmationLabel(item.status)}
+                    </span>
+                  </div>
+                  {item.note && (
+                    <div className="client-confirmation-note">
+                      <p>{item.note}</p>
+                    </div>
+                  )}
+                  {item.updatedAt && item.status !== "pending" && (
+                    <div className="client-confirmation-resolved">
+                      处理时间：{item.updatedAt.slice(0, 10)}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          </details>
+        </section>
+      )}
+
+      {/* Project Timeline */}
+      {archive.milestones.length > 0 && (
+        <section className="client-portal-section">
+          <div className="client-portal-section-header">
+            <h2>项目进度</h2>
+            <span>近期里程碑</span>
+          </div>
+          <div className="client-portal-timeline">
+            {archive.milestones.map((milestone, index) => (
+              <div className="client-portal-timeline-item" key={milestone.id}>
+                <div className={`client-portal-timeline-dot ${milestone.status === "done" ? "completed" : ""}`} />
+                <div className="client-portal-timeline-content">
+                  <div className="client-portal-timeline-main">
+                    <strong>{milestone.name}</strong>
+                    <span>{milestone.plannedDate}</span>
+                  </div>
+                  <span className={`client-portal-timeline-status client-portal-timeline-status-${milestone.status}`}>
+                    {milestone.status === "done" ? "已完成" : milestone.status === "in_progress" ? "进行中" : milestone.status === "blocked" ? "已阻塞" : "待开始"}
+                  </span>
+                </div>
+                {index < archive.milestones.length - 1 && (
+                  <div className="client-portal-timeline-line" />
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Attachments */}
+      {archive.attachments.length > 0 && (
+        <section className="client-portal-section">
+          <div className="client-portal-section-header">
+            <h2>资料清单</h2>
+            <span>{archive.attachments.length} 个文件</span>
+          </div>
+          <div className="client-portal-attachments">
+            {archive.attachments.map((item) => (
+              <div className="client-portal-attachment" key={item.id}>
+                <div className="client-portal-attachment-icon">📎</div>
+                <div className="client-portal-attachment-info">
+                  <strong>{item.filename}</strong>
+                  <span>{item.category}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
   );
 }

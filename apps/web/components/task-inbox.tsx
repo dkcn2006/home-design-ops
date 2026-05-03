@@ -17,10 +17,15 @@ import {
   Ban,
   ClipboardList,
   RefreshCw,
-  ArrowRight
+  ArrowRight,
+  ArrowUpDown,
+  CalendarClock
 } from "lucide-react";
+import { EmptyState } from "./ui/empty-state";
+import { StatusBadge } from "./ui/status-badge";
 
 type FilterKey = "all" | "in_progress" | "waiting_client" | "blocked";
+type SortKey = "priority" | "dueDate" | "overdueFirst";
 
 interface TaskInboxProps {
   tasks: ProjectTaskCard[];
@@ -34,6 +39,7 @@ interface TaskInboxProps {
   assigneeId: string;
   assigneeName: string;
   greeting: string;
+  today?: string;
 }
 
 const statusLabels: Record<TaskStatus, string> = {
@@ -54,13 +60,15 @@ const filterTabs: { key: FilterKey; label: string; showDot?: boolean }[] = [
   { key: "blocked", label: "已阻塞" }
 ];
 
-function toDateKey(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
+const sortOptions: { key: SortKey; label: string }[] = [
+  { key: "overdueFirst", label: "逾期优先" },
+  { key: "priority", label: "优先级" },
+  { key: "dueDate", label: "截止日期" }
+];
 
-function isOverdue(dueDate?: string, status?: TaskStatus): boolean {
+function isOverdue(dueDate: string | undefined, today: string, status?: TaskStatus): boolean {
   if (!dueDate || status === "done" || status === "canceled") return false;
-  return toDateKey(new Date(dueDate)) < toDateKey(new Date());
+  return dueDate < today;
 }
 
 function formatRelativeTime(dateStr: string): string {
@@ -81,7 +89,6 @@ function getActivityDotClass(
   type: WorkspaceActivityItem["type"],
   index: number
 ): string {
-  // Map types to colors for visual variety
   switch (type) {
     case "confirmation":
       return "atelier-workspace-timeline-dot-primary";
@@ -92,7 +99,6 @@ function getActivityDotClass(
     case "change_order":
       return "atelier-workspace-timeline-dot-warn";
     default:
-      // Alternate for follow_up
       return index % 2 === 0
         ? "atelier-workspace-timeline-dot-default"
         : "atelier-workspace-timeline-dot-default";
@@ -119,9 +125,11 @@ export default function TaskInbox({
   stats,
   activities,
   assigneeName,
-  greeting
+  greeting,
+  today = new Date().toISOString().slice(0, 10)
 }: TaskInboxProps) {
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [sort, setSort] = useState<SortKey>("overdueFirst");
 
   const priorityCount = tasks.filter(
     (t) =>
@@ -147,25 +155,35 @@ export default function TaskInbox({
         break;
     }
 
-    return result.sort((a, b) => {
-      const aOverdue = isOverdue(a.task.dueDate, a.task.status);
-      const bOverdue = isOverdue(b.task.dueDate, b.task.status);
-      if (aOverdue && !bOverdue) return -1;
-      if (!aOverdue && bOverdue) return 1;
+    result.sort((a, b) => {
+      const aOverdue = isOverdue(a.task.dueDate, today, a.task.status);
+      const bOverdue = isOverdue(b.task.dueDate, today, b.task.status);
+
+      if (sort === "overdueFirst") {
+        if (aOverdue && !bOverdue) return -1;
+        if (!aOverdue && bOverdue) return 1;
+      }
 
       const pOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
       const pDiff = pOrder[a.task.priority] - pOrder[b.task.priority];
       if (pDiff !== 0) return pDiff;
 
-      if (a.task.dueDate && b.task.dueDate) {
-        return (
-          new Date(a.task.dueDate).getTime() -
-          new Date(b.task.dueDate).getTime()
-        );
+      if (sort === "dueDate" || sort === "overdueFirst") {
+        if (a.task.dueDate && b.task.dueDate) {
+          return (
+            new Date(a.task.dueDate).getTime() -
+            new Date(b.task.dueDate).getTime()
+          );
+        }
+        if (a.task.dueDate) return -1;
+        if (b.task.dueDate) return 1;
       }
+
       return 0;
     });
-  }, [tasks, filter]);
+
+    return result;
+  }, [tasks, filter, sort, today]);
 
   const displayedActivities = activities.slice(0, 6);
 
@@ -218,7 +236,7 @@ export default function TaskInbox({
 
           {/* Tasks Section */}
           <div className="atelier-workspace-tasks">
-            {/* Tabs */}
+            {/* Tabs + Sort */}
             <div className="atelier-workspace-tabs">
               {filterTabs.map((tab) => (
                 <button
@@ -236,6 +254,20 @@ export default function TaskInbox({
                   )}
                 </button>
               ))}
+              <div className="atelier-workspace-sort">
+                <ArrowUpDown size={14} strokeWidth={1.5} />
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as SortKey)}
+                  aria-label="排序方式"
+                >
+                  {sortOptions.map((opt) => (
+                    <option key={opt.key} value={opt.key}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Table */}
@@ -256,6 +288,7 @@ export default function TaskInbox({
                     ({ task, assignee, phase, space }) => {
                       const overdue = isOverdue(
                         task.dueDate,
+                        today,
                         task.status
                       );
                       const isBlocked = task.status === "blocked";
@@ -265,7 +298,9 @@ export default function TaskInbox({
                           className={
                             isBlocked
                               ? "atelier-workspace-table-row-blocked"
-                              : ""
+                              : overdue
+                                ? "atelier-workspace-table-row-overdue"
+                                : ""
                           }
                         >
                           <td
@@ -298,9 +333,13 @@ export default function TaskInbox({
                                 : "atelier-workspace-table-date"
                             }
                           >
-                            {overdue
-                              ? "已逾期"
-                              : task.dueDate ?? "-"}
+                            {overdue ? (
+                              <span className="atelier-table-due-overdue">
+                                <CalendarClock size={12} strokeWidth={2} /> {task.dueDate}
+                              </span>
+                            ) : (
+                              task.dueDate ?? "-"
+                            )}
                           </td>
                           <td>
                             <div className="atelier-workspace-avatar">
@@ -319,26 +358,21 @@ export default function TaskInbox({
                           </td>
                           <td className="atelier-workspace-table-td-right">
                             {task.status === "blocked" ? (
-                              <span className="atelier-workspace-badge atelier-workspace-badge-blocked">
-                                <Ban size={14} strokeWidth={2} /> 已阻塞
-                              </span>
+                              <StatusBadge tone="blocked" icon={<Ban size={14} strokeWidth={2} />}>
+                                已阻塞
+                              </StatusBadge>
                             ) : overdue ? (
-                              <span className="atelier-workspace-badge atelier-workspace-badge-overdue">
-                                已逾期
-                              </span>
+                              <StatusBadge tone="danger">已逾期</StatusBadge>
                             ) : task.status === "waiting_client" ? (
-                              <span className="atelier-workspace-badge atelier-workspace-badge-waiting">
-                                待确认
-                              </span>
+                              <StatusBadge tone="waiting">待确认</StatusBadge>
                             ) : task.status === "in_progress" ? (
-                              <span className="atelier-workspace-badge atelier-workspace-badge-progress">
-                                <span className="atelier-workspace-badge-dot" />
+                              <StatusBadge tone="progress" dot>
                                 进行中
-                              </span>
+                              </StatusBadge>
                             ) : (
-                              <span className="atelier-workspace-badge atelier-workspace-badge-default">
+                              <StatusBadge tone="default">
                                 {statusLabels[task.status]}
-                              </span>
+                              </StatusBadge>
                             )}
                           </td>
                         </tr>
@@ -350,7 +384,7 @@ export default function TaskInbox({
             </div>
 
             {/* View all button */}
-            {filteredTasks.length > 0 && (
+            {filteredTasks.length > 0 && filter !== "all" && (
               <button
                 className="atelier-workspace-viewall"
                 onClick={() => setFilter("all")}
@@ -361,10 +395,10 @@ export default function TaskInbox({
             )}
 
             {filteredTasks.length === 0 && (
-              <div className="atelier-workspace-empty">
-                <ClipboardList size={24} strokeWidth={1.5} />
-                <p>该分类下暂无任务</p>
-              </div>
+              <EmptyState
+                icon={<ClipboardList size={24} strokeWidth={1.5} />}
+                title="该分类下暂无任务"
+              />
             )}
           </div>
         </div>

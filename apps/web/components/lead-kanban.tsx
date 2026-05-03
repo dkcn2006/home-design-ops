@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useTransition, useEffect, useCallback } from "react";
-import type { LeadPipelineItem, LeadStage, LeadSource } from "@home-design-ops/shared";
+import { useState, useTransition, useEffect, useCallback, useMemo } from "react";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import type { Route } from "next";
+import type { LeadPipelineItem, LeadStage, LeadSource, LeadIntentLevel } from "@home-design-ops/shared";
 import { updateLeadStageAction } from "../lib/actions";
+import { EmptyState } from "./ui/empty-state";
 
 interface LeadKanbanProps {
   pipeline: LeadPipelineItem[];
@@ -10,6 +13,13 @@ interface LeadKanbanProps {
   stageLabels: Record<LeadStage, string>;
   sourceLabels: Record<LeadSource, string>;
   intentLabels: Record<string, string>;
+  filters: {
+    source?: LeadSource;
+    intent?: LeadIntentLevel;
+    owner?: string;
+    stage?: LeadStage;
+    sort?: string;
+  };
 }
 
 type ToastType = "success" | "error";
@@ -19,23 +29,111 @@ interface Toast {
   type: ToastType;
 }
 
+const sortOptions = [
+  { value: "followUp", label: "按跟进时间" },
+  { value: "intentDesc", label: "意向高→低" },
+  { value: "intentAsc", label: "意向低→高" },
+  { value: "budgetDesc", label: "预算高→低" },
+  { value: "newest", label: "最新录入" }
+];
+
 export function LeadKanban({
   pipeline,
   stageOrder,
   stageLabels,
   sourceLabels,
-  intentLabels
+  intentLabels,
+  filters
 }: LeadKanbanProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value) {
+        params.set(name, value);
+      } else {
+        params.delete(name);
+      }
+      return params.toString();
+    },
+    [searchParams]
+  );
+
+  const setFilter = useCallback(
+    (name: string, value: string) => {
+      const qs = createQueryString(name, value);
+      router.replace(`${pathname}?${qs}` as Route, { scroll: false });
+    },
+    [createQueryString, pathname, router]
+  );
+
+  const clearFilters = useCallback(() => {
+    router.replace(pathname as Route, { scroll: false });
+  }, [pathname, router]);
+
+  const filteredPipeline = useMemo(() => {
+    let result = [...pipeline];
+
+    if (filters.source) {
+      result = result.filter((item) => item.lead.source === filters.source);
+    }
+    if (filters.intent) {
+      result = result.filter((item) => item.lead.intentLevel === filters.intent);
+    }
+    if (filters.owner) {
+      result = result.filter((item) => item.lead.ownerId === filters.owner);
+    }
+    if (filters.stage) {
+      result = result.filter((item) => item.lead.stage === filters.stage);
+    }
+
+    const sort = filters.sort ?? "followUp";
+    switch (sort) {
+      case "followUp":
+        result.sort((a, b) => {
+          const da = a.lead.nextFollowUpAt ?? "9999-12-31";
+          const db = b.lead.nextFollowUpAt ?? "9999-12-31";
+          return da.localeCompare(db);
+        });
+        break;
+      case "intentDesc":
+        result.sort((a, b) => {
+          const order = { high: 3, medium: 2, low: 1 };
+          return (order[b.lead.intentLevel] ?? 0) - (order[a.lead.intentLevel] ?? 0);
+        });
+        break;
+      case "intentAsc":
+        result.sort((a, b) => {
+          const order = { high: 3, medium: 2, low: 1 };
+          return (order[a.lead.intentLevel] ?? 0) - (order[b.lead.intentLevel] ?? 0);
+        });
+        break;
+      case "budgetDesc":
+        result.sort((a, b) => b.customer.budgetMax - a.customer.budgetMax);
+        break;
+      case "newest":
+        result.sort((a, b) => (b.lead.createdAt ?? "").localeCompare(a.lead.createdAt ?? ""));
+        break;
+    }
+
+    return result;
+  }, [pipeline, filters]);
+
+  const hasActiveFilters = filters.source || filters.intent || filters.owner || filters.stage;
+
   const selectedItem = selectedId
-    ? pipeline.find((item) => item.lead.id === selectedId)
+    ? filteredPipeline.find((item) => item.lead.id === selectedId)
     : null;
 
   const getColumnCount = (stage: LeadStage) =>
-    pipeline.filter((item) => item.lead.stage === stage).length;
+    filteredPipeline.filter((item) => item.lead.stage === stage).length;
 
   const todayISO = new Date().toISOString().slice(0, 10);
   const isOverdue = (date?: string) => {
@@ -102,10 +200,80 @@ export function LeadKanban({
         </div>
       ))}
 
+      {/* Filter Bar */}
+      <div className="atelier-filter-bar">
+        <div className="atelier-filter-group">
+          <span className="atelier-filter-pill">
+            <span>☰</span> 筛选
+          </span>
+          <select
+            className="atelier-filter-select"
+            value={filters.source ?? ""}
+            onChange={(e) => setFilter("source", e.target.value)}
+            aria-label="按来源筛选"
+          >
+            <option value="">来源：全部</option>
+            {Object.entries(sourceLabels).map(([source, label]) => (
+              <option key={source} value={source}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <select
+            className="atelier-filter-select"
+            value={filters.intent ?? ""}
+            onChange={(e) => setFilter("intent", e.target.value)}
+            aria-label="按意向筛选"
+          >
+            <option value="">意向：全部</option>
+            <option value="high">高意向</option>
+            <option value="medium">中意向</option>
+            <option value="low">低意向</option>
+          </select>
+          <select
+            className="atelier-filter-select"
+            value={filters.stage ?? ""}
+            onChange={(e) => setFilter("stage", e.target.value)}
+            aria-label="按阶段筛选"
+          >
+            <option value="">阶段：全部</option>
+            {stageOrder.map((stage) => (
+              <option key={stage} value={stage}>
+                {stageLabels[stage]}
+              </option>
+            ))}
+          </select>
+          <select
+            className="atelier-filter-select"
+            value={filters.sort ?? "followUp"}
+            onChange={(e) => setFilter("sort", e.target.value)}
+            aria-label="排序方式"
+          >
+            {sortOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              className="atelier-filter-clear"
+              onClick={clearFilters}
+            >
+              清除筛选
+            </button>
+          )}
+        </div>
+        <div className="atelier-filter-result-count">
+          共 {filteredPipeline.length} 条线索
+        </div>
+      </div>
+
       {/* Kanban Board */}
       <div className={`atelier-kanban-board ${selectedItem ? "atelier-kanban-board-shrink" : ""}`}>
         {stageOrder.map((stage) => {
-          const items = pipeline.filter((item) => item.lead.stage === stage);
+          const items = filteredPipeline.filter((item) => item.lead.stage === stage);
           return (
             <div className="atelier-kanban-column" key={stage}>
               <div className="atelier-kanban-column-header">
@@ -140,6 +308,11 @@ export function LeadKanban({
                         <span className={`atelier-kanban-intent atelier-kanban-intent-${item.lead.intentLevel}`}>
                           {intentLabels[item.lead.intentLevel]}
                         </span>
+                        {item.lead.source && (
+                          <span className="atelier-kanban-source">
+                            {sourceLabels[item.lead.source]}
+                          </span>
+                        )}
                       </div>
                       <div className="atelier-kanban-card-meta">
                         <div className="atelier-kanban-card-owner">
@@ -177,7 +350,7 @@ export function LeadKanban({
                   );
                 })}
                 {items.length === 0 && (
-                  <div className="atelier-kanban-empty">当前阶段暂无线索</div>
+                  <EmptyState title="当前阶段暂无线索" className="atelier-kanban-empty-compact" />
                 )}
               </div>
             </div>

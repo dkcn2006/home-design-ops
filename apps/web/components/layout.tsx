@@ -4,15 +4,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FolderKanban, Palette, Settings } from "lucide-react";
-import { AppSidebar } from "./app-sidebar";
-
-const bottomNavItems: { href: string; label: string; icon: ReactNode }[] = [
-  { href: "/", label: "总览", icon: <LayoutDashboard size={20} strokeWidth={1.5} /> },
-  { href: "/projects/proj-1", label: "项目", icon: <FolderKanban size={20} strokeWidth={1.5} /> },
-  { href: "/tasks", label: "个人工作台", icon: <Palette size={20} strokeWidth={1.5} /> },
-  { href: "/", label: "设置", icon: <Settings size={20} strokeWidth={1.5} /> }
-];
+import { AppSidebar, mobileNavConfig } from "./app-sidebar";
 
 export function Shell({ children }: { children: ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -38,7 +30,7 @@ function MobileBottomNav() {
 
   return (
     <nav className="atelier-mobile-nav">
-      {bottomNavItems.map((item) => (
+      {mobileNavConfig.map((item) => (
         <Link
           key={item.label}
           href={item.href as Route}
