@@ -64,6 +64,11 @@
   --sidebar-bg: #f0ebe2;
   --hover: #ebe5da;
   --panel-tint: #faf7f2;
+  --error: #991b1b;
+  --error-soft: #fef2f2;
+  --amber: #a16207;
+  --amber-soft: #fef3c7;
+  --amber-muted: #fde68a;
 
   /* Typography */
   --font-display: "Cormorant Garamond", "Georgia", "Times New Roman", serif;
@@ -1212,42 +1217,41 @@ ul.clean li:hover {
    ═════════════════════════════════════════════════════════════════════════════ */
 
 /* 3.0  Atelier CSS Variables
-   映射关系：--at-* 是 Atelier 主题的具体色值，与 §1 :root 变量在语义上对应。
-   安全映射（不破坏视觉）：radius、font-family 直接引用 :root。
-   颜色保持独立（Atelier 使用更偏 Material 的暖色调）。 */
+   映射关系：--at-* 直接映射到 §1 :root 语义 token，不再保留独立色值。
+   所有颜色统一收口到 DESIGN.md 定义的米色、棕色、橄榄绿体系。 */
 .atelier-shell {
-  /* Surface / Background */
-  --at-surface: #fff8f6;
-  --at-on-surface: #221a17;
-  --at-surface-container: #fbeae5;
-  --at-surface-container-high: #f5e5e0;
-  --at-surface-container-low: #fff1ec;
-  --at-surface-container-lowest: #ffffff;
+  /* Surface / Background — 映射到 :root 语义 token */
+  --at-surface: var(--bg);
+  --at-on-surface: var(--ink);
+  --at-surface-container: var(--accent-soft);
+  --at-surface-container-high: var(--panel-tint);
+  --at-surface-container-low: var(--card);
+  --at-surface-container-lowest: var(--card-elevated);
 
   /* Primary / Accent */
-  --at-primary: #924627;
+  --at-primary: var(--accent);
   --at-on-primary: #ffffff;
-  --at-primary-container: #b15e3c;
-  --at-on-primary-container: #fffbff;
+  --at-primary-container: var(--accent-hover);
+  --at-on-primary-container: var(--card);
 
   /* Secondary */
-  --at-secondary: #7e5445;
+  --at-secondary: var(--accent-hover);
   --at-on-secondary: #ffffff;
-  --at-on-secondary-container: #7b5242;
-  --at-secondary-container: #ffc8b4;
+  --at-on-secondary-container: var(--ink-soft);
+  --at-secondary-container: var(--accent-muted);
 
   /* Tertiary / Olive */
-  --at-tertiary: #006860;
+  --at-tertiary: var(--olive);
   --at-on-tertiary: #ffffff;
-  --at-tertiary-container: #00837a;
+  --at-tertiary-container: var(--olive);
 
   /* Outline / Border */
-  --at-outline: #87736b;
-  --at-outline-variant: #dac1b9;
+  --at-outline: var(--line);
+  --at-outline-variant: var(--line-subtle);
 
   /* Error */
-  --at-error: #ba1a1a;
-  --at-error-container: #ffdad6;
+  --at-error: var(--error);
+  --at-error-container: var(--error-soft);
   --at-on-error: #ffffff;
 
   /* Layout / Shape — 直接引用 :root 变量 */
@@ -2303,24 +2307,24 @@ ul.clean li:hover {
    ─────────────────────────────────────────── */
 
 .atelier-pipeline {
-  --atp-surface: #fff8f6;
-  --atp-on-surface: #221a17;
-  --atp-primary: #924627;
+  --atp-surface: var(--bg);
+  --atp-on-surface: var(--ink);
+  --atp-primary: var(--accent);
   --atp-on-primary: #ffffff;
-  --atp-secondary: #7e5445;
-  --atp-on-secondary-container: #7b5242;
-  --atp-tertiary: #006860;
-  --atp-surface-container: #fbeae5;
-  --atp-surface-container-high: #f5e5e0;
-  --atp-surface-container-low: #fff1ec;
-  --atp-surface-container-lowest: #ffffff;
-  --atp-outline: #87736b;
-  --atp-outline-variant: #dac1b9;
-  --atp-error: #ba1a1a;
-  --atp-error-container: #ffdad6;
-  --atp-primary-fixed: #ffdbce;
-  --atp-primary-container: #b15e3c;
-  --atp-secondary-container: #ffc8b4;
+  --atp-secondary: var(--accent-hover);
+  --atp-on-secondary-container: var(--ink-soft);
+  --atp-tertiary: var(--olive);
+  --atp-surface-container: var(--accent-soft);
+  --atp-surface-container-high: var(--panel-tint);
+  --atp-surface-container-low: var(--card);
+  --atp-surface-container-lowest: var(--card-elevated);
+  --atp-outline: var(--line);
+  --atp-outline-variant: var(--line-subtle);
+  --atp-error: var(--error);
+  --atp-error-container: var(--error-soft);
+  --atp-primary-fixed: var(--accent-muted);
+  --atp-primary-container: var(--accent-hover);
+  --atp-secondary-container: var(--accent-muted);
 
   --atp-radius-sm: 8px;
   --atp-radius: 12px;
@@ -2555,7 +2559,7 @@ ul.clean li:hover {
 }
 
 .atelier-kanban-card-overdue {
-  border: 1px solid var(--atp-primary);
+  border: 1px solid var(--amber);
 }
 
 .atelier-kanban-card-top {
@@ -2648,7 +2652,7 @@ ul.clean li:hover {
 }
 
 .atelier-kanban-card-date-overdue {
-  color: var(--atp-primary);
+  color: var(--amber);
   font-weight: 700;
 }
 
@@ -3698,8 +3702,8 @@ ul.clean li:hover {
 
 .atelier-archive-task-priority-high,
 .atelier-archive-task-priority-blocked {
-  background: var(--at-error-container);
-  color: var(--at-error);
+  background: var(--amber-soft);
+  color: var(--amber);
 }
 
 .atelier-archive-task-priority-in_progress,
@@ -4212,12 +4216,12 @@ ul.clean li:hover {
 
 /* Blocked Card */
 .atelier-board-task-blocked {
-  border-left: 4px solid var(--at-error);
-  box-shadow: 0 8px 24px rgba(186, 26, 26, 0.06);
+  border-left: 4px solid var(--amber);
+  box-shadow: 0 8px 24px rgba(161, 98, 7, 0.06);
 }
 
 .atelier-board-task-blocked:hover {
-  box-shadow: 0 12px 32px rgba(186, 26, 26, 0.1);
+  box-shadow: 0 12px 32px rgba(161, 98, 7, 0.1);
 }
 
 /* In Progress Card */
@@ -4361,7 +4365,7 @@ ul.clean li:hover {
 }
 
 .atelier-board-task-overdue {
-  color: var(--at-error);
+  color: var(--amber);
   font-weight: 700;
 }
 
@@ -4708,11 +4712,11 @@ ul.clean li:hover {
 }
 
 .atelier-inbox-row-overdue {
-  background: rgba(186, 26, 26, 0.03);
+  background: rgba(161, 98, 7, 0.03);
 }
 
 .atelier-inbox-row-overdue:hover {
-  background: rgba(186, 26, 26, 0.06);
+  background: rgba(161, 98, 7, 0.06);
 }
 
 /* Cell: Title */
@@ -4775,7 +4779,7 @@ ul.clean li:hover {
 }
 
 .atelier-inbox-cell-overdue {
-  color: var(--at-error);
+  color: var(--amber);
   font-weight: 700;
 }
 
@@ -4823,10 +4827,14 @@ ul.clean li:hover {
   color: var(--at-tertiary);
 }
 
-.atelier-inbox-status-blocked,
+.atelier-inbox-status-blocked {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
 .atelier-inbox-status-waiting_client {
-  background: var(--at-error-container);
-  color: var(--at-error);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .atelier-inbox-status-waiting_internal {
@@ -5197,7 +5205,7 @@ ul.clean li:hover {
 }
 
 .atelier-workspace-table-title-overdue a {
-  color: var(--at-error);
+  color: var(--amber);
 }
 
 .atelier-workspace-table-project {
@@ -5211,7 +5219,7 @@ ul.clean li:hover {
 }
 
 .atelier-workspace-table-date-overdue {
-  color: var(--at-error);
+  color: var(--amber);
   font-weight: 700;
   font-size: 13px;
 }
