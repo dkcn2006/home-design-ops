@@ -8,12 +8,14 @@ import { LeadsModule } from "./modules/leads.module";
 import { ProjectsModule } from "./modules/projects.module";
 import { RepositoryModule } from "./modules/repository.module";
 import { TasksModule } from "./modules/tasks.module";
+import { HealthModule } from "./health/health.module";
 import { RequestLoggerMiddleware } from "./middleware/request-logger.middleware";
 
 @Module({
   imports: [
     RepositoryModule,
     AuthModule,
+    HealthModule,
     CustomersModule,
     LeadsModule,
     ProjectsModule,

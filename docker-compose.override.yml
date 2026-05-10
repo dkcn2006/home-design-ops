@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      target: builder
+    command: sh -c "npm run dev:api"
+    volumes:
+      - ./packages/shared/src:/app/packages/shared/src
+      - ./apps/api/src:/app/apps/api/src
+      - ./apps/api/prisma:/app/apps/api/prisma
+    environment:
+      NODE_ENV: development
+      REPOSITORY_IMPL: ${REPOSITORY_IMPL:-demo}
+
+  web:
+    build:
+      target: builder
+    command: sh -c "npm run dev:web"
+    volumes:
+      - ./packages/shared/src:/app/packages/shared/src
+      - ./apps/web/app:/app/apps/web/app
+      - ./apps/web/lib:/app/apps/web/lib
+      - ./apps/web/components:/app/apps/web/components
+      - ./apps/web/public:/app/apps/web/public
+    environment:
+      NODE_ENV: development

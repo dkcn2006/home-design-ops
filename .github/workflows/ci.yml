@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit dependencies
+        run: npm audit --audit-level=moderate || true
+
       - name: Lint
         run: npm run lint
 
@@ -41,3 +44,9 @@ jobs:
 
       - name: Build web
         run: npm run build --workspace @home-design-ops/web
+
+      - name: Verify Docker build (API)
+        run: docker build -f apps/api/Dockerfile -t hdo-api:test .
+
+      - name: Verify Docker build (Web)
+        run: docker build -f apps/web/Dockerfile -t hdo-web:test .

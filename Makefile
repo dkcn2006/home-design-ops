@@ -1,4 +1,5 @@
-.PHONY: dev build lint test deploy deploy-api deploy-web stop status logs
+.PHONY: dev build lint test deploy deploy-api deploy-web stop status logs \
+        docker-build docker-up docker-down docker-logs migrate-prod
 
 API_PORT ?= 4010
 API_HOST ?= 127.0.0.1
@@ -15,12 +16,12 @@ WEB_LOG := $(LOG_DIR)/web.log
 dev:
 	npm run build --workspace @home-design-ops/shared
 	@trap 'kill 0' INT TERM EXIT; \
-	HOST=$(API_HOST) PORT=$(API_PORT) npm run dev:api & \
-	until curl -sS $(API_BASE_URL)/projects/overview >/dev/null 2>&1; do \
-		sleep 1; \
-	done; \
-	INTERNAL_API_BASE_URL=$(API_BASE_URL) NEXT_PUBLIC_API_BASE_URL=$(API_BASE_URL) npm run dev:web & \
-	wait
+		host=$(API_HOST) PORT=$(API_PORT) npm run dev:api & \
+		until curl -sS $(API_BASE_URL)/health/live >/dev/null 2>&1; do \
+			sleep 1; \
+		done; \
+		INTERNAL_API_BASE_URL=$(API_BASE_URL) NEXT_PUBLIC_API_BASE_URL=$(API_BASE_URL) npm run dev:web & \
+		wait
 
 # ── Build ──
 
@@ -33,7 +34,24 @@ lint:
 test:
 	npm run test
 
-# ── Deploy ──
+# ── Docker ──
+
+docker-build:
+	docker compose build
+
+docker-up:
+	docker compose up -d
+
+docker-down:
+	docker compose down
+
+docker-logs:
+	docker compose logs -f
+
+migrate-prod:
+	docker compose exec api sh -c "cd apps/api && npx prisma migrate deploy"
+
+# ── Legacy Deploy (裸机 nohup) ──
 
 deploy: build
 	@mkdir -p $(LOG_DIR)
@@ -86,7 +104,7 @@ stop:
 status:
 	@echo "Service Status:"
 	@printf "  %-8s " "API:"
-	@if curl -sS $(API_BASE_URL)/projects/overview >/dev/null 2>&1; then \
+	@if curl -sS $(API_BASE_URL)/health/live >/dev/null 2>&1; then \
 		echo "✓ running ($(API_BASE_URL))"; \
 	else \
 		echo "✗ down"; \
