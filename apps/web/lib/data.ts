@@ -39,6 +39,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",
+      "x-user-role": "admin",
       ...(init?.headers ?? {})
     }
   });
