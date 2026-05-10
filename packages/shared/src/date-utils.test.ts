@@ -37,6 +37,32 @@ describe("date-utils", () => {
       expect(ctx.isStale(undefined, 10)).toBe(false);
     });
 
+    it("isStale: 边界值行为", () => {
+      const ctx = createDateContext("2026-04-19");
+      // 正好 10 天前（2026-04-09）→ 不 stale（严格小于阈值）
+      expect(ctx.isStale("2026-04-09", 10)).toBe(false);
+      // 10 天前再早一天（2026-04-08）→ stale
+      expect(ctx.isStale("2026-04-08", 10)).toBe(true);
+      // 今天 → 不 stale
+      expect(ctx.isStale("2026-04-19", 10)).toBe(false);
+    });
+
+    it("isStale: staleDays <= 0 返回 false", () => {
+      const ctx = createDateContext("2026-04-19");
+      expect(ctx.isStale("2026-04-01", 0)).toBe(false);
+      expect(ctx.isStale("2026-04-01", -1)).toBe(false);
+    });
+
+    it("isOverdue: 空字符串返回 false", () => {
+      const ctx = createDateContext("2026-04-19");
+      expect(ctx.isOverdue("")).toBe(false);
+    });
+
+    it("isBeforeToday: 空字符串返回 false", () => {
+      const ctx = createDateContext("2026-04-19");
+      expect(ctx.isBeforeToday("")).toBe(false);
+    });
+
     it("isTodayFollowUp: 只有等于 today 才返回 true", () => {
       const ctx = createDateContext("2026-04-19");
       expect(ctx.isTodayFollowUp("2026-04-19")).toBe(true);

@@ -94,7 +94,7 @@ export class DemoRepositoryService
 
   getLeadSummary(): LeadSummary {
     const { today } = this.date;
-    const staleBefore = "2026-04-09";
+    const STALE_DAYS = 10;
     const stageCounts = leads.reduce(
       (result, lead) => {
         result[lead.stage] += 1;
@@ -115,6 +115,11 @@ export class DemoRepositoryService
     const lostCount = stageCounts.lost;
     const effectiveLeadCount = Math.max(leads.length - lostCount, 1);
 
+    // 指标口径说明：
+    // - todayFollowUpCount：nextFollowUpAt 等于今天的线索（含所有阶段，包括 won/lost）
+    // - overdueFollowUpCount：nextFollowUpAt 已过期（< today）且未终结的线索，排除 won/lost
+    // - staleLeadCount：lastContactedAt 超过 STALE_DAYS 天未联系且未终结的线索，排除 won/lost
+    // - highIntentCount：意向度为 high 且未终结的线索，排除 won/lost
     return {
       total: leads.length,
       newCount: stageCounts.new,
@@ -123,7 +128,7 @@ export class DemoRepositoryService
       conversionRate: Math.round((wonCount / effectiveLeadCount) * 100),
       todayFollowUpCount: leads.filter((lead) => lead.nextFollowUpAt === today).length,
       overdueFollowUpCount: leads.filter((lead) => lead.nextFollowUpAt && lead.nextFollowUpAt < today && lead.stage !== "won" && lead.stage !== "lost").length,
-      staleLeadCount: leads.filter((lead) => lead.lastContactedAt && lead.lastContactedAt < staleBefore && lead.stage !== "won" && lead.stage !== "lost").length,
+      staleLeadCount: leads.filter((lead) => this.date.isStale(lead.lastContactedAt, STALE_DAYS) && lead.stage !== "won" && lead.stage !== "lost").length,
       highIntentCount: leads.filter((lead) => lead.intentLevel === "high" && lead.stage !== "won" && lead.stage !== "lost").length,
       stageCounts
     };
