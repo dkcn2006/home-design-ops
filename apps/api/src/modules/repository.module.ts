@@ -1,5 +1,6 @@
 import { Global, Module } from "@nestjs/common";
 import { DemoRepositoryService } from "../services/demo-repository.service";
+import { PrismaRepositoryService } from "../services/prisma-repository.service";
 import {
   CUSTOMER_REPOSITORY,
   DASHBOARD_REPOSITORY,
@@ -8,15 +9,19 @@ import {
   TASK_REPOSITORY
 } from "../repositories";
 
+const usePrisma = process.env.REPOSITORY_IMPL === "prisma";
+
+const repositoryProvider = usePrisma ? PrismaRepositoryService : DemoRepositoryService;
+
 @Global()
 @Module({
   providers: [
-    DemoRepositoryService,
-    { provide: CUSTOMER_REPOSITORY, useExisting: DemoRepositoryService },
-    { provide: LEAD_REPOSITORY, useExisting: DemoRepositoryService },
-    { provide: PROJECT_REPOSITORY, useExisting: DemoRepositoryService },
-    { provide: TASK_REPOSITORY, useExisting: DemoRepositoryService },
-    { provide: DASHBOARD_REPOSITORY, useExisting: DemoRepositoryService }
+    repositoryProvider,
+    { provide: CUSTOMER_REPOSITORY, useExisting: repositoryProvider },
+    { provide: LEAD_REPOSITORY, useExisting: repositoryProvider },
+    { provide: PROJECT_REPOSITORY, useExisting: repositoryProvider },
+    { provide: TASK_REPOSITORY, useExisting: repositoryProvider },
+    { provide: DASHBOARD_REPOSITORY, useExisting: repositoryProvider }
   ],
   exports: [
     CUSTOMER_REPOSITORY,

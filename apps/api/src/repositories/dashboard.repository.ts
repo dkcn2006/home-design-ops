@@ -8,9 +8,9 @@ import type {
 } from "@home-design-ops/shared";
 
 export interface DashboardRepository {
-  getPortfolioOverview(): PortfolioOverview;
-  getDashboard(role: UserRole): DashboardSummary;
-  getRoleWorkbench(role: UserRole): RoleWorkbench;
-  getUsers(): User[];
-  getWorkflowPhases(): WorkflowPhase[];
+  getPortfolioOverview(): PortfolioOverview | Promise<PortfolioOverview>;
+  getDashboard(role: UserRole): DashboardSummary | Promise<DashboardSummary>;
+  getRoleWorkbench(role: UserRole): RoleWorkbench | Promise<RoleWorkbench>;
+  getUsers(): User[] | Promise<User[]>;
+  getWorkflowPhases(): WorkflowPhase[] | Promise<WorkflowPhase[]>;
 }

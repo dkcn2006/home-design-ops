@@ -11,7 +11,7 @@
     "test": "jest",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "echo 'Seed script not yet implemented'"
+    "db:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@home-design-ops/shared": "0.1.0",
