@@ -7214,3 +7214,308 @@ ul.clean li:hover {
   font-size: 13px;
   color: var(--muted-light);
 }
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   §5  Design System Components — 可复用组件样式层
+   ═════════════════════════════════════════════════════════════════════════════
+   目标：把 §3 中重复出现的模式收口为语义化组件类，供新增页面直接复用，
+   避免页面级 CSS 继续膨胀。
+   
+   命名前缀：hds- (Home Design System)
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* 5.1 Page Header — 页面标题区 */
+.hds-page-header {
+  margin-bottom: 24px;
+}
+
+.hds-page-header h1 {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.hds-page-header p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* 5.2 Metric Card — 指标卡片 */
+.hds-metric-card {
+  background: var(--card);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.2s;
+}
+
+.hds-metric-card:hover {
+  box-shadow: var(--shadow);
+}
+
+.hds-metric-card__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.hds-metric-card__value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.hds-metric-card__note {
+  font-size: 12px;
+  color: var(--muted-light);
+}
+
+.hds-metric-card--attention {
+  border-left: 3px solid var(--amber);
+}
+
+.hds-metric-card--positive {
+  border-left: 3px solid var(--olive);
+}
+
+.hds-metric-card--error {
+  border-left: 3px solid var(--error);
+}
+
+/* 5.3 Badge — 状态徽章 */
+.hds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.hds-badge--pending {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.hds-badge--confirmed {
+  background: var(--olive-soft);
+  color: var(--olive);
+}
+
+.hds-badge--rejected {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
+.hds-badge--neutral {
+  background: var(--bg-warm);
+  color: var(--muted);
+}
+
+/* 5.4 Data Table — 表格 */
+.hds-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.hds-table thead th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-warm);
+}
+
+.hds-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line-subtle);
+  color: var(--ink-soft);
+  vertical-align: middle;
+}
+
+.hds-table tbody tr:hover td {
+  background: var(--hover);
+}
+
+/* 5.5 Form Group — 表单组 */
+.hds-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hds-form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.hds-form-group input,
+.hds-form-group textarea,
+.hds-form-group select {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--card-elevated);
+  font-size: 14px;
+  color: var(--ink);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.hds-form-group input:focus,
+.hds-form-group textarea:focus,
+.hds-form-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.hds-form-group--error input,
+.hds-form-group--error textarea {
+  border-color: var(--error);
+  background: var(--error-soft);
+}
+
+.hds-form-group__error {
+  font-size: 12px;
+  color: var(--error);
+  font-weight: 500;
+}
+
+/* 5.6 Empty State — 空状态 */
+.hds-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.hds-empty-state__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.hds-empty-state__description {
+  font-size: 14px;
+  color: var(--muted-light);
+  margin: 0;
+  max-width: 360px;
+}
+
+/* 5.7 Toast — 临时提示 */
+.hds-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  animation: hds-toast-in 0.3s ease;
+}
+
+.hds-toast--success {
+  background: var(--olive);
+  color: #fff;
+}
+
+.hds-toast--error {
+  background: var(--error);
+  color: #fff;
+}
+
+.hds-toast--warning {
+  background: var(--amber);
+  color: #fff;
+}
+
+@keyframes hds-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 5.8 Button — 按钮 */
+.hds-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  line-height: 1;
+}
+
+.hds-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hds-button--primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.hds-button--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.hds-button--secondary {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.hds-button--danger {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
+.hds-button--ghost {
+  background: transparent;
+  color: var(--muted);
+}
+
+.hds-button--ghost:hover:not(:disabled) {
+  background: var(--hover);
+}

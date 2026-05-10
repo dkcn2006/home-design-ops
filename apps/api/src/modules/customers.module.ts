@@ -1,7 +1,9 @@
-import { Controller, Get, Inject, Module } from "@nestjs/common";
+import { Controller, Get, Inject, Module, UseGuards } from "@nestjs/common";
+import { InternalGuard } from "../guards/roles.guard";
 import { CUSTOMER_REPOSITORY } from "../repositories";
 import type { CustomerRepository } from "../repositories";
 
+@UseGuards(InternalGuard)
 @Controller("customers")
 class CustomersController {
   constructor(

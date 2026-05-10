@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Inject, Module, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Module, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { InternalGuard } from "../guards/roles.guard";
 import { CreateLeadIntakeDto, UpdateLeadStageDto } from "../dto";
 import { LEAD_REPOSITORY } from "../repositories";
 import type { LeadRepository } from "../repositories";
 
+@UseGuards(InternalGuard)
 @Controller("leads")
 class LeadsController {
   constructor(
@@ -30,6 +32,7 @@ class LeadsController {
   }
 }
 
+@UseGuards(InternalGuard)
 @Controller("sales/leads")
 class SalesLeadsController {
   constructor(

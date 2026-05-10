@@ -1,8 +1,10 @@
-import { Controller, Get, Inject, Module, Param, Query } from "@nestjs/common";
+import { Controller, Get, Inject, Module, Param, Query, UseGuards } from "@nestjs/common";
+import { InternalGuard } from "../guards/roles.guard";
 import type { UserRole } from "@home-design-ops/shared";
 import { DASHBOARD_REPOSITORY, PROJECT_REPOSITORY } from "../repositories";
 import type { DashboardRepository, ProjectRepository } from "../repositories";
 
+@UseGuards(InternalGuard)
 @Controller("projects")
 class ProjectsController {
   constructor(

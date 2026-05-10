@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Inject, Module, Param, Patch, Query } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Module, Param, Patch, Query, UseGuards } from "@nestjs/common";
+import { InternalGuard } from "../guards/roles.guard";
 import { UpdateTaskStatusDto, UpdateTaskAssigneeDto } from "../dto";
 import { TASK_REPOSITORY } from "../repositories";
 import type { TaskRepository } from "../repositories";
 
+@UseGuards(InternalGuard)
 @Controller("tasks")
 class TasksController {
   constructor(

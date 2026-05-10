@@ -1,7 +1,9 @@
-import { Controller, Get, Inject, Module, Param } from "@nestjs/common";
+import { Controller, Get, Inject, Module, Param, UseGuards } from "@nestjs/common";
+import { InternalGuard } from "../guards/roles.guard";
 import { PROJECT_REPOSITORY } from "../repositories";
 import type { ProjectRepository } from "../repositories";
 
+@UseGuards(InternalGuard)
 @Controller("projects/:id/attachments")
 class AttachmentsController {
   constructor(

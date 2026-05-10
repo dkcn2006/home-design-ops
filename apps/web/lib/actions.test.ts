@@ -14,9 +14,10 @@ vi.mock("next/cache", () => ({
 
 describe("Server Actions", () => {
   describe("submitConfirmationAction", () => {
-    it("should throw on missing fields", async () => {
+    it("should return error on missing fields", async () => {
       const formData = new FormData();
-      await expect(submitConfirmationAction(formData)).rejects.toThrow("Missing confirmation payload");
+      const result = await submitConfirmationAction(formData);
+      expect(result).toEqual({ success: false, error: "Missing confirmation payload", code: "INVALID_INPUT" });
     });
 
     it("should process valid confirmation", async () => {
@@ -48,9 +49,10 @@ describe("Server Actions", () => {
   });
 
   describe("updateLeadStageAction", () => {
-    it("should throw on missing fields", async () => {
+    it("should return error on missing fields", async () => {
       const formData = new FormData();
-      await expect(updateLeadStageAction(formData)).rejects.toThrow("Missing lead stage payload");
+      const result = await updateLeadStageAction(formData);
+      expect(result).toEqual({ success: false, error: "Missing lead stage payload", code: "INVALID_INPUT" });
     });
 
     it("should process valid stage update", async () => {

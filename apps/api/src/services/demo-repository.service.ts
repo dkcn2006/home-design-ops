@@ -47,7 +47,10 @@ import type {
   UserRole,
   WorkspaceActivityItem,
   WorkspaceHome,
-  WorkspaceRiskItem
+  WorkspaceRiskItem,
+  Project,
+  ProjectTask,
+  ConfirmationRecord
 } from "@home-design-ops/shared";
 import { createDateContext, type DateContext } from "@home-design-ops/shared";
 
@@ -191,7 +194,56 @@ export class DemoRepositoryService
       throw new NotFoundException(`Customer for lead ${leadId} was not found`);
     }
 
-    const linkedProject = projects.find((item) => item.leadId === lead.id);
+    let linkedProject = projects.find((item) => item.leadId === lead.id);
+
+    // P7.1: 赢单线索自动生成项目草稿
+    if (input.stage === "won" && !linkedProject) {
+      const now = new Date().toISOString();
+      const projectId = this.buildId("proj", projects);
+      linkedProject = {
+        id: projectId,
+        createdAt: now,
+        updatedAt: now,
+        createdBy: "system",
+        customerId: lead.customerId,
+        leadId: lead.id,
+        code: `HDO-${String(projects.length + 1).padStart(3, "0")}`,
+        name: `${customer.name} 家装项目`,
+        location: customer.city,
+        areaSqm: 0,
+        status: "discovery",
+        currentRequirementSheetId: ""
+      };
+      projects.push(linkedProject as Project);
+
+      // 创建初始项目任务（量房、需求梳理）
+      const initialTasks = [
+        { title: "预约量房", phaseId: "phase-sales-2", spaceId: undefined as string | undefined },
+        { title: "现场量房", phaseId: "phase-sales-2", spaceId: undefined },
+        { title: "需求梳理", phaseId: "phase-design-1", spaceId: undefined }
+      ];
+      for (const taskDef of initialTasks) {
+        const taskId = this.buildId("task", projectTasks);
+        projectTasks.push({
+          id: taskId,
+          createdAt: now,
+          updatedAt: now,
+          createdBy: "system",
+          projectId,
+          spaceId: taskDef.spaceId,
+          phaseId: taskDef.phaseId,
+          title: taskDef.title,
+          description: `${taskDef.title} - ${customer.name}`,
+          status: "backlog",
+          priority: "high",
+          assigneeId: "user-sales-1",
+          ownerRole: "sales",
+          reporterId: "user-sales-1",
+          linkedEntities: [],
+          dueDate: undefined
+        } as ProjectTask);
+      }
+    }
 
     return {
       lead,
@@ -293,6 +345,38 @@ export class DemoRepositoryService
     task.status = input.status;
     task.updatedAt = new Date().toISOString();
     task.completedAt = input.status === "done" ? task.updatedAt : undefined;
+
+    // P7.2: 待客户确认任务自动生成确认记录
+    if (input.status === "waiting_client") {
+      const existingConfirmation = confirmations.find(
+        (c) => c.projectId === task.projectId && c.targetId === taskId
+      );
+      if (!existingConfirmation) {
+        const now = new Date().toISOString();
+        const customer = customers.find((c) => {
+          const project = projects.find((p) => p.id === task.projectId);
+          return project?.customerId === c.id;
+        });
+        const typeMap: Record<string, string> = {
+          design_output: "proposal",
+          quotation: "quotation",
+          change_order: "change_order"
+        };
+        confirmations.push({
+          id: this.buildId("conf", confirmations),
+          projectId: task.projectId,
+          targetId: taskId,
+          type: (typeMap[task.title] || "proposal") as ConfirmationRecord["type"],
+          status: "pending",
+          clientName: customer?.name ?? "客户",
+          note: undefined,
+          createdAt: now,
+          updatedAt: now,
+          createdBy: "system"
+        } as ConfirmationRecord);
+      }
+    }
+
     return task;
   }
 
@@ -656,7 +740,24 @@ export class DemoRepositoryService
         ];
       });
 
-    return [...issueRisks, ...confirmationRisks, ...milestoneRisks].sort((a, b) => {
+    // P7.3: 客户驳回确认的风险项
+    const rejectedConfirmationRisks: WorkspaceRiskItem[] = confirmations
+      .filter((item) => item.status === "rejected")
+      .map((item) => {
+        const project = projects.find((projectEntry) => projectEntry.id === item.projectId);
+        return {
+          id: `${item.id}-rejected`,
+          title: `${item.clientName} 驳回了${item.type === "change_order" ? "增减项" : "客户"}确认`,
+          summary: item.note ? `客户意见：${item.note}` : "客户驳回确认，需重新沟通并推动再次确认。",
+          severity: "high",
+          ownerRole: "sales",
+          projectId: project?.id,
+          projectName: project?.name,
+          targetPath: project ? `/client/${project.id}` : "/"
+        } satisfies WorkspaceRiskItem;
+      });
+
+    return [...issueRisks, ...confirmationRisks, ...milestoneRisks, ...rejectedConfirmationRisks].sort((a, b) => {
       const severityOrder: Record<WorkspaceRiskItem["severity"], number> = { high: 0, medium: 1, low: 2 };
       return severityOrder[a.severity] - severityOrder[b.severity];
     });

@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Inject, Module, Param, Patch } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Module, Param, Patch, UseGuards } from "@nestjs/common";
+import { InternalGuard } from "../guards/roles.guard";
 import { UpdateConfirmationDto } from "../dto";
 import { PROJECT_REPOSITORY } from "../repositories";
 import type { ProjectRepository } from "../repositories";
 
+@UseGuards(InternalGuard)
 @Controller("projects/:id/confirmations")
 class ConfirmationsController {
   constructor(
