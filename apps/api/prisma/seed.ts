@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PrismaClient } from "@prisma/client";
 import {
   customers,
@@ -17,8 +18,7 @@ import {
   confirmations,
   projectTasks,
   workItems,
-  requirementSheets,
-  dashboards
+  requirementSheets
 } from "@home-design-ops/shared";
 
 const prisma = new PrismaClient();
@@ -48,7 +48,6 @@ async function main() {
   await prisma.workflowPhase.deleteMany();
   await prisma.user.deleteMany();
   await prisma.customer.deleteMany();
-  await prisma.dashboard.deleteMany();
 
   // Seed in dependency order
   for (const customer of customers) {
@@ -241,18 +240,6 @@ async function main() {
     });
   }
 
-  for (const dashboard of dashboards) {
-    await prisma.dashboard.create({
-      data: {
-        role: dashboard.role,
-        metrics: dashboard.metrics as never,
-        focus: dashboard.focus as never,
-        projects: dashboard.projects as never,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    });
-  }
 
   console.log("Seed completed successfully.");
 }

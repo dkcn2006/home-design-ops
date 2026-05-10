@@ -180,6 +180,7 @@ model Customer {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   createdBy        String
+  updatedBy   String
   projects         Project[]
   leads            Lead[]
 }
@@ -205,8 +206,14 @@ model Lead {
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
   createdBy           String
+  updatedBy   String
   customer            Customer        @relation(fields: [customerId], references: [id])
   projects            Project[]
+
+  @@index([ownerId])
+  @@index([stage])
+  @@index([customerId])
+  @@index([createdAt])
 }
 
 model User {
@@ -244,8 +251,11 @@ model Space {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   String
+  updatedBy   String
   project     Project  @relation(fields: [projectId], references: [id])
   tasks       ProjectTask[]
+
+  @@index([projectId])
 }
 
 model ProjectTask {
@@ -267,11 +277,17 @@ model ProjectTask {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   createdBy     String
+  updatedBy   String
   project       Project       @relation(fields: [projectId], references: [id])
   space         Space?        @relation(fields: [spaceId], references: [id])
   phase         WorkflowPhase @relation(fields: [phaseId], references: [id])
   assignee      User          @relation("AssignedTasks", fields: [assigneeId], references: [id])
   reporter      User          @relation("ReportedTasks", fields: [reporterId], references: [id])
+
+  @@index([projectId])
+  @@index([assigneeId])
+  @@index([status])
+  @@index([phaseId])
 }
 
 model RequirementSheet {
@@ -285,7 +301,10 @@ model RequirementSheet {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   createdBy       String
+  updatedBy   String
   project         Project  @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
 }
 
 model Project {
@@ -304,6 +323,7 @@ model Project {
   createdAt                         DateTime @default(now())
   updatedAt                         DateTime @updatedAt
   createdBy                         String
+  updatedBy   String
   customer                          Customer @relation(fields: [customerId], references: [id])
   lead                              Lead     @relation(fields: [leadId], references: [id])
   spaces                            Space[]
@@ -318,6 +338,10 @@ model Project {
   inspections                       InspectionRecord[]
   confirmations                     ConfirmationRecord[]
   attachments                       Attachment[]
+
+  @@index([customerId])
+  @@index([leadId])
+  @@index([status])
 }
 
 model DesignVersion {
@@ -331,7 +355,10 @@ model DesignVersion {
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
   createdBy         String
+  updatedBy   String
   project           Project      @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
 }
 
 model RenderingVersion {
@@ -345,7 +372,10 @@ model RenderingVersion {
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
   createdBy         String
+  updatedBy   String
   project           Project      @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
 }
 
 model ConstructionDrawingVersion {
@@ -359,7 +389,10 @@ model ConstructionDrawingVersion {
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
   createdBy         String
+  updatedBy   String
   project           Project      @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
 }
 
 model Quotation {
@@ -374,7 +407,10 @@ model Quotation {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   createdBy   String
+  updatedBy   String
   project     Project        @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
 }
 
 model ChangeOrder {
@@ -388,7 +424,10 @@ model ChangeOrder {
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   createdBy          String
+  updatedBy   String
   project            Project           @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
 }
 
 model ProjectMilestone {
@@ -402,8 +441,11 @@ model ProjectMilestone {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   createdBy   String
+  updatedBy   String
   project     Project         @relation(fields: [projectId], references: [id])
   inspections InspectionRecord[]
+
+  @@index([projectId])
 }
 
 model InspectionRecord {
@@ -415,8 +457,12 @@ model InspectionRecord {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   String
+  updatedBy   String
   project     Project  @relation(fields: [projectId], references: [id])
   milestone   ProjectMilestone @relation(fields: [milestoneId], references: [id])
+
+  @@index([projectId])
+  @@index([milestoneId])
 }
 
 model ConfirmationRecord {
@@ -430,7 +476,11 @@ model ConfirmationRecord {
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
   createdBy String
+  updatedBy   String
   project   Project           @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([status])
 }
 
 model Attachment {
@@ -443,7 +493,10 @@ model Attachment {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   createdBy     String
+  updatedBy   String
   project       Project?          @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
 }
 
 model WorkItem {
@@ -461,4 +514,8 @@ model WorkItem {
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
   createdBy String
+  updatedBy   String
+
+  @@index([projectId])
+  @@index([leadId])
 }
